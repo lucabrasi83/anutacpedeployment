@@ -1,0 +1,19 @@
+<rule-engine>
+        <rules>
+            <rule>
+                <name>cpedeployment-event-ipsla-threshold-violation</name>
+                <description>Invoke Cpedeployment ipsla threshold violation event handler</description>
+                <conditions>
+                </conditions>
+                <enable>true</enable>
+                <event-spec>NET_IP_SLA_THRESHOLD_VIOLATION</event-spec>
+                <match-type>MATCH_ALL</match-type>
+                <actions>
+		  <rule-action>
+		    <index>0</index>
+		    <rpc-name>cpedeployment-ipsla-threshold-violation-event-handler</rpc-name>
+		  </rule-action>
+                </actions>
+            </rule>
+	</rules>
+</rule-engine>

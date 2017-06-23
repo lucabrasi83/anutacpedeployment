@@ -1,0 +1,9 @@
+<package>
+  <name>CPEDEPLOYMENT Service</name>
+  <module-name>cpedeployment</module-name>
+  <version>3.6.0</version>
+  <ncx-version>[5.8.7,)</ncx-version>
+  <type>SERVICE_MODEL</type>
+  <auto-start>true</auto-start>
+  <description>ASD CPEDEPLOYMENT Service Package</description>
+</package>
