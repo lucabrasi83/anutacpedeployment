@@ -2234,6 +2234,10 @@ def back_endpoint(entity, smodelctx, sdata, device, **kwargs):
         netmask = ""
         print 'TEST OK'
     else:
+        ip_addr_obj = ip_addr.ipam_pool_obj
+        prefix = util.IPPrefix(ip_addr_obj.cidr)
+        netmask = prefix.netmask
+        wildcard = prefix.wildcard
         used_ips_list = get_used_ip_list_from_ippool(ip_addr_obj.name, sdata)
         if used_ips_list.__len__() >= 0:
             if str(prefix.masklen) != str(32):
