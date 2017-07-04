@@ -79,6 +79,7 @@ class AccessListRules(yang.AbstractYangServiceHandler):
         # START OF FETCHING THE LEAF PARAMETERS
         inputdict['name'] = config.get_field_value('name')
         inputdict['action'] = config.get_field_value('action')
+        inputdict['acl_sequence_num'] = config.get_field_value('acl_sequence_num')
         inputdict['protocol'] = config.get_field_value('protocol')
         inputdict['service_obj_name'] = config.get_field_value('service_obj_name')
         inputdict['source_condition'] = config.get_field_value('source_condition')

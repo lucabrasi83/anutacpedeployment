@@ -104,6 +104,7 @@ class ServiceDataCustomization:
         for key, value in kwargs.iteritems():
           log("%s == %s" %(key,value))
 
+
     @staticmethod
     def process_service_delete_data(smodelctx, sdata, **kwargs):
       """callback called for delete operation"""

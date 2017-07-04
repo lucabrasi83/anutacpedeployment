@@ -75,6 +75,7 @@ class AccessListRules(yang.AbstractYangServiceHandler):
         inputdict['action'] = config.get_field_value('action')
         inputdict['protocol'] = config.get_field_value('protocol')
         inputdict['service_obj_name'] = config.get_field_value('service_obj_name')
+        inputdict['acl_sequence_num'] = config.get_field_value('acl_sequence_num')
         inputdict['source_condition'] = config.get_field_value('source_condition')
         inputdict['source_object'] = config.get_field_value('source_object')
         inputdict['destination_condition'] = config.get_field_value('destination_condition')

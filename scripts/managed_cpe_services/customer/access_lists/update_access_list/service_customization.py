@@ -371,6 +371,7 @@ def create_acl(entity, conf, sdata, **kwargs):
     inputdict = kwargs['inputdict']
     access_list_name = inputdict['access_list_name']
     access_list_entry = inputdict['access_list_entry']
+    acl_sequence_num = inputdict['acl_sequence_num']
     operation = inputdict['operation']
     acl_name = inputdict['acl_name']
     action = inputdict['action']
@@ -402,7 +403,11 @@ def create_acl(entity, conf, sdata, **kwargs):
         access_rule_obj = devices.device.access_lists.access_list.acl_rules.acl_rule.acl_rule()
         access_rule_obj.action = action
         access_rule_obj.layer4protocol = protocol
-        name_rule = action + ' ' + protocol
+        if util.isNotEmpty(acl_sequence_num):
+            access_rule_obj.linenumber = acl_sequence_num
+            name_rule = acl_sequence_num + ' ' + action + ' ' + protocol
+        else:
+            name_rule = action + ' ' + protocol
         if util.isNotEmpty(service_obj_name):
             object_group_def(service_obj_name, device, sdata)
             access_rule_obj.service_obj_name = service_obj_name
@@ -556,6 +561,7 @@ def delete_acl(entity, conf, sdata, **kwargs):
 
         inputdict = kwargs['inputdict']
         access_list_name = inputdict['access_list_name']
+        acl_sequence_num = inputdict['acl_sequence_num']
         action = inputdict['action']
         protocol = inputdict['protocol']
         service_obj_name = inputdict['service_obj_name']
@@ -574,7 +580,11 @@ def delete_acl(entity, conf, sdata, **kwargs):
         access_rule_obj = devices.device.access_lists.access_list.acl_rules.acl_rule.acl_rule()
         access_rule_obj.action = action
         access_rule_obj.layer4protocol = protocol
-        name_rule = action + ' ' + protocol
+        if util.isNotEmpty(acl_sequence_num):
+            access_rule_obj.linenumber = acl_sequence_num
+            name_rule = acl_sequence_num + ' ' + action + ' ' + protocol
+        else:
+            name_rule = action + ' ' + protocol
         if util.isNotEmpty(service_obj_name):
             access_rule_obj.service_obj_name = service_obj_name
             name_rule += ' ' + service_obj_name

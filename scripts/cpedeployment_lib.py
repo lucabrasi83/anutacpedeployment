@@ -652,6 +652,11 @@ def access_list(smodelctx, sdata, dev, **kwargs):
         access_obj.acl_type = access_list_entry
         if name is not None:
             access_obj.name = name
+    elif access_list_entry == 'standard':
+        access_obj = devices.device.access_lists.access_list.access_list()
+        access_obj.acl_type = access_list_entry
+        if name is not None:
+            access_obj.name = name
     #yang.Sdk.createData(dev.url, '<access-lists/>', sdata.getSession(), False)
 
     access_obj_url = dev.url + '/access-lists'
@@ -710,6 +715,7 @@ def object_group_def(source_object_group, dev, sdata):
 
 def access_list_rule(smodelctx, sdata, dev, access_list_name, **kwargs):
     inputdict = kwargs['inputdict']
+    acl_sequence_num = inputdict['acl_sequence_num']
     action = inputdict['action']
     protocol = inputdict['protocol']
     source_condition = inputdict['source_condition']
@@ -744,7 +750,11 @@ def access_list_rule(smodelctx, sdata, dev, access_list_name, **kwargs):
     access_rule_obj = devices.device.access_lists.access_list.acl_rules.acl_rule.acl_rule()
     access_rule_obj.action = action
     access_rule_obj.layer4protocol = protocol
-    name_rule = action + ' ' + protocol
+    if util.isNotEmpty(acl_sequence_num):
+            access_rule_obj.linenumber = acl_sequence_num
+            name_rule = acl_sequence_num + ' ' + action + ' ' + protocol
+    else:
+            name_rule = action + ' ' + protocol
     if util.isNotEmpty(service_obj_name):
         object_group_def(service_obj_name, dev, sdata)
         access_rule_obj.service_obj_name = service_obj_name

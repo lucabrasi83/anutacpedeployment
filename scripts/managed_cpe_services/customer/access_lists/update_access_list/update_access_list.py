@@ -78,6 +78,7 @@ class UpdateAccessList(yang.AbstractYangServiceHandler):
         inputdict['access_list_entry'] = config.get_field_value('access_list_entry')
         inputdict['operation'] = config.get_field_value('operation')
         inputdict['acl_name'] = config.get_field_value('acl_name')
+        inputdict['acl_sequence_num'] = config.get_field_value('acl_sequence_num')
         inputdict['action'] = config.get_field_value('action')
         inputdict['protocol'] = config.get_field_value('protocol')
         inputdict['service_obj_name'] = config.get_field_value('service_obj_name')

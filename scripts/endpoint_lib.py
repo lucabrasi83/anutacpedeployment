@@ -1302,6 +1302,11 @@ def access_group_def(url, access_group, dev, sdata):
         access_obj.acl_type = access_list_entry
         if name is not None:
             access_obj.name = name
+    elif access_list_entry == 'standard':
+        access_obj.acl_type = access_list_entry
+        if name is not None:
+            access_obj.name = name
+
     #yang.Sdk.createData(dev.url, '<access-lists/>', sdata.getSession(), False)
 
     access_obj_url = dev.url + '/access-lists'
@@ -1313,6 +1318,8 @@ def access_group_def(url, access_group, dev, sdata):
             service_obj_name = rule.service_obj_name
         else:
             service_obj_name = None
+        if hasattr(rule, 'acl_sequence_num') and util.isNotEmpty(rule.acl_sequence_num):
+            acl_sequence_num = rule.acl_sequence_num
         source_condition = rule.source_condition
         if hasattr(rule, 'source_object') and util.isNotEmpty(rule.source_object):
             source_object = rule.source_object
@@ -1367,7 +1374,11 @@ def access_group_def(url, access_group, dev, sdata):
 
         access_rule_obj.action = action
         access_rule_obj.layer4protocol = protocol
-        name_rule = action + ' ' + protocol
+        if util.isNotEmpty(acl_sequence_num):
+            access_rule_obj.linenumber = acl_sequence_num
+            name_rule = acl_sequence_num + ' ' + action + ' ' + protocol
+        else:
+            name_rule = action + ' ' + protocol
         if util.isNotEmpty(service_obj_name):
             object_group_def(service_obj_name, dev, sdata)
             access_rule_obj.service_obj_name = service_obj_name

@@ -117,9 +117,11 @@ class EndPoints(yang.AbstractYangServiceHandler):
         service_customization.ServiceDataCustomization.process_service_device_bindings(smodelctx, sdata, dev, inputdict=inputdict, parentobj=parentobj, config=config, devbindobjs=devbindobjs)
 
     def update(self, id, sdata):
-        #Fetch Local Config Object
+
+         #Fetch Local Config Object
         config = getCurrentObjectConfig(id, sdata, 'end_points')
 
+       
         #Fetch Service Model Context Object
         smodelctx = ServiceModelContext(id, sdata)
 
@@ -127,7 +129,9 @@ class EndPoints(yang.AbstractYangServiceHandler):
         parentobj = getParentObject(sdata)
 
         #Fetch Device Object
-        dev = getDeviceObject(config.get_field_value('device_ip'), sdata)
+        #dev = getDeviceObject(config.get_field_value('device_ip'), sdata)
+        dev = None
+        
 
         #Use the custom method to process the data
         service_customization.ServiceDataCustomization.process_service_update_data(smodelctx, sdata, dev=dev, parentobj=parentobj, config=config)

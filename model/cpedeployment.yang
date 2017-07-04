@@ -100,6 +100,7 @@ module cpedeployment {
   typedef access-list-entry-type {
     type enumeration {
       enum "extended";
+      enum "standard";
     }
   }
 
@@ -641,37 +642,55 @@ module cpedeployment {
         "percentage";
     }
   }
+
   grouping bridge-def {
     leaf enable-vcaas-bridge {
       type boolean;
+      description
+        "enable-vcaas-bridge: True/False";
     }
     leaf interface-bridge-group {
       type uint8;
+      description
+        "0..255";
       when " ../enable-vcaas-bridge = 'true' ";
     }
     leaf interface-mac-acl {
       type uint16;
+      description
+        "0..65535";
       when " ../create-bvi-interface = 'true' ";
     }
     leaf create-bvi-interface {
       type boolean;
+      description
+        "create-bvi-interface: True/False";
     }
     leaf bvi-interface-number {
       type uint8;
-       when " ../create-bvi-interface = 'true' ";
+      description
+        "0..255";
+      when " ../create-bvi-interface = 'true' ";
     }
     leaf bvi-interface-ip {
       type inet:ipv4-address;
-       when " ../create-bvi-interface = 'true' ";
+      description
+        "Valid IPv4 Address (A.B.C.D for e.x: 172.16.1.1)";
+      when " ../create-bvi-interface = 'true' ";
     }
     leaf bvi-interface-mask {
       type string;
-       when " ../create-bvi-interface = 'true' ";
+      description
+        "string";
+      when " ../create-bvi-interface = 'true' ";
     }
   }
+
   grouping mac-acl-def {
     leaf acl-number {
       type uint16;
+      description
+        "0..65535";
     }
     list access-list-rules {
       key "name action source-mac";
@@ -692,12 +711,17 @@ module cpedeployment {
       }
       leaf source-mac {
         type string;
+        description
+          "string";
       }
       leaf destination-mac {
         type string;
+        description
+          "string";
       }
+    }
   }
-}
+
   grouping rate-conform-def {
     description
       "rate-conform-def";
@@ -11663,6 +11687,13 @@ module cpedeployment {
         description
           "string";
       }
+      leaf acl-sequence-num {
+        type uint32 {
+          range "1..2147483647";
+        }
+        description
+          "1..2147483647";
+      }
       leaf action {
         type enumeration {
           enum "permit";
@@ -11849,6 +11880,13 @@ module cpedeployment {
       //  path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../name]/access-lists/access-list[name=current()/../access-list-name]/access-list-rules/name";
       //}
       mandatory true;
+    }
+    leaf acl-sequence-num {
+      type uint32 {
+        range "1..2147483647";
+      }
+      description
+        "1..2147483647";
     }
     leaf action {
       type enumeration {
@@ -12149,6 +12187,13 @@ module cpedeployment {
            tcp
            udp
           ";
+      }
+      leaf acl-sequence-num {
+        type uint32 {
+          range "1..2147483647";
+        }
+        description
+          "1..2147483647";
       }
       leaf service-obj-name {
         type leafref {
