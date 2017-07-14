@@ -2548,7 +2548,8 @@ module cpedeployment {
         /*n-ext:maps-to "/controller:devices/device/l3features:ip-prefixlist-list/ip-prefixlist/ip-prefixlist-entries/ip-prefixlist-entry/rule-num";*/
       }
       leaf ipv4-prefix {
-        type inet:ipv4-prefix;
+        //type inet:ipv4-prefix;
+        type string;
         description
           "Valid IPv4 Prefix (A.B.C.D/Z for e.x: 172.16.1.0/24)";
         /*n-ext:maps-to "/controller:devices/device/l3features:ip-prefixlist-list/ip-prefixlist/ip-prefixlist-entries/ip-prefixlist-entry/subnet";*/

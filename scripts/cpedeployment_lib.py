@@ -21,7 +21,7 @@ import re
 from servicemodel.controller import devices
 from com.anuta.api import DataNodeNotFoundException
 
-managed_cpe_services_debug = False
+managed_cpe_services_debug = True
 
 
 def log(s):
@@ -894,7 +894,7 @@ def route_maps(redistroutepolicy, device, sdata, int_name=None, entity=None):
                             route_map(route_map_name, route_map_entry, device, sdata, int_name, entity)
 
 
-def prefix_list_gen(smodelctx, sdata, device, **kwarg):
+def prefix_list_gen(smodelctx, sdata, device,entity=None, **kwarg):
     '''
     :param smodelctx:
     :param sdata:
@@ -920,10 +920,10 @@ def prefix_list_gen(smodelctx, sdata, device, **kwarg):
                         if hasattr(prefixlist_obj,'prefix'):
                             prefixs = util.convert_to_list(prefixlist_obj.prefix)
                             for prefix in prefixs:
-                                prefix_gen(prefix_list_name, prefix, device, sdata)
+                                prefix_gen(prefix_list_name, prefix, device, sdata, entity)
 
 
-def prefix_gen(prefix_list_name, prefix, device, sdata):
+def prefix_gen(prefix_list_name, prefix, device, sdata, entity=None):
     '''
 
     :param smodelctx:
@@ -944,7 +944,41 @@ def prefix_gen(prefix_list_name, prefix, device, sdata):
         prefix_obj.rule_num = rule_num
     ipv4_prefix = prefix.get_field_value('ipv4_prefix')
     if util.isNotEmpty(ipv4_prefix):
-        prefix_obj.subnet = ipv4_prefix
+        #Replace Keyword DPS-LOOPBACK in prefix list rules by DPS Loopback100 IP /32 prefix
+        if ipv4_prefix == 'DPS-LOOPBACK':
+            if entity == 'cpe':
+                obj_loopback = getLocalObject(sdata, 'cpe')
+                log("cpe obj is: %s" % (obj_loopback))
+                obj_loopback.cpe.loopback.loopback = util.convert_to_list(obj_loopback.cpe.loopback.loopback)
+                for loopback_obj in obj_loopback.cpe.loopback.loopback:
+                    dps_loopback_id = loopback_obj.get_field_value('loopback_interface_id')
+                    if dps_loopback_id == '100':
+                        dps_loopback_prefix = loopback_obj.get_field_value('ip')
+                        dps_loopback_prefix = dps_loopback_prefix + "/32"
+                        prefix_obj.subnet = dps_loopback_prefix
+            elif entity == 'cpe_primary' or entity == 'cpe_secondary':
+                obj_loopback = getLocalObject(sdata, 'dual-cpe-site-services')
+                log("cpe obj is: %s" % (obj_loopback))
+                obj_loopback.dual_cpe_site_services.cpe_secondary.loopback.loopback = util.convert_to_list(obj_loopback.dual_cpe_site_services.cpe_secondary.loopback.loopback)
+                for loopback_obj in obj_loopback.dual_cpe_site_services.cpe_secondary.loopback.loopback:
+                    dps_loopback_id = loopback_obj.get_field_value('loopback_interface_id')
+                    if dps_loopback_id == '100':
+                        dps_loopback_prefix = loopback_obj.get_field_value('ip')
+                        dps_loopback_prefix = dps_loopback_prefix + "/32"
+                        prefix_obj.subnet = dps_loopback_prefix
+            elif entity == 'cpe_primary_dual' or entity == 'cpe_secondary_dual':
+                obj_loopback = getLocalObject(sdata, 'dual-cpe-dual-wan-site-services')
+                log("cpe obj is: %s" % (obj_loopback))
+                obj_loopback.dual_cpe_dual_wan_site_services.cpe_secondary.loopback.loopback = util.convert_to_list(obj_loopback.dual_cpe_dual_wan_site_services.cpe_secondary.loopback.loopback)
+                for loopback_obj in obj_loopback.dual_cpe_dual_wan_site_services.cpe_secondary.loopback.loopback:
+                    dps_loopback_id = loopback_obj.get_field_value('loopback_interface_id')
+                    if dps_loopback_id == '100':
+                        dps_loopback_prefix = loopback_obj.get_field_value('ip')
+                        dps_loopback_prefix = dps_loopback_prefix + "/32"
+                        prefix_obj.subnet = dps_loopback_prefix
+
+        else:     
+            prefix_obj.subnet = ipv4_prefix
     condition = prefix.get_field_value('condition')
     if util.isNotEmpty(condition):
         prefix_obj.condition = condition

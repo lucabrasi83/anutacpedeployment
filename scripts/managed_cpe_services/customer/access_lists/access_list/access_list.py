@@ -75,9 +75,9 @@ class AccessList(yang.AbstractYangServiceHandler):
           inputdict['access_list_entry'] = 'extended'
         # END OF FETCHING THE LEAF PARAMETERS
 
-        inputkeydict = {}
+        #inputkeydict = {}
         # START OF FETCHING THE PARENT KEY LEAF PARAMETERS
-        inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-3].split('=')[1]
+        #inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-3].split('=')[1]
         # END OF FETCHING THE PARENT KEY LEAF PARAMETERS
 
         #Use the custom methods to process the data

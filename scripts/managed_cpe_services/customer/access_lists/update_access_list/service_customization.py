@@ -310,14 +310,14 @@ def object_group_def(source_object_group, dev, sdata):
         if util.isNotEmpty(obj.object_group.description):
             objectgroup_obj.description = obj.object_group.description
     objectgroup_url = dev.url + '/object-groups-acl'
-    yang.Sdk.createData(dev.url, '<object-groups-acl/>', sdata.getSession())
-    yang.Sdk.createData(objectgroup_url, objectgroup_obj.getxml(filter=True), sdata.getSession())
+    #yang.Sdk.createData(dev.url, '<object-groups-acl/>', sdata.getSession())
+    yang.Sdk.createData(objectgroup_url, objectgroup_obj.getxml(filter=True), sdata.getSession(), False)
     if hasattr(obj.object_group, 'networks'):
         if hasattr(obj.object_group.networks, 'network'):
             for objectgroup in util.convert_to_list(obj.object_group.networks.network):
                 network_obj = devices.device.object_groups_acl.object_group.networks.network.network()
                 net_url = dev.url + '/object-groups-acl/object-group=%s' %(obj.object_group.name)
-                yang.Sdk.createData(net_url, '<networks/>', sdata.getSession())
+                yang.Sdk.createData(net_url, '<networks/>', sdata.getSession(), False)
 
                 if hasattr(objectgroup, 'group_object'):
                     if util.isNotEmpty(objectgroup.group_object):
@@ -325,7 +325,7 @@ def object_group_def(source_object_group, dev, sdata):
                         network_obj.group_object = objectgroup.group_object
                         network_obj.name = "group-object" + " " + objectgroup.group_object
                         network_url = dev.url + '/object-groups-acl/object-group=%s/networks' %(obj.object_group.name)
-                        yang.Sdk.createData(network_url, network_obj.getxml(filter=True), sdata.getSession())
+                        yang.Sdk.createData(network_url, network_obj.getxml(filter=True), sdata.getSession(), False)
 
                 if hasattr(objectgroup, 'host'):
                     if util.isNotEmpty(objectgroup.host):
@@ -333,7 +333,7 @@ def object_group_def(source_object_group, dev, sdata):
                         network_obj1.host = objectgroup.host
                         network_obj1.name = "host" + " " + objectgroup.host
                         network_url = dev.url + '/object-groups-acl/object-group=%s/networks' %(obj.object_group.name)
-                        yang.Sdk.createData(network_url, network_obj1.getxml(filter=True), sdata.getSession())
+                        yang.Sdk.createData(network_url, network_obj1.getxml(filter=True), sdata.getSession(), False)
 
                 if hasattr(objectgroup, 'prefix'):
                     if util.isNotEmpty(objectgroup.prefix):
@@ -345,7 +345,7 @@ def object_group_def(source_object_group, dev, sdata):
                         network_obj2.netmask = netmask
                         network_obj2.name = ip_address + " " + netmask
                         network_url = dev.url + '/object-groups-acl/object-group=%s/networks' %(obj.object_group.name)
-                        yang.Sdk.createData(network_url, network_obj2.getxml(filter=True), sdata.getSession())
+                        yang.Sdk.createData(network_url, network_obj2.getxml(filter=True), sdata.getSession()), False
 
 
 def create_acl(entity, conf, sdata, **kwargs):
@@ -504,7 +504,7 @@ def create_acl(entity, conf, sdata, **kwargs):
         print "ACL_RULE_NAME: ", name_rule
         access_rule_obj.name = name_rule
         access_rules_url = device.url + "/access-lists/access-list=%s" %(access_list_name)
-        yang.Sdk.createData(access_rules_url, '<acl-rules/>', sdata.getSession())
+        #yang.Sdk.createData(access_rules_url, '<acl-rules/>', sdata.getSession())
 
         access_rule_url = device.url + '/access-lists/access-list=%s/acl-rules' %(access_list_name)
         yang.Sdk.createData(access_rule_url, access_rule_obj.getxml(filter=True), sdata.getSession(), False)

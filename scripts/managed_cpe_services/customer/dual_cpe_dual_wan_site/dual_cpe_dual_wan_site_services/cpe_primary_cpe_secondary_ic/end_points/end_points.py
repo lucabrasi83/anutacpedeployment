@@ -146,6 +146,8 @@ class EndPoints(yang.AbstractYangServiceHandler):
         inputdict['outbound_acl'] = config.get_field_value('outbound_acl')
         inputdict['global_outbound_acl'] = config.get_field_value('global_outbound_acl')
         inputdict['site_outbound_acl'] = config.get_field_value('site_outbound_acl')
+        inputdict['nat_outside'] = config.get_field_value('nat_outside')
+        inputdict['nat_inside'] = config.get_field_value('nat_inside')
         # END OF FETCHING THE LEAF PARAMETERS
 
         #Fetch Device Object
@@ -190,6 +192,8 @@ class EndPoints(yang.AbstractYangServiceHandler):
         inputdict['outbound_acl'] = config.get_field_value('outbound_acl')
         inputdict['global_outbound_acl'] = config.get_field_value('global_outbound_acl')
         inputdict['site_outbound_acl'] = config.get_field_value('site_outbound_acl')
+        inputdict['nat_outside'] = config.get_field_value('nat_outside')
+        inputdict['nat_inside'] = config.get_field_value('nat_inside')
         # END OF FETCHING THE LEAF PARAMETERS
 
         #Fetch Device Object
