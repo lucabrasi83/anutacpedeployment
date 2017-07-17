@@ -62,6 +62,7 @@ from cpedeployment.cpedeployment_lib import getParentObject
 from cpedeployment.cpedeployment_lib import log
 
 
+
 class ServiceDataCustomization:
 
     @staticmethod
@@ -268,30 +269,68 @@ def create_route_map(entity, conf, sdata, **kwargs):
     set_ip = inputdict['ip']
     set_value = inputdict['set_value']
     if route_map_name in device_route:
-        if entry == 'match-condition':
-            matchcondition_obj = devices.device.route_maps.route_map.route_map_entries.match_condition.match_condition()
-            if condition_type is not None:
-                matchcondition_obj.condition_type = condition_type
-            if condition_value is not None:
-                matchcondition_obj.value = condition_value
-            if condition_type == 'as-path' and condition_value is not None:
-                as_path_acl(condition_value, device, sdata)
-            match_condition_url = device.url + '/route-maps/route-map=%s/route-map-entries=%s' % (route_map_name,sequence_number)
-            yang.Sdk.createData(match_condition_url, matchcondition_obj.getxml(filter=True), sdata.getSession(), False)
+        url_device_route_map_entries = '/controller:devices/device=%s/l3features:route-maps/route-map=%s' %(device.device.id, route_map_name)
+        device_route_map_entries = yang.Sdk.getData(url_device_route_map_entries, '', sdata.getTaskId())
+        conf_route_entries = util.parseXmlString(device_route_map_entries)
+        device_route_entries = []
+        if hasattr(conf_route_entries, 'route_maps_entries'):
+            conf_route_entries.route_maps_entries = util.convert_to_list(conf_route_entries.route_maps_entries)
+            for routemap_entries in conf_route_entries.route_maps_entries:
+                device_route_entries.append(routemap_entries.seq)
 
-        if entry == 'set-action':
-            set_obj1 = devices.device.route_maps.route_map.route_map_entries.set_action.set_action()
-            if set_type is not None:
-                set_obj1.set_type = set_type
-                if set_type == 'ip':
-                    if set_ip is None:
-                        raise Exception("Please provide ip precedence/df/next-hop")
-                    else:
-                        set_obj1.ip = set_ip
-            if set_value is not None:
-                set_obj1.value = set_value
-            set_action_url = device.url + '/route-maps/route-map=%s/route-map-entries=%s' % (route_map_name,sequence_number)
-            yang.Sdk.createData(set_action_url, set_obj1.getxml(filter=True), sdata.getSession(), False)
+        if sequence_number in device_route_entries:
+            if entry == 'match-condition':
+                matchcondition_obj = devices.device.route_maps.route_map.route_map_entries.match_condition.match_condition()
+                if condition_type is not None:
+                    matchcondition_obj.condition_type = condition_type
+                if condition_value is not None:
+                    matchcondition_obj.value = condition_value
+                if condition_type == 'as-path' and condition_value is not None:
+                    as_path_acl(condition_value, device, sdata)
+                match_condition_url = device.url + '/route-maps/route-map=%s/route-map-entries=%s' % (route_map_name,sequence_number)
+                yang.Sdk.createData(match_condition_url, matchcondition_obj.getxml(filter=True), sdata.getSession(), False)
+            elif entry == 'set-action':
+                set_obj1 = devices.device.route_maps.route_map.route_map_entries.set_action.set_action()
+                if set_type is not None:
+                    set_obj1.set_type = set_type
+                    if set_type == 'ip':
+                        if set_ip is None:
+                            raise Exception("Please provide ip precedence/df/next-hop")
+                        else:
+                            set_obj1.ip = set_ip
+                if set_value is not None:
+                    set_obj1.value = set_value
+                set_action_url = device.url + '/route-maps/route-map=%s/route-map-entries=%s' % (route_map_name,sequence_number)
+                yang.Sdk.createData(set_action_url, set_obj1.getxml(filter=True), sdata.getSession(), False)
+        else:
+            entries_obj = devices.device.route_maps.route_map.route_map_entries.route_map_entries()
+            entries_obj.seq = sequence_number
+            entries_obj.action = action
+            route_map_entries_url = device.url + '/route-maps/route-map=%s' % (route_map_name)
+            yang.Sdk.createData(route_map_entries_url, entries_obj.getxml(filter=True), sdata.getSession(), False)
+            if entry == 'match-condition':
+                matchcondition_obj = devices.device.route_maps.route_map.route_map_entries.match_condition.match_condition()
+                if condition_type is not None:
+                    matchcondition_obj.condition_type = condition_type
+                if condition_value is not None:
+                    matchcondition_obj.value = condition_value
+                if condition_type == 'as-path' and condition_value is not None:
+                    as_path_acl(condition_value, device, sdata)
+                match_condition_url = device.url + '/route-maps/route-map=%s/route-map-entries=%s' % (route_map_name,sequence_number)
+                yang.Sdk.createData(match_condition_url, matchcondition_obj.getxml(filter=True), sdata.getSession(), False)
+            elif entry == 'set-action':
+                set_obj1 = devices.device.route_maps.route_map.route_map_entries.set_action.set_action()
+                if set_type is not None:
+                    set_obj1.set_type = set_type
+                    if set_type == 'ip':
+                        if set_ip is None:
+                            raise Exception("Please provide ip precedence/df/next-hop")
+                        else:
+                            set_obj1.ip = set_ip
+                if set_value is not None:
+                    set_obj1.value = set_value
+                set_action_url = device.url + '/route-maps/route-map=%s/route-map-entries=%s' % (route_map_name,sequence_number)
+                yang.Sdk.createData(set_action_url, set_obj1.getxml(filter=True), sdata.getSession(), False)
     else:
         print "Route-map is not in device: ", device
 
@@ -305,7 +344,7 @@ def as_path_acl(condition_value, device, sdata):
     obj = util.parseXmlString(xml_output)
     print "obj: ",obj
     print "xml of as path acl obj: ", obj.toXml()
-    yang.Sdk.createData(device.url, '<as-path-acls/>', sdata.getSession())
+    yang.Sdk.createData(device.url, '<as-path-acls/>', sdata.getSession(), False)
 
     if hasattr(obj.as_path_acls, 'as_path_acl'):
         obj.as_path_acls.as_path_acl = util.convert_to_list(obj.as_path_acls.as_path_acl)
