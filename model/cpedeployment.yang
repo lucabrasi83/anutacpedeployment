@@ -4452,6 +4452,13 @@ module cpedeployment {
         "string";
       when "../outbound-acl = 'true'";
     }
+    leaf pbr-policy {
+      type leafref {
+        path "../../../../../route-maps/route-map/route-map-name";
+      }
+      description
+        "pbr-policy";
+    }
     leaf nat-inside {
       type boolean;
       description
@@ -5385,6 +5392,12 @@ module cpedeployment {
           units "Mbps";
           when "../interface-type = 'Tunnel'";
         }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
+          when "../interface-type = 'Tunnel'";
+        }
         list bgp-peers {
           leaf sequence-number {
             type string;
@@ -5563,6 +5576,12 @@ module cpedeployment {
           description
             "0..65535";
           units "Mbps";
+          when "../interface-type = 'Tunnel'";
+        }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
           when "../interface-type = 'Tunnel'";
         }
         list bgp-peers {
@@ -6905,6 +6924,12 @@ module cpedeployment {
           units "Mbps";
           when "../interface-type = 'Tunnel'";
         }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
+          when "../interface-type = 'Tunnel'";
+        }
         list bgp-peers {
           leaf sequence-number {
             type string;
@@ -7083,6 +7108,12 @@ module cpedeployment {
           description
             "0..65535";
           units "Mbps";
+          when "../interface-type = 'Tunnel'";
+        }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
           when "../interface-type = 'Tunnel'";
         }
         list bgp-peers {
@@ -7265,6 +7296,12 @@ module cpedeployment {
           units "Mbps";
           when "../interface-type = 'Tunnel'";
         }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
+          when "../interface-type = 'Tunnel'";
+        }
         list bgp-peers {
           leaf sequence-number {
             type string;
@@ -7443,6 +7480,12 @@ module cpedeployment {
           description
             "0..65535";
           units "Mbps";
+          when "../interface-type = 'Tunnel'";
+        }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
           when "../interface-type = 'Tunnel'";
         }
         list bgp-peers {
@@ -7625,6 +7668,12 @@ module cpedeployment {
           units "Mbps";
           when "../interface-type = 'Tunnel'";
         }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
+          when "../interface-type = 'Tunnel'";
+        }
         list bgp-peers {
           leaf sequence-number {
             type string;
@@ -7803,6 +7852,12 @@ module cpedeployment {
           description
             "0..65535";
           units "Mbps";
+          when "../interface-type = 'Tunnel'";
+        }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
           when "../interface-type = 'Tunnel'";
         }
         list bgp-peers {
@@ -8747,6 +8802,12 @@ module cpedeployment {
           units "Mbps";
           when "../interface-type = 'Tunnel'";
         }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
+          when "../interface-type = 'Tunnel'";
+        }
         list bgp-peers {
           leaf sequence-number {
             type string;
@@ -8925,6 +8986,12 @@ module cpedeployment {
           description
             "0..65535";
           units "Mbps";
+          when "../interface-type = 'Tunnel'";
+        }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
           when "../interface-type = 'Tunnel'";
         }
         list bgp-peers {
@@ -9107,6 +9174,12 @@ module cpedeployment {
           units "Mbps";
           when "../interface-type = 'Tunnel'";
         }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
+          when "../interface-type = 'Tunnel'";
+        }
         list bgp-peers {
           leaf sequence-number {
             type string;
@@ -9285,6 +9358,12 @@ module cpedeployment {
           description
             "0..65535";
           units "Mbps";
+          when "../interface-type = 'Tunnel'";
+        }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
           when "../interface-type = 'Tunnel'";
         }
         list bgp-peers {
@@ -9924,6 +10003,12 @@ module cpedeployment {
           units "Mbps";
           when "../interface-type = 'Tunnel'";
         }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
+          when "../interface-type = 'Tunnel'";
+        }
         list bgp-peers {
           leaf sequence-number {
             type string;
@@ -10324,6 +10409,12 @@ module cpedeployment {
           units "Mbps";
           when "../interface-type = 'Tunnel'";
         }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
+          when "../interface-type = 'Tunnel'";
+        }
         list bgp-peers {
           leaf sequence-number {
             type string;
@@ -10502,6 +10593,12 @@ module cpedeployment {
           description
             "0..65535";
           units "Mbps";
+          when "../interface-type = 'Tunnel'";
+        }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
           when "../interface-type = 'Tunnel'";
         }
         list bgp-peers {
@@ -12396,8 +12493,6 @@ module cpedeployment {
           enum "cpe-secondary";
           enum "cpe-secondary-only";
           enum "cpe-primary-only";
-          enum "cpe-primary-dual";
-          enum "cpe-secondary-dual";
           enum "cpe-primary-triple";
           enum "cpe-secondary-only-dual";
         }
@@ -12415,34 +12510,34 @@ module cpedeployment {
         }
         description
           "string";
-        when " ../cpe = 'cpe' or ../cpe = 'cpe-secondary' or ../cpe = 'cpe-secondary-only' or ../cpe = 'cpe-primary-only' or ../cpe = 'cpe-secondary-only-dual' or ../cpe = 'cpe-primary-triple'";
+        when " ../cpe = 'cpe' or ../cpe = 'cpe-secondary' or ../cpe = 'cpe-secondary-only' or ../cpe = 'cpe-primary-only' or ../cpe = 'cpe-primary-triple'";
       }
       leaf rd {
         type string;
         description
           "string";
-        when " ../cpe = 'cpe' or ../cpe = 'cpe-secondary' or ../cpe = 'cpe-secondary-only' or ../cpe = 'cpe-primary-only' or ../cpe = 'cpe-secondary-only-dual' or ../cpe = 'cpe-primary-triple'";
+        when " ../cpe = 'cpe' or ../cpe = 'cpe-secondary' or ../cpe = 'cpe-secondary-only' or ../cpe = 'cpe-primary-only' or ../cpe = 'cpe-primary-triple'";
         config false;
       }
       leaf rt-import {
         type string;
         description
           "string";
-        when " ../cpe = 'cpe' or ../cpe = 'cpe-secondary' or ../cpe = 'cpe-secondary-only' or ../cpe = 'cpe-primary-only' or ../cpe = 'cpe-secondary-only-dual' or ../cpe = 'cpe-primary-triple'";
+        when " ../cpe = 'cpe' or ../cpe = 'cpe-secondary' or ../cpe = 'cpe-secondary-only' or ../cpe = 'cpe-primary-only' or ../cpe = 'cpe-primary-triple'";
         config false;
       }
       leaf rt-export {
         type string;
         description
           "string";
-        when " ../cpe = 'cpe' or ../cpe = 'cpe-secondary' or ../cpe = 'cpe-secondary-only' or ../cpe = 'cpe-primary-only' or ../cpe = 'cpe-secondary-only-dual' or ../cpe = 'cpe-primary-triple'";
+        when " ../cpe = 'cpe' or ../cpe = 'cpe-secondary' or ../cpe = 'cpe-secondary-only' or ../cpe = 'cpe-primary-only' or ../cpe = 'cpe-primary-triple'";
         config false;
       }
       leaf lan-interface {
         type boolean;
         description
           "lan-interface: True/False";
-        when " ../cpe = 'cpe' or ../cpe = 'cpe-primary' or ../cpe = 'cpe-secondary-only' or ../cpe = 'cpe-primary-only' or ../cpe = 'cpe-secondary-only-dual' or ../cpe = 'cpe-primary-triple'";
+        when " ../cpe = 'cpe' or ../cpe = 'cpe-primary' or ../cpe = 'cpe-secondary-only' or ../cpe = 'cpe-primary-only' or ../cpe = 'cpe-primary-triple'";
       }
       leaf hierarchical-inbound-policy {
         type boolean;
@@ -12472,7 +12567,7 @@ module cpedeployment {
         }
         description
           "pbr-policy";
-        when " ../lan-interface = 'true' and ../cpe != 'cpe-secondary' ";
+        when " ../lan-interface = 'true' and ../cpe != 'cpe-secondary'";
       }
       leaf next-hop-ip {
         type inet:ipv4-address;
@@ -12502,7 +12597,7 @@ module cpedeployment {
         type boolean;
         description
           "b2b-interface: True/False";
-        when " ../cpe = 'cpe-secondary' or ../cpe = 'cpe-primary' ";
+        when " ../cpe = 'cpe-secondary' or ../cpe = 'cpe-primary'";
       }
       leaf vlan-id {
         type uint32 {
@@ -12536,7 +12631,7 @@ module cpedeployment {
         type boolean;
         description
           "loopback: True/False";
-        when " ../cpe = 'cpe' or ../cpe = 'cpe-secondary' or ../cpe = 'cpe-secondary-only' or ../cpe = 'cpe-primary-only'";
+        when " ../cpe = 'cpe' or ../cpe = 'cpe-secondary' or ../cpe = 'cpe-primary-only'";
       }
       leaf loopback-interface-id {
         type uint8;
@@ -12764,7 +12859,7 @@ module cpedeployment {
         type boolean;
         description
           "tunnel: True/False";
-        when " ../cpe = 'cpe' or ../cpe = 'cpe-secondary' or ../cpe = 'cpe-secondary-only' or ../cpe = 'cpe-primary-only'";
+        when " ../cpe = 'cpe' or ../cpe = 'cpe-secondary' or ../cpe = 'cpe-secondary-only'";
       }
       leaf hub {
         type boolean;
@@ -12794,6 +12889,14 @@ module cpedeployment {
       }
       leaf tunnel-interface-description {
         type string;
+        description
+          "string";
+        when " ../tunnel = 'true' and ../cpe != 'cpe-primary'";
+      }
+      leaf tunnel-fvrf {
+        type leafref {
+          path "../../../../vrfs/vrf/vrf-name";
+        }
         description
           "string";
         when " ../tunnel = 'true' and ../cpe != 'cpe-primary'";
@@ -13110,6 +13213,12 @@ module cpedeployment {
             "vrf-definition-mode: True/False";
           default "false";
         }
+        //leaf vrf-wan {
+        //type boolean;
+        //description
+        //"WAN VRF won't be deleted if Checked during service deletion";
+        //default "true";
+        //}
         list rt-import {
           key "rt-import";
           leaf rt-import {

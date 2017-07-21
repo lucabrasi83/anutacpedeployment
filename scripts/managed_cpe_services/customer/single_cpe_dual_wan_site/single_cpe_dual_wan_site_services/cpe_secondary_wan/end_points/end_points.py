@@ -98,6 +98,7 @@ class EndPoints(yang.AbstractYangServiceHandler):
         inputdict['tunnel_bandwidth'] = config.get_field_value('tunnel_bandwidth')
         inputdict['nat_outside'] = config.get_field_value('nat_outside')
         inputdict['nat_inside'] = config.get_field_value('nat_inside')
+        inputdict['tunnel_mss'] = config.get_field_value('tunnel_mss')
         # END OF FETCHING THE LEAF PARAMETERS
 
         #Fetch Device Object

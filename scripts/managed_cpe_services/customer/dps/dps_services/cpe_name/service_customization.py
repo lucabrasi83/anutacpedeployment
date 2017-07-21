@@ -1036,6 +1036,7 @@ def dps(entity, conf, sdata, **kwargs):
         tunnel_ip_address = inputdict['tunnel_interface_ip_address']
         bandwidth = inputdict['tunnel_bandwidth']
         tunnel_description = inputdict['tunnel_interface_description']
+        tunnel_fvrf = inputdict['tunnel_fvrf']
 
         uri = sdata.getRcPath()
         uri_list = uri.split('/', 5)
@@ -1054,6 +1055,9 @@ def dps(entity, conf, sdata, **kwargs):
             util.log_debug("obj_local: ", obj_local)
             dmvpn_obj.vrf_definition_mode = obj_local.vrf.vrf_definition_mode
             dmvpn_obj.vrf_name = vrf
+        
+        if tunnel_fvrf is not None:
+               dmvpn_obj.front_vrf_name = tunnel_fvrf
 
         if hasattr(obj_dmvpn.dmvpn_tunnel_profile, 'delay'):
             delay = obj_dmvpn.dmvpn_tunnel_profile.delay

@@ -180,4 +180,7 @@ class CreatePreProcessor(yang.SessionPreProcessor):
         yang.moveOperations(operations, ['CreateAclRule'], ['UpdateInterface'], False)
         print 'pass15: operations: %s' % (operations)
         yang.moveOperations(operations, ['CreateAclRule'], ['CreateAccessList'], True)
-        print 'pass06: operations: %s' % (operations)
+        print 'pass16: operations: %s' % (operations)
+        yang.moveOperations(operations, ['CreateObjectGroup', 'CreateNetworkGroup'], ['CreateAccessList'], False)
+        print 'pass17: operations: %s' % (operations)
+        

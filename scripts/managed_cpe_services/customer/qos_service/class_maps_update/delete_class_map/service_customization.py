@@ -303,6 +303,14 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
             if isinstance(inputdict['protocol'], list) is True:
                 for pr in inputdict['protocol']:
                     if pr in device_protocol:
+                        cls_protocol_url = "/controller:devices/device=%s/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(device.device.id, cls_name, 'protocol', pr)
+                        output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+cls_protocol_url+'</rc-path></input>')
+                        ref = util.parseXmlString(output)
+                        if hasattr(ref.output, 'references'):
+                           if hasattr(ref.output.references, 'reference'):
+                               if hasattr(ref.output.references.reference, 'src_node'):
+                                  for each_ref in util.convert_to_list(ref.output.references.reference.src_node):
+                                     yang.Sdk.removeReference(each_ref, cls_protocol_url)
                         match_obj = devices.device.class_maps.class_map.class_match_condition.class_match_condition()
                         match_obj.condition_type = "protocol"
                         match_obj.match_value = pr
@@ -330,6 +338,14 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
                                                 match_object.url = url_http
                                                 yang.Sdk.deleteData(device.url+"/qos:class-maps/class-map=%s/class-match-condition=%s,%s/http-url=%s,%s" %(cls_name,'protocol','http',dev_http_url.url), match_object.getxml(filter=True), sdata.getSession())
                             else:
+                                cls_protocol_url = "/controller:devices/device=%s/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(device.device.id, cls_name, 'protocol', pr)
+                                output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+cls_protocol_url+'</rc-path></input>')
+                                ref = util.parseXmlString(output)
+                                if hasattr(ref.output, 'references'):
+                                    if hasattr(ref.output.references, 'reference'):
+                                        if hasattr(ref.output.references.reference, 'src_node'):
+                                           for each_ref in util.convert_to_list(ref.output.references.reference.src_node):
+                                                yang.Sdk.removeReference(each_ref, cls_protocol_url)
                                 match_obj = devices.device.class_maps.class_map.class_match_condition.class_match_condition()
                                 match_obj.condition_type = "protocol"
                                 match_obj.match_value = pr
@@ -337,6 +353,14 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
                                 yang.Sdk.deleteData(device.url+"/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(cls_name, 'protocol', pr), match_obj.getxml(filter=True), sdata.getTaskId(), sdata.getSession())
             else:
                 if inputdict['protocol'] in device_protocol:
+                    cls_protocol_url = "/controller:devices/device=%s/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(device.device.id, cls_name, 'protocol', inputdict['protocol'])
+                    output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+cls_protocol_url+'</rc-path></input>')
+                    ref = util.parseXmlString(output)
+                    if hasattr(ref.output, 'references'):
+                        if hasattr(ref.output.references, 'reference'):
+                            if hasattr(ref.output.references.reference, 'src_node'):
+                                for each_ref in util.convert_to_list(ref.output.references.reference.src_node):
+                                    yang.Sdk.removeReference(each_ref, cls_protocol_url)
                     match_obj = devices.device.class_maps.class_map.class_match_condition.class_match_condition()
                     match_obj.condition_type = "protocol"
                     match_obj.match_value = inputdict['protocol']

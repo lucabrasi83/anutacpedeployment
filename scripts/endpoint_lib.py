@@ -689,6 +689,8 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
             if util.isNotEmpty(fvrf) and fvrf != 'GLOBAL':
                 dmvpn_obj.front_vrf_name = fvrf
         else:
+            tcp_mss = inputdict['tunnel_mss']
+            ivrf = inputdict['ivrf']
             tunnel_mask = inputdict['tunnel_interface_mask']
             tunnel_id = inputdict['tunnel_interface_id']
             tunnel_destination = inputdict['tunnel_interface_destination']
@@ -699,9 +701,23 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
             dmvpn_obj = devices.device.dmvpntunnels.dmvpntunnel.dmvpntunnel()
             if util.isNotEmpty(fvrf) and fvrf != 'GLOBAL':
                 dmvpn_obj.front_vrf_name = fvrf
+            if util.isNotEmpty(ivrf) and ivrf != 'GLOBAL':
+                print 'ivrf is: ' + str(ivrf)
+                dmvpn_obj.vrf_name = ivrf
+                uri = sdata.getRcPath()
+                uri_list = uri.split('/', 5)
+                url = '/'.join(uri_list[0:4])
+                xml_output = yang.Sdk.getData(url+"/vrfs/vrf="+str(ivrf), '', sdata.getTaskId())
+                obj_local = util.parseXmlString(xml_output)
+                dmvpn_obj.vrf_definition_mode = obj_local.vrf.vrf_definition_mode
+            
             dmvpn_obj.name = tunnel_id
             dmvpn_obj.description = interface_description
-            dmvpn_obj.tcp_adjust_mss = "1300"
+            print 'tcp mss is: ' + str(tcp_mss)
+            if tcp_mss is not None:
+                dmvpn_obj.tcp_adjust_mss = tcp_mss
+            else:
+                dmvpn_obj.tcp_adjust_mss = '1300'
             dmvpn_obj.ipaddress = tunnel_ip_address
             dmvpn_obj.netmask = tunnel_mask
             dmvpn_obj.tunnel_destination = tunnel_destination
@@ -1320,6 +1336,8 @@ def access_group_def(url, access_group, dev, sdata):
             service_obj_name = None
         if hasattr(rule, 'acl_sequence_num') and util.isNotEmpty(rule.acl_sequence_num):
             acl_sequence_num = rule.acl_sequence_num
+        else:
+            acl_sequence_num = None
         source_condition = rule.source_condition
         if hasattr(rule, 'source_object') and util.isNotEmpty(rule.source_object):
             source_object = rule.source_object
@@ -1376,7 +1394,8 @@ def access_group_def(url, access_group, dev, sdata):
         access_rule_obj.layer4protocol = protocol
         if util.isNotEmpty(acl_sequence_num):
             access_rule_obj.linenumber = acl_sequence_num
-            name_rule = acl_sequence_num + ' ' + action + ' ' + protocol
+            #name_rule = acl_sequence_num + ' ' + action + ' ' + protocol
+            name_rule = action + ' ' + protocol
         else:
             name_rule = action + ' ' + protocol
         if util.isNotEmpty(service_obj_name):
@@ -1934,7 +1953,7 @@ def delete_physical_interface(entity, smodelctx, sdata, device, **kwarg):
             intf_obj.acl_inbound_name._empty_tag = True
             intf_obj.acl_outbound_name._empty_tag = True
             #if ((vrf is not None and vrf != 'GLOBAL') or (ivrf is not None and ivrf != 'GLOBAL')) and inet_mpls == 'MPLS':
-            intf_obj.vrf._empty_tag = True
+            #intf_obj.vrf._empty_tag = False
             uri = device.url + '/interface:interfaces/interface=%s' % (str(interface_name1).replace('/', '%2F'))
             payload = intf_obj.getxml(filter=True)
             if device.isInterfaceInDeviceExists(interface_name1):
@@ -1943,7 +1962,7 @@ def delete_physical_interface(entity, smodelctx, sdata, device, **kwarg):
             intf_obj_phy.name = interface_name
             intf_obj_phy.long_name = interface_name
             intf_obj_phy.mode = "l3-interface"
-            #intf_obj_phy.vrf._empty_tag = True
+            #intf_obj_phy.vrf._empty_tag = False
             intf_obj_phy.link_negotiation._empty_tag = True
             intf_obj_phy.outbound_qos._empty_tag = True
             intf_obj_phy.inbound_qos._empty_tag = True
@@ -1989,7 +2008,7 @@ def delete_physical_interface(entity, smodelctx, sdata, device, **kwarg):
             intf_obj.acl_inbound_name._empty_tag = True
             intf_obj.acl_outbound_name._empty_tag = True
             #if ((vrf is not None and vrf != 'GLOBAL') or (ivrf is not None and ivrf != 'GLOBAL')) and inet_mpls == 'MPLS':
-            intf_obj.vrf._empty_tag = True
+            #intf_obj.vrf._empty_tag = False
             #if load_interval_delay is not None:
             intf_obj.load_interval_delay._empty_tag = True
             #if in_queue_length is not None:
@@ -2004,6 +2023,7 @@ def delete_physical_interface(entity, smodelctx, sdata, device, **kwarg):
                 yang.Sdk.patchData(uri, payload, sdata, add_reference=False)
                 intf_obj_phy1 = devices.device.interfaces.interface.interface()
                 intf_obj_phy1.name = interface_name
+                #intf_obj_phy1.vrf._empty_tag = False
                 intf_obj_phy1.long_name = interface_name
                 intf_obj_phy1.mode._empty_tag = True
                 payload1 = intf_obj_phy1.getxml(filter=True)
@@ -2336,6 +2356,10 @@ def back_endpoint(entity, smodelctx, sdata, device, **kwargs):
             intf_obj.vrf_definition_mode = obj_local.vrf.vrf_definition_mode
             intf_obj.vrf = vrf
         if entity != "cpe_primary_cpe_secondary_ic":
+            if util.isNotEmpty(inputdict['pbr_policy']):
+                route_maps(inputdict['pbr_policy'], device, sdata)
+                intf_obj.pbr_policy = inputdict['pbr_policy']
+        else:
             if util.isNotEmpty(inputdict['pbr_policy']):
                 route_maps(inputdict['pbr_policy'], device, sdata)
                 intf_obj.pbr_policy = inputdict['pbr_policy']
@@ -2917,6 +2941,10 @@ def new_back_endpoint(entity, smodelctx, sdata, device, **kwargs):
             intf_obj.vrf = vrf
         if entity != "cpe_primary_cpe_secondary_ic_dual" and entity != "cpe_primary_cpe_secondary_ic_triple" and entity != "cpe_secondary_cpe_tertiary_ic_triple" and entity != "cpe_tertiary_cpe_primary_ic_triple":
             if util.isNotEmpty(inputdict['pbr_policy']):
+                route_maps(inputdict['pbr_policy'], device, sdata)
+                intf_obj.pbr_policy = inputdict['pbr_policy']
+        else:
+             if util.isNotEmpty(inputdict['pbr_policy']):
                 route_maps(inputdict['pbr_policy'], device, sdata)
                 intf_obj.pbr_policy = inputdict['pbr_policy']
         if hierarchical_inbound_policy == 'false':

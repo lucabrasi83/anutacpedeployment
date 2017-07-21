@@ -345,7 +345,7 @@ def object_group_def(source_object_group, dev, sdata):
                         network_obj2.netmask = netmask
                         network_obj2.name = ip_address + " " + netmask
                         network_url = dev.url + '/object-groups-acl/object-group=%s/networks' %(obj.object_group.name)
-                        yang.Sdk.createData(network_url, network_obj2.getxml(filter=True), sdata.getSession()), False
+                        yang.Sdk.createData(network_url, network_obj2.getxml(filter=True), sdata.getSession(), False)
 
 
 def create_acl(entity, conf, sdata, **kwargs):
