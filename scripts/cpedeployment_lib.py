@@ -21,7 +21,7 @@ import re
 from servicemodel.controller import devices
 from com.anuta.api import DataNodeNotFoundException
 
-managed_cpe_services_debug = True
+managed_cpe_services_debug = False
 
 
 def log(s):
@@ -948,7 +948,7 @@ def prefix_gen(prefix_list_name, prefix, device, sdata, entity=None):
     if util.isNotEmpty(ipv4_prefix):
         #Replace Keyword DPS-LOOPBACK in prefix list rules by DPS Loopback100 IP /32 prefix
         if ipv4_prefix == 'DPS-LOOPBACK':
-            if entity == 'cpe':
+            if entity == 'cpe' or entity == 'cpe_dual':
                 obj_loopback = getLocalObject(sdata, 'cpe')
                 log("cpe obj is: %s" % (obj_loopback))
                 obj_loopback.cpe.loopback.loopback = util.convert_to_list(obj_loopback.cpe.loopback.loopback)
@@ -978,6 +978,41 @@ def prefix_gen(prefix_list_name, prefix, device, sdata, entity=None):
                         dps_loopback_prefix = loopback_obj.get_field_value('ip')
                         dps_loopback_prefix = dps_loopback_prefix + "/32"
                         prefix_obj.subnet = dps_loopback_prefix
+
+        #Haulotte Replace Keyword in prefix-list by GUESTS LAN subnet
+        elif ipv4_prefix == 'HAULOTTE-GUESTS':
+            if entity == 'cpe':
+                obj_haulotte_guests = getLocalObject(sdata, 'single-cpe-site-services')
+                log("haulotte guest obj is: %s" % (obj_haulotte_guests))
+                obj_haulotte_guests.single_cpe_site_services.cpe_lan.lan_profile = util.convert_to_list(obj_haulotte_guests.single_cpe_site_services.cpe_lan.lan_profile)
+                for lanprof in obj_haulotte_guests.single_cpe_site_services.cpe_lan.lan_profile:
+                    if lanprof.profile_name == 'HAULOTTE-GUESTS':
+                        haulotte_guests_prefix = lanprof.get_field_value('cidr')
+                        prefix_obj.subnet = haulotte_guests_prefix
+            elif entity == 'cpe_dual':
+                obj_haulotte_guests = getLocalObject(sdata, 'single-cpe-dual-wan-site-services')
+                log("haulotte guest obj is: %s" % (obj_haulotte_guests))
+                obj_haulotte_guests.single_cpe_dual_wan_site_services.cpe_lan.lan_profile = util.convert_to_list(obj_haulotte_guests.single_cpe_dual_wan_site_services.cpe_lan.lan_profile)
+                for lanprof in obj_haulotte_guests.single_cpe_dual_wan_site_services.cpe_lan.lan_profile:
+                    if lanprof.profile_name == 'HAULOTTE-GUESTS':
+                        haulotte_guests_prefix = lanprof.get_field_value('cidr')
+                        prefix_obj.subnet = haulotte_guests_prefix
+            elif entity == 'cpe_primary' or entity == 'cpe_secondary':
+                obj_haulotte_guests = getLocalObject(sdata, 'dual-cpe-site-services')
+                log("haulotte guest obj is: %s" % (obj_haulotte_guests))
+                obj_haulotte_guests.dual_cpe_site_services.cpe_lan.lan_profile = util.convert_to_list(obj_haulotte_guests.dual_cpe_site_services.cpe_lan.lan_profile)
+                for lanprof in obj_haulotte_guests.dual_cpe_site_services.cpe_lan.lan_profile:
+                    if lanprof.profile_name == 'HAULOTTE-GUESTS':
+                        haulotte_guests_prefix = lanprof.get_field_value('cidr')
+                        prefix_obj.subnet = haulotte_guests_prefix
+            elif entity == 'cpe_primary_dual' or entity == 'cpe_secondary_dual':
+                obj_haulotte_guests = getLocalObject(sdata, 'dual-cpe-dual-wan-site-services')
+                log("haulotte guest obj is: %s" % (obj_haulotte_guests))
+                obj_haulotte_guests.dual_cpe_dual_wan_site_services.cpe_lan.lan_profile = util.convert_to_list(obj_haulotte_guests.dual_cpe_dual_wan_site_services.cpe_lan.lan_profile)
+                for lanprof in obj_haulotte_guests.dual_cpe_dual_wan_site_services.cpe_lan.lan_profile:
+                    if lanprof.profile_name == 'HAULOTTE-GUESTS':
+                        haulotte_guests_prefix = lanprof.get_field_value('cidr')
+                        prefix_obj.subnet = haulotte_guests_prefix
 
         else:     
             prefix_obj.subnet = ipv4_prefix
@@ -1092,8 +1127,8 @@ def route_map(route_map_name, route_map_entries, device, sdata, int_name=None, e
                     set_obj1.value = set_value
             # if set_type == 'as-path' and set_value is not None:
             #     as_path_acl(set_value, device, sdata)
-            if set_type == 'community' and set_value is not None:
-                community_lists(set_value, device, sdata)
+            #if set_type == 'community' and set_value is not None:
+                #community_lists(set_value, device, sdata)
             set_action_url = device.url + '/route-maps/route-map=%s/route-map-entries=%s' % (route_map_name,seq)
             yang.Sdk.createData(set_action_url, set_obj1.getxml(filter=True), sdata.getSession())
 
@@ -1141,7 +1176,7 @@ def adv_networks(entity, smodelctx, sdata, device, **kwargs):
     if util.isEmpty(vrf):
         vrf = 'GLOBAL'
     adv_networks_url1 = device.url + '/vrfs/vrf=%s' % (vrf)
-    is_router_bgp_xml_output = yang.Sdk.getData(adv_networks_url1, '', smodelctx.task_id)
+    is_router_bgp_xml_output = yang.Sdk.getData(adv_networks_url1, '', sdata.getTaskId())
     is_router_bgp_obj = util.parseXmlString(is_router_bgp_xml_output)
     util.log_debug( "is_router_bgp_obj is:", is_router_bgp_obj)
     #if not hasattr(is_router_bgp_obj.vrf, 'router_bgp'):
@@ -1284,7 +1319,7 @@ def staticroute(smodelctx, sdata, dev, **kwarg):
                         yang.Sdk.createData(dev.url + '/vrfs', vrfobj.getxml(filter=True), sdata.getSession())
 
 
-                        #vrf_xml_output = yang.Sdk.getData(vrf_test_url, '', smodelctx.task_id)
+                        #vrf_xml_output = yang.Sdk.getData(vrf_test_url, '', sdata.getTaskId())
                         #vrf_obj_get = util.parseXmlString(vrf_xml_output)
                         #util.log_debug( "obj of vrf is: ",obj_get)
                     #except DataNodeNotFoundException:
@@ -1322,7 +1357,7 @@ def staticroute(smodelctx, sdata, dev, **kwarg):
     else:
         get_static_route_url = dev.url + '/vrfs/vrf=%s/routes/route=%s,%s' % (vrf_name,obj_local.static_route.dest_ip_address,obj_local.static_route.dest_mask)
     try:
-        xml_output = yang.Sdk.getData(get_static_route_url, '', smodelctx.task_id)
+        xml_output = yang.Sdk.getData(get_static_route_url, '', sdata.getTaskId())
         obj_get = util.parseXmlString(xml_output)
         util.log_debug( "obj of route is: ",obj_get)
         #yang.Sdk.createData(static_routes_url, static_obj1.getxml(filter=True), sdata.getSession(), False)
@@ -1460,7 +1495,7 @@ def staticroute(smodelctx, sdata, dev, **kwarg):
 #         static_obj1 = devices.device.routes.route.route()
 #
 #     yang.Sdk.deleteData(static_url, static_obj.getxml(filter=True), sdata.getTaskId(), sdata.getSession())
-#     xml_output = yang.Sdk.getData(static_route_url, '', smodelctx.task_id)
+#     xml_output = yang.Sdk.getData(static_route_url, '', sdata.getTaskId())
 #     obj = util.parseXmlString(xml_output)
 #     util.log_debug( "obj of route is: ",obj)
 #     static_obj1.dest_ip_address = obj.route.dest_ip_address
@@ -1543,7 +1578,8 @@ def extcommunity_list(sdata, device, extcommunity_list_obj_given):
 
 
 def modifiedGetLocalObject(sdata, elem):
-    smodelctx = ServiceModelContext(id, sdata)
+    #smodelctx = None
+    smodelctx = None
     rcpath = sdata.getRcPath() + '/'
     print 'rcpath = %s' % (rcpath)
     pattern = '/controller:services'
@@ -1564,7 +1600,8 @@ def modifiedGetLocalObject(sdata, elem):
     rcpath = rcpath[:idx]
     print 'setting rcpath= %s' % (rcpath)
 
-    xml_output = yang.Sdk.getData(rcpath, '', smodelctx.task_id)
+    #xml_output = yang.Sdk.getData(rcpath, '', sdata.getTaskId())
+    xml_output = yang.Sdk.getData(rcpath, '', sdata.getTaskId())
     obj = util.parseXmlString(xml_output)
     return obj
 

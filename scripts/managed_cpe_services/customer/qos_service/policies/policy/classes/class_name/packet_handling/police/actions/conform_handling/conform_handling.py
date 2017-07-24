@@ -73,7 +73,7 @@ class ConformHandling(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'conform_handling')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -109,7 +109,7 @@ class ConformHandling(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'conform_handling')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -124,7 +124,7 @@ class ConformHandling(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'conform_handling')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)

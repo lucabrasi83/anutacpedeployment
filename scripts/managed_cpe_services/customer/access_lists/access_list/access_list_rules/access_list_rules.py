@@ -61,7 +61,7 @@ class AccessListRules(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'access_list_rules')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -104,7 +104,7 @@ class AccessListRules(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'access_list_rules')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -119,7 +119,7 @@ class AccessListRules(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'access_list_rules')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)

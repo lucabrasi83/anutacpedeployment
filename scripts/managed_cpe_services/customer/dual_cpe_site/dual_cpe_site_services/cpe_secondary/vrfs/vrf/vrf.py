@@ -67,7 +67,7 @@ class Vrf(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'vrf')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -108,8 +108,8 @@ class Vrf(yang.AbstractYangServiceHandler):
         dev = getDeviceObject(device_mgmt_ip_address, sdata)
 
         # START OF FETCHING THE PARENT KEY LEAF PARAMETERS
-        inputkeydict['managed_cpe_services_customer_dual_cpe_site_dual_cpe_site_services_site_name'] = sdata.getRcPath().split('/')[-4].split('=')[1]
-        inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-6].split('=')[1]
+        #inputkeydict['managed_cpe_services_customer_dual_cpe_site_dual_cpe_site_services_site_name'] = sdata.getRcPath().split('/')[-4].split('=')[1]
+        #inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-6].split('=')[1]
         # END OF FETCHING THE PARENT KEY LEAF PARAMETERS
 
         #Use the custom methods to process the data
@@ -126,7 +126,7 @@ class Vrf(yang.AbstractYangServiceHandler):
         opaque_args = self.opaque_args
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -177,7 +177,7 @@ class Vrf(yang.AbstractYangServiceHandler):
         opaque_args = self.opaque_args
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)

@@ -61,7 +61,7 @@ class ClassMap(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'class_map')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -110,7 +110,7 @@ class ClassMap(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'class_map')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -125,7 +125,7 @@ class ClassMap(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'class_map')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)

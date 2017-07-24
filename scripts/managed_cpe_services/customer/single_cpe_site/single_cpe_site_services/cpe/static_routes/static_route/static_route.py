@@ -67,7 +67,7 @@ class StaticRoute(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'static_route')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -108,7 +108,7 @@ class StaticRoute(yang.AbstractYangServiceHandler):
         opaque_args = self.opaque_args
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -141,7 +141,7 @@ class StaticRoute(yang.AbstractYangServiceHandler):
         opaque_args = self.opaque_args
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)

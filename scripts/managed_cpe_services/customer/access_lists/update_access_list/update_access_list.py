@@ -61,7 +61,7 @@ class UpdateAccessList(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'update_access_list')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -133,7 +133,7 @@ class UpdateAccessList(yang.AbstractYangServiceHandler):
         opaque_args = self.opaque_args
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -197,7 +197,7 @@ class UpdateAccessList(yang.AbstractYangServiceHandler):
         opaque_args = self.opaque_args
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)

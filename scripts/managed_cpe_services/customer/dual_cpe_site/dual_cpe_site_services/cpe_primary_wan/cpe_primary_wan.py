@@ -61,7 +61,7 @@ class CpePrimaryWan(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'cpe_primary_wan')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -111,7 +111,7 @@ class CpePrimaryWan(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'cpe_primary_wan')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -126,7 +126,7 @@ class CpePrimaryWan(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'cpe_primary_wan')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)

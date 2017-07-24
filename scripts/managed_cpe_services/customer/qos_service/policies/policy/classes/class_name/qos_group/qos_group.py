@@ -67,7 +67,7 @@ class QosGroup(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'qos_group')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -98,7 +98,7 @@ class QosGroup(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'qos_group')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -113,7 +113,7 @@ class QosGroup(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'qos_group')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)

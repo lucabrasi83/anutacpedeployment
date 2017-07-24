@@ -63,7 +63,7 @@ class MatchCondition(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'match_condition')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -95,7 +95,7 @@ class MatchCondition(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'match_condition')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -110,7 +110,7 @@ class MatchCondition(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'match_condition')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)

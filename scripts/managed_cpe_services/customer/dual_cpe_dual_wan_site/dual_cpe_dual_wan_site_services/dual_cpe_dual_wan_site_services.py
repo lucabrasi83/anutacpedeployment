@@ -61,7 +61,7 @@ class DualCpeDualWanSiteServices(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'dual_cpe_dual_wan_site_services')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -97,7 +97,7 @@ class DualCpeDualWanSiteServices(yang.AbstractYangServiceHandler):
         opaque_args = self.opaque_args
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -126,7 +126,7 @@ class DualCpeDualWanSiteServices(yang.AbstractYangServiceHandler):
         opaque_args = self.opaque_args
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)

@@ -12802,7 +12802,7 @@ module cpedeployment {
         type boolean;
         description
           "vrf-lite: True/False";
-        when " ../ospf = 'true' and ../cpe = 'cpe'";
+        when " ../ospf = 'true'";
       }
       container ospf-networks {
         list ospf-network {

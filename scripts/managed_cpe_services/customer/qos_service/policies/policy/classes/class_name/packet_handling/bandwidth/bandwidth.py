@@ -69,7 +69,7 @@ class Bandwidth(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'bandwidth')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -103,7 +103,7 @@ class Bandwidth(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'bandwidth')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -118,7 +118,7 @@ class Bandwidth(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'bandwidth')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)

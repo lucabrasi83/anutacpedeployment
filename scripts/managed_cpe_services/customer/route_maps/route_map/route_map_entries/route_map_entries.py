@@ -61,7 +61,7 @@ class RouteMapEntries(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'route_map_entries')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -94,7 +94,7 @@ class RouteMapEntries(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'route_map_entries')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -109,7 +109,7 @@ class RouteMapEntries(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'route_map_entries')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)

@@ -3171,7 +3171,8 @@ def update_hsrp_priority(entity, smodelctx, sdata, device, **kwarg):
 
 
 def modifiedGetLocalObject(sdata, elem):
-    smodelctx = ServiceModelContext(id, sdata)
+    #smodelctx = None
+    smodelctx = None
     rcpath = sdata.getRcPath() + '/'
     print 'rcpath = %s' % (rcpath)
     pattern = '/controller:services'
@@ -3192,7 +3193,8 @@ def modifiedGetLocalObject(sdata, elem):
     rcpath = rcpath[:idx]
     print 'setting rcpath= %s' % (rcpath)
 
-    xml_output = yang.Sdk.getData(rcpath, '', smodelctx.task_id)
+    #xml_output = yang.Sdk.getData(rcpath, '', smodelctx.task_id)
+    xml_output = yang.Sdk.getData(rcpath, '', sdata.getTaskId())
     obj = util.parseXmlString(xml_output)
     return obj
 

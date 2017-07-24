@@ -227,7 +227,7 @@ def update_bgp_peer(entity, smodelctx, sdata, device, **kwargs):
     rcpath = util.get_parent_rcpath(sdata.getRcPath())
     print 'setting rcpath= %s' % (rcpath)
 
-    xml_output = yang.Sdk.getData(rcpath, '', smodelctx.task_id)
+    xml_output = yang.Sdk.getData(rcpath, '', sdata.getTaskId())
     obj = util.parseXmlString(xml_output)
 
     vrf = None

@@ -65,7 +65,7 @@ class BgpPeers(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'bgp_peers')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -128,7 +128,7 @@ class BgpPeers(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'bgp_peers')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -149,7 +149,7 @@ class BgpPeers(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'bgp_peers')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)

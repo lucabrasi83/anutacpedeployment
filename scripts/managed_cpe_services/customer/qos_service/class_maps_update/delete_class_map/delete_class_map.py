@@ -61,7 +61,7 @@ class DeleteClassMap(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'delete_class_map')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -122,7 +122,7 @@ class DeleteClassMap(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'delete_class_map')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -137,7 +137,7 @@ class DeleteClassMap(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'delete_class_map')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)

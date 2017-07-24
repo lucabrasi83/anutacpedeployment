@@ -61,7 +61,7 @@ class UpdateDmvpnTunnelProfile(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'update_dmvpn_tunnel_profile')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -126,7 +126,7 @@ class UpdateDmvpnTunnelProfile(yang.AbstractYangServiceHandler):
         opaque_args = self.opaque_args
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -164,7 +164,7 @@ class UpdateDmvpnTunnelProfile(yang.AbstractYangServiceHandler):
         opaque_args = self.opaque_args
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)

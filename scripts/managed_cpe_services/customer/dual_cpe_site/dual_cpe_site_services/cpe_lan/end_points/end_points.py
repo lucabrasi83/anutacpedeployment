@@ -63,7 +63,7 @@ class EndPoints(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'end_points')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -126,7 +126,7 @@ class EndPoints(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'end_points')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -146,7 +146,7 @@ class EndPoints(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'end_points')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)

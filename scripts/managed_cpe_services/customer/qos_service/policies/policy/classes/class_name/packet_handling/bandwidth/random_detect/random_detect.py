@@ -71,7 +71,7 @@ class RandomDetect(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'random_detect')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -102,7 +102,7 @@ class RandomDetect(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'random_detect')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -117,7 +117,7 @@ class RandomDetect(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'random_detect')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)

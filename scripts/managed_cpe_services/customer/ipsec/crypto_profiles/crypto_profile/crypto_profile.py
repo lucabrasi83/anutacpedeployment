@@ -61,7 +61,7 @@ class CryptoProfile(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'crypto_profile')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -103,7 +103,7 @@ class CryptoProfile(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'crypto_profile')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -118,7 +118,7 @@ class CryptoProfile(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'crypto_profile')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)

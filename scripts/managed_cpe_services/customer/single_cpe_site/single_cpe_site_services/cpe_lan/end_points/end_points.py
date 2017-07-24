@@ -63,7 +63,7 @@ class EndPoints(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'end_points')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -108,8 +108,8 @@ class EndPoints(yang.AbstractYangServiceHandler):
 
         inputkeydict = {}
         # START OF FETCHING THE PARENT KEY LEAF PARAMETERS
-        inputkeydict['managed_cpe_services_customer_single_cpe_site_single_cpe_site_services_site_name'] = sdata.getRcPath().split('/')[-3].split('=')[1]
-        inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-5].split('=')[1]
+        #inputkeydict['managed_cpe_services_customer_single_cpe_site_single_cpe_site_services_site_name'] = sdata.getRcPath().split('/')[-3].split('=')[1]
+        #inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-5].split('=')[1]
         # END OF FETCHING THE PARENT KEY LEAF PARAMETERS
 
         #Use the custom methods to process the data
@@ -125,7 +125,7 @@ class EndPoints(yang.AbstractYangServiceHandler):
 
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -146,7 +146,7 @@ class EndPoints(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'end_points')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)

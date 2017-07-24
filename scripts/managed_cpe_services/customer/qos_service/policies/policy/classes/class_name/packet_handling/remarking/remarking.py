@@ -69,7 +69,7 @@ class Remarking(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'remarking')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -105,7 +105,7 @@ class Remarking(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'remarking')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -120,7 +120,7 @@ class Remarking(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'remarking')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)

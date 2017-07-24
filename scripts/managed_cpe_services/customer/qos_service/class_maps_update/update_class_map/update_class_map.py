@@ -61,7 +61,7 @@ class UpdateClassMap(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'update_class_map')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -126,7 +126,7 @@ class UpdateClassMap(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'update_class_map')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -141,7 +141,7 @@ class UpdateClassMap(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'update_class_map')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)

@@ -69,7 +69,7 @@ class Police(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'police')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -110,7 +110,7 @@ class Police(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'police')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -125,7 +125,7 @@ class Police(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'police')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)

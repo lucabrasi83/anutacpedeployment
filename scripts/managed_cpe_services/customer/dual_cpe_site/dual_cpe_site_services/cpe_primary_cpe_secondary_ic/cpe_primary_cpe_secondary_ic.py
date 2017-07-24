@@ -61,7 +61,7 @@ class CpePrimaryCpeSecondaryIc(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'cpe_primary_cpe_secondary_ic')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -105,7 +105,7 @@ class CpePrimaryCpeSecondaryIc(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'cpe_primary_cpe_secondary_ic')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -120,7 +120,7 @@ class CpePrimaryCpeSecondaryIc(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'cpe_primary_cpe_secondary_ic')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
