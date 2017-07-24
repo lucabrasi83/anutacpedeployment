@@ -1211,13 +1211,28 @@ def staticroute(smodelctx, sdata, dev, **kwarg):
                     if util.isNotEmpty(vrf.vrf_definition_mode):
                         vrfobj.vrf_definition_mode = vrf.vrf_definition_mode
 
-                    vrf_test_url = dev.url + 'vrfs/vrf=%s' % (vrf_name)
-                    try:
-                        vrf_xml_output = yang.Sdk.getData(vrf_test_url, '', smodelctx.task_id)
-                        vrf_obj_get = util.parseXmlString(vrf_xml_output)
-                        util.log_debug( "obj of vrf is: ",obj_get)
-                    except DataNodeNotFoundException:
+                    #vrf_test_url = dev.url + 'vrfs/vrf=%s' % (vrf_name)
+                    #try:
+                    
+                    is_vrf_exists = False
+                    is_vrf = yang.Sdk.getData(dev.url, '', sdata.getTaskId())
+                    is_vrf_exists_obj = util.parseXmlString(is_vrf)
+                    util.log_debug( "is_vrf_obj is:", is_vrf_exists_obj)
+                    if hasattr(is_vrf_exists_obj.device, 'vrfs'):
+                        if hasattr(is_vrf_exists_obj.device.vrfs, 'vrf'):
+                           vrf_check_all = util.convert_to_list(is_vrf_exists_obj.device.vrfs.vrf)
+                           for vrf_check in vrf_check_all:
+                               if vrf_check.name == vrf_name:
+                                 is_vrf_exists = True
+                    if not is_vrf_exists:
                         yang.Sdk.createData(dev.url + '/vrfs', vrfobj.getxml(filter=True), sdata.getSession())
+
+
+                        #vrf_xml_output = yang.Sdk.getData(vrf_test_url, '', smodelctx.task_id)
+                        #vrf_obj_get = util.parseXmlString(vrf_xml_output)
+                        #util.log_debug( "obj of vrf is: ",obj_get)
+                    #except DataNodeNotFoundException:
+                        #yang.Sdk.createData(dev.url + '/vrfs', vrfobj.getxml(filter=True), sdata.getSession())
 
                 list_vrf.append(vrf.vrf_name)
         if vrf_name not in list_vrf:
@@ -1579,7 +1594,19 @@ def vrf(entity, dev, sdata, **kwarg):
                             vrfobj.description = vrf.description
                     if util.isNotEmpty(vrf.vrf_definition_mode):
                         vrfobj.vrf_definition_mode = vrf.vrf_definition_mode
-                    yang.Sdk.createData(dev.url + '/vrfs', vrfobj.getxml(filter=True), sdata.getSession())
+
+                    is_vrf_exists = False
+                    is_vrf = yang.Sdk.getData(dev.url, '', sdata.getTaskId())
+                    is_vrf_exists_obj = util.parseXmlString(is_vrf)
+                    util.log_debug( "is_vrf_obj is:", is_vrf_exists_obj)
+                    if hasattr(is_vrf_exists_obj.device, 'vrfs'):
+                        if hasattr(is_vrf_exists_obj.device.vrfs, 'vrf'):
+                           vrf_check_all = util.convert_to_list(is_vrf_exists_obj.device.vrfs.vrf)
+                           for vrf_check in vrf_check_all:
+                               if vrf_check.name == vrf_name:
+                                 is_vrf_exists = True
+                    if not is_vrf_exists:
+                        yang.Sdk.createData(dev.url + '/vrfs', vrfobj.getxml(filter=True), sdata.getSession())
                     if hasattr(vrf, 'rt_import'):
                         vrf.rt_import = util.convert_to_list(vrf.rt_import)
                         for rtimport in vrf.rt_import:
@@ -1587,7 +1614,8 @@ def vrf(entity, dev, sdata, **kwarg):
                             if util.isNotEmpty(rtimport.rt_import):
                                 vrfobj1.rt_import = rtimport.rt_import
                             import_url = dev.url + '/vrfs/vrf=%s' % (vrf_name)
-                            yang.Sdk.createData(import_url, vrfobj1.getxml(filter=True), sdata.getSession())
+                            if not is_vrf_exists:
+                               yang.Sdk.createData(import_url, vrfobj1.getxml(filter=True), sdata.getSession())
                     if hasattr(vrf, 'rt_export'):
                         vrf.rt_export = util.convert_to_list(vrf.rt_export)
                         for rtexport in vrf.rt_export:
@@ -1595,7 +1623,8 @@ def vrf(entity, dev, sdata, **kwarg):
                             if util.isNotEmpty(rtexport.rt_export):
                                 vrfobj1.rt_export = rtexport.rt_export
                             export_url = dev.url + '/vrfs/vrf=%s' % (vrf_name)
-                            yang.Sdk.createData(export_url, vrfobj1.getxml(filter=True), sdata.getSession())
+                            if not is_vrf_exists:
+                               yang.Sdk.createData(export_url, vrfobj1.getxml(filter=True), sdata.getSession())
                     if hasattr(vrf, 'import_map'):
                         vrf.import_map = util.convert_to_list(vrf.import_map)
                         for importmap in vrf.import_map:
@@ -1612,7 +1641,8 @@ def vrf(entity, dev, sdata, **kwarg):
                                 if util.isNotEmpty(importmap.upper_limit):
                                     vrfobj1.upper_limit = importmap.upper_limit
                             importmap_url = dev.url + '/vrfs/vrf=%s' % (vrf_name)
-                            yang.Sdk.createData(importmap_url, vrfobj1.getxml(filter=True), sdata.getSession())
+                            if not is_vrf_exists:
+                                yang.Sdk.createData(importmap_url, vrfobj1.getxml(filter=True), sdata.getSession())
                     if hasattr(vrf, 'export_map'):
                         vrf.export_map = util.convert_to_list(vrf.export_map)
                         for exportmap in vrf.export_map:
@@ -1629,7 +1659,8 @@ def vrf(entity, dev, sdata, **kwarg):
                                 if util.isNotEmpty(exportmap.upper_limit):
                                     vrfobj1.upper_limit = exportmap.upper_limit
                             importmap_url = dev.url + '/vrfs/vrf=%s' % (vrf_name)
-                            yang.Sdk.createData(importmap_url, vrfobj1.getxml(filter=True), sdata.getSession())
+                            if not is_vrf_exists:
+                                 yang.Sdk.createData(importmap_url, vrfobj1.getxml(filter=True), sdata.getSession())
     else:
         vrfobj = devices.device.vrfs.vrf.vrf()
         vrfobj.name = vrf_name
