@@ -3193,7 +3193,7 @@ def modifiedGetLocalObject(sdata, elem):
     rcpath = rcpath[:idx]
     print 'setting rcpath= %s' % (rcpath)
 
-    #xml_output = yang.Sdk.getData(rcpath, '', smodelctx.task_id)
+    #xml_output = yang.Sdk.getData(rcpath, '', sdata.getTaskId())
     xml_output = yang.Sdk.getData(rcpath, '', sdata.getTaskId())
     obj = util.parseXmlString(xml_output)
     return obj
@@ -3362,6 +3362,7 @@ def loopback(smodelctx, sdata, dev, **kwargs):
     loopback_int_id = 'Loopback' + str(int_id)
     cidr = inputdict['cidr']
     vrf = inputdict['vrf']
+    description = inputdict['description']
     ip_addr = IpamPoolID(sdata.getTaskId(), sdata, cidr)
     ip_addr_obj = ip_addr.ipam_pool_obj
     prefix = util.IPPrefix(ip_addr_obj.cidr)
@@ -3414,6 +3415,8 @@ def loopback(smodelctx, sdata, dev, **kwargs):
     if util.isNotEmpty(loopback_ip):
         intf_obj.ip_address = loopback_ip
         intf_obj.netmask = netmask
+    if util.isNotEmpty(description):
+        intf_obj.description = description
     uri = sdata.getRcPath()
     uri_list = uri.split('/',5)
     url = '/'.join(uri_list[0:4])

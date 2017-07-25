@@ -986,7 +986,7 @@ def prefix_gen(prefix_list_name, prefix, device, sdata, entity=None):
                 log("haulotte guest obj is: %s" % (obj_haulotte_guests))
                 obj_haulotte_guests.single_cpe_site_services.cpe_lan.lan_profile = util.convert_to_list(obj_haulotte_guests.single_cpe_site_services.cpe_lan.lan_profile)
                 for lanprof in obj_haulotte_guests.single_cpe_site_services.cpe_lan.lan_profile:
-                    if lanprof.profile_name == 'HAULOTTE-GUESTS':
+                    if lanprof.profile_name == 'GUEST_LAN_PROFILE':
                         haulotte_guests_prefix = lanprof.get_field_value('cidr')
                         prefix_obj.subnet = haulotte_guests_prefix
             elif entity == 'cpe_dual':
@@ -994,7 +994,7 @@ def prefix_gen(prefix_list_name, prefix, device, sdata, entity=None):
                 log("haulotte guest obj is: %s" % (obj_haulotte_guests))
                 obj_haulotte_guests.single_cpe_dual_wan_site_services.cpe_lan.lan_profile = util.convert_to_list(obj_haulotte_guests.single_cpe_dual_wan_site_services.cpe_lan.lan_profile)
                 for lanprof in obj_haulotte_guests.single_cpe_dual_wan_site_services.cpe_lan.lan_profile:
-                    if lanprof.profile_name == 'HAULOTTE-GUESTS':
+                    if lanprof.profile_name == 'GUEST_LAN_PROFILE':
                         haulotte_guests_prefix = lanprof.get_field_value('cidr')
                         prefix_obj.subnet = haulotte_guests_prefix
             elif entity == 'cpe_primary' or entity == 'cpe_secondary':
@@ -1002,7 +1002,7 @@ def prefix_gen(prefix_list_name, prefix, device, sdata, entity=None):
                 log("haulotte guest obj is: %s" % (obj_haulotte_guests))
                 obj_haulotte_guests.dual_cpe_site_services.cpe_lan.lan_profile = util.convert_to_list(obj_haulotte_guests.dual_cpe_site_services.cpe_lan.lan_profile)
                 for lanprof in obj_haulotte_guests.dual_cpe_site_services.cpe_lan.lan_profile:
-                    if lanprof.profile_name == 'HAULOTTE-GUESTS':
+                    if lanprof.profile_name == 'GUEST_LAN_PROFILE':
                         haulotte_guests_prefix = lanprof.get_field_value('cidr')
                         prefix_obj.subnet = haulotte_guests_prefix
             elif entity == 'cpe_primary_dual' or entity == 'cpe_secondary_dual':
@@ -1010,7 +1010,7 @@ def prefix_gen(prefix_list_name, prefix, device, sdata, entity=None):
                 log("haulotte guest obj is: %s" % (obj_haulotte_guests))
                 obj_haulotte_guests.dual_cpe_dual_wan_site_services.cpe_lan.lan_profile = util.convert_to_list(obj_haulotte_guests.dual_cpe_dual_wan_site_services.cpe_lan.lan_profile)
                 for lanprof in obj_haulotte_guests.dual_cpe_dual_wan_site_services.cpe_lan.lan_profile:
-                    if lanprof.profile_name == 'HAULOTTE-GUESTS':
+                    if lanprof.profile_name == 'GUEST_LAN_PROFILE':
                         haulotte_guests_prefix = lanprof.get_field_value('cidr')
                         prefix_obj.subnet = haulotte_guests_prefix
 

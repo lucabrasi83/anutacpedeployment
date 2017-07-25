@@ -119,7 +119,7 @@ class Customer(yang.AbstractYangServiceHandler):
 
         print 'setting rcpath= %s' % (rcpath)
 
-        xml_output = yang.Sdk.getData(rcpath, '', smodelctx.task_id)
+        xml_output = yang.Sdk.getData(rcpath, '', sdata.getTaskId())
         obj = util.parseXmlString(xml_output)
 
         if hasattr(obj.customer,'single_cpe_site'):

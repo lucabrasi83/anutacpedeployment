@@ -1,7 +1,7 @@
 <package>
   <name>CPEDEPLOYMENT Service</name>
   <module-name>cpedeployment</module-name>
-  <version>6.2.0</version>
+  <version>6.3.0</version>
   <ncx-version>[5.8.7,)</ncx-version>
   <type>SERVICE_MODEL</type>
   <auto-start>true</auto-start>

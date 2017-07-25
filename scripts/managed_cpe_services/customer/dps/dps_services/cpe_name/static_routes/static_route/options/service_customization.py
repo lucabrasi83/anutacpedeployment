@@ -215,7 +215,7 @@ def staticroute(smodelctx, sdata, device_ip, **kwarg):
         static_obj = devices.device.routes.route.options.options()
         get_static_route_url = dev.url + '/routes/route=%s,%s' % (obj_local.static_route.dest_ip_address,obj_local.static_route.dest_mask)
     try:
-        xml_output = yang.Sdk.getData(get_static_route_url, '', smodelctx.task_id)
+        xml_output = yang.Sdk.getData(get_static_route_url, '', sdata.getTaskId())
         obj_get = util.parseXmlString(xml_output)
         util.log_debug( "obj of route is: ",obj_get)
         yang.Sdk.createData(static_route_url, static_obj1.getxml(filter=True), sdata.getSession(), False)

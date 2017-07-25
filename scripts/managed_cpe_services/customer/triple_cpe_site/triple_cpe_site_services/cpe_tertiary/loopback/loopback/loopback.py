@@ -83,6 +83,7 @@ class Loopback(yang.AbstractYangServiceHandler):
         inputdict['cidr'] = config.get_field_value('cidr')
         inputdict['ip'] = config.get_field_value('ip')
         inputdict['vrf'] = config.get_field_value('vrf')
+        inputdict['description'] = config.get_field_value('description')
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'cpe-tertiary')

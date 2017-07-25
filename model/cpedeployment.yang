@@ -3442,6 +3442,11 @@ module cpedeployment {
         "Name of Vrf";
       //mandatory true;
     }
+    leaf description {
+      type string;
+      description
+        "Loopback Interface Description";
+    }
   }
 
   grouping ospf-def {
