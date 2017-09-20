@@ -44,7 +44,7 @@ cpe-tertiary-hsrp-priority
 from servicemodel import util
 from servicemodel import yang
 from servicemodel import devicemgr
-from servicemodel.controller import devices
+from servicemodel.controller.devices.device import interfaces
 
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject
@@ -126,7 +126,7 @@ class ServiceDataCustomization:
                         lan_ic_uri2 = "%s/cpe-lan/lan-profile=%s" % (parent_uri, lan_profile)
                         site_output2 = yang.Sdk.getData(lan_ic_uri2, '', sdata.getTaskId())
                         conf = util.parseXmlString(site_output2)
-                        hsrp_obj = devices.device.interfaces.interface.hsrp.hsrp()
+                        hsrp_obj = interfaces.interface.hsrp.hsrp()
                         if hasattr(conf.lan_profile, 'hsrp_version'):
                             version = conf.lan_profile.hsrp_version
                         # else:
@@ -139,7 +139,7 @@ class ServiceDataCustomization:
                         lan_uri = "%s/cpe-lan" % (parent_uri)
                         site_output = yang.Sdk.getData(lan_uri, '', sdata.getTaskId())
                         conf = util.parseXmlString(site_output)
-                        hsrp_obj = devices.device.interfaces.interface.hsrp.hsrp()
+                        hsrp_obj = interfaces.interface.hsrp.hsrp()
                         if hasattr(conf.cpe_lan, 'hsrp_version'):
                             version = conf.cpe_lan.hsrp_version
                         # else:
@@ -181,7 +181,7 @@ class ServiceDataCustomization:
                         lan_ic_uri2 = "%s/cpe-lan/lan-profile=%s" % (parent_uri, lan_profile)
                         site_output2 = yang.Sdk.getData(lan_ic_uri2, '', sdata.getTaskId())
                         conf = util.parseXmlString(site_output2)
-                        hsrp_obj = devices.device.interfaces.interface.hsrp.hsrp()
+                        hsrp_obj = interfaces.interface.hsrp.hsrp()
                         if hasattr(conf.lan_profile, 'hsrp_version'):
                             version = conf.lan_profile.hsrp_version
                         # else:
@@ -194,7 +194,7 @@ class ServiceDataCustomization:
                         lan_uri = "%s/cpe-lan" % (parent_uri)
                         site_output = yang.Sdk.getData(lan_uri, '', sdata.getTaskId())
                         conf = util.parseXmlString(site_output)
-                        hsrp_obj = devices.device.interfaces.interface.hsrp.hsrp()
+                        hsrp_obj = interfaces.interface.hsrp.hsrp()
                         if hasattr(conf.cpe_lan, 'hsrp_version'):
                             version = conf.cpe_lan.hsrp_version
                         # else:
@@ -237,7 +237,7 @@ class ServiceDataCustomization:
                         lan_ic_uri2 = "%s/cpe-lan/lan-profile=%s" % (parent_uri, lan_profile)
                         site_output2 = yang.Sdk.getData(lan_ic_uri2, '', sdata.getTaskId())
                         conf = util.parseXmlString(site_output2)
-                        hsrp_obj = devices.device.interfaces.interface.hsrp.hsrp()
+                        hsrp_obj = interfaces.interface.hsrp.hsrp()
                         if hasattr(conf.lan_profile, 'hsrp_version'):
                             version = conf.lan_profile.hsrp_version
                         # else:
@@ -250,7 +250,7 @@ class ServiceDataCustomization:
                         lan_uri = "%s/cpe-lan" % (parent_uri)
                         site_output = yang.Sdk.getData(lan_uri, '', sdata.getTaskId())
                         conf = util.parseXmlString(site_output)
-                        hsrp_obj = devices.device.interfaces.interface.hsrp.hsrp()
+                        hsrp_obj = interfaces.interface.hsrp.hsrp()
                         if hasattr(conf.cpe_lan, 'hsrp_version'):
                             version = conf.cpe_lan.hsrp_version
                         # else:

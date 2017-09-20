@@ -72,7 +72,11 @@ tunnel-interface-ip-address
 from servicemodel import util
 from servicemodel import yang
 from servicemodel import devicemgr
-from servicemodel.controller import devices
+from servicemodel.controller.devices.device import vrfs
+from servicemodel.controller.devices.device import interfaces
+from servicemodel.controller.devices.device import dmvpntunnels
+from servicemodel.controller.devices.device import policy_maps
+from servicemodel.controller.devices.device import class_maps
 
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject
@@ -102,42 +106,47 @@ class ServiceDataCustomization:
             uri = sdata.getRcPath()
             uri_list = uri.split('/',5)
             url = '/'.join(uri_list[0:4])
-            if obj.dps_services.single_cpe_site == "true":
-                site = obj.dps_services.single_cpe_sites
-                site_output = yang.Sdk.getData(url+"/single-cpe-site/single-cpe-site-services="+str(site), '', sdata.getTaskId())
-                conf = util.parseXmlString(site_output)
-                entity = 'cpe'
-            elif obj.dps_services.dual_cpe_site == "true":
-                site = obj.dps_services.dual_cpe_sites
-                site_output = yang.Sdk.getData(url+"/dual-cpe-site/dual-cpe-site-services="+str(site), '', sdata.getTaskId())
-                conf = util.parseXmlString(site_output)
-                if inputdict['cpe'] == 'cpe-primary':
-                    entity = 'cpe_primary'
-                elif inputdict['cpe'] == 'cpe-secondary':
-                    entity = 'cpe_secondary'
-                elif inputdict['cpe'] == 'cpe-secondary-only':
-                    entity = 'cpe_secondary_only'
-            elif obj.dps_services.single_cpe_dual_wan_site == "true":
-                site = obj.dps_services.single_cpe_dual_wan_sites
-                site_output = yang.Sdk.getData(url+"/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
-                conf = util.parseXmlString(site_output)
-                entity = 'cpe_dual'
-            elif obj.dps_services.dual_cpe_dual_wan_site == "true":
-                site = obj.dps_services.dual_cpe_dual_wan_sites
-                site_output = yang.Sdk.getData(url+"/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
-                conf = util.parseXmlString(site_output)
-                if inputdict['cpe'] == 'cpe-primary':
-                    entity = 'cpe_primary_dual'
-                elif inputdict['cpe'] == 'cpe-secondary':
-                    entity = 'cpe_secondary_dual'
-                elif inputdict['cpe'] == 'cpe-secondary-only':
-                    entity = 'cpe_secondary_only_dual'
-            elif obj.dps_services.triple_cpe_site == "true":
-                site = obj.dps_services.triple_cpe_sites
-                site_output = yang.Sdk.getData(url+"/triple-cpe-site/triple-cpe-site-services="+str(site), '', sdata.getTaskId())
-                conf = util.parseXmlString(site_output)
-                if inputdict['cpe'] == 'cpe-primary-only':
-                    entity = 'cpe_primary_triple'
+            if hasattr(obj.dps_services, 'single_cpe_site'):
+                if obj.dps_services.single_cpe_site == "true":
+                    site = obj.dps_services.single_cpe_sites
+                    site_output = yang.Sdk.getData(url+"/single-cpe-site/single-cpe-site-services="+str(site), '', sdata.getTaskId())
+                    conf = util.parseXmlString(site_output)
+                    entity = 'cpe'
+            elif hasattr(obj.dps_services, 'dual_cpe_site'):
+                if obj.dps_services.dual_cpe_site == "true":
+                    site = obj.dps_services.dual_cpe_sites
+                    site_output = yang.Sdk.getData(url+"/dual-cpe-site/dual-cpe-site-services="+str(site), '', sdata.getTaskId())
+                    conf = util.parseXmlString(site_output)
+                    if inputdict['cpe'] == 'cpe-primary':
+                        entity = 'cpe_primary'
+                    elif inputdict['cpe'] == 'cpe-secondary':
+                        entity = 'cpe_secondary'
+                    elif inputdict['cpe'] == 'cpe-secondary-only':
+                        entity = 'cpe_secondary_only'
+            elif hasattr(obj.dps_services, 'single_cpe_dual_wan_site'):
+                if obj.dps_services.single_cpe_dual_wan_site == "true":
+                    site = obj.dps_services.single_cpe_dual_wan_sites
+                    site_output = yang.Sdk.getData(url+"/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
+                    conf = util.parseXmlString(site_output)
+                    entity = 'cpe_dual'
+            elif hasattr(obj.dps_services, 'dual_cpe_dual_wan_site'):
+                if obj.dps_services.dual_cpe_dual_wan_site == "true":
+                    site = obj.dps_services.dual_cpe_dual_wan_sites
+                    site_output = yang.Sdk.getData(url+"/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
+                    conf = util.parseXmlString(site_output)
+                    if inputdict['cpe'] == 'cpe-primary':
+                        entity = 'cpe_primary_dual'
+                    elif inputdict['cpe'] == 'cpe-secondary':
+                        entity = 'cpe_secondary_dual'
+                    elif inputdict['cpe'] == 'cpe-secondary-only':
+                        entity = 'cpe_secondary_only_dual'
+            elif hasattr(obj.dps_services, 'triple_cpe_site'):
+                if obj.dps_services.triple_cpe_site == "true":
+                    site = obj.dps_services.triple_cpe_sites
+                    site_output = yang.Sdk.getData(url+"/triple-cpe-site/triple-cpe-site-services="+str(site), '', sdata.getTaskId())
+                    conf = util.parseXmlString(site_output)
+                    if inputdict['cpe'] == 'cpe-primary-only':
+                        entity = 'cpe_primary_triple'
             dps(entity, conf, sdata, **kwargs)
 
     @staticmethod
@@ -177,13 +186,19 @@ class ServiceDataCustomization:
         uri = sdata.getRcPath()
         uri_list = uri.split('/',5)
         url = '/'.join(uri_list[0:4])
-        if obj.dps_services.single_cpe_site == "true":
-            site = obj.dps_services.single_cpe_sites
+        single_cpe_site = str(getattr(obj.dps_services, 'single_cpe_site', None)).lstrip()
+        dual_cpe_site = str(getattr(obj.dps_services, 'dual_cpe_site', None)).lstrip()
+        triple_cpe_site = str(getattr(obj.dps_services, 'triple_cpe_site', None)).lstrip()
+        single_cpe_dual_wan_site = str(getattr(obj.dps_services, 'single_cpe_dual_wan_site', None)).lstrip()
+        dual_cpe_dual_wan_site = str(getattr(obj.dps_services, 'dual_cpe_dual_wan_site', None)).lstrip()
+
+        if single_cpe_site == 'true':
+            site = getattr(obj.dps_services, 'single_cpe_sites', None)
             site_output = yang.Sdk.getData(url+"/single-cpe-site/single-cpe-site-services="+str(site), '', sdata.getTaskId())
             conf = util.parseXmlString(site_output)
             entity = 'cpe'
-        elif obj.dps_services.dual_cpe_site == "true":
-            site = obj.dps_services.dual_cpe_sites
+        elif dual_cpe_site == 'true':
+            site = getattr(obj.dps_services, 'dual_cpe_sites', None)
             site_output = yang.Sdk.getData(url+"/dual-cpe-site/dual-cpe-site-services="+str(site), '', sdata.getTaskId())
             conf = util.parseXmlString(site_output)
             if config.cpe == 'cpe-primary':
@@ -192,13 +207,13 @@ class ServiceDataCustomization:
                 entity = 'cpe_secondary'
             elif config.cpe == 'cpe-secondary-only':
                 entity = 'cpe_secondary_only'
-        elif obj.dps_services.single_cpe_dual_wan_site == "true":
-            site = obj.dps_services.single_cpe_dual_wan_sites
+        elif single_cpe_dual_wan_site == 'true':
+            site = getattr(obj.dps_services, 'single_cpe_dual_wan_sites', None)
             site_output = yang.Sdk.getData(url+"/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
             conf = util.parseXmlString(site_output)
             entity = 'cpe_dual'
-        elif obj.dps_services.dual_cpe_dual_wan_site == "true":
-            site = obj.dps_services.dual_cpe_dual_wan_sites
+        elif dual_cpe_dual_wan_site == 'true':
+            site = getattr(obj.dps_services, 'dual_cpe_dual_wan_sites', None)
             site_output = yang.Sdk.getData(url+"/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
             conf = util.parseXmlString(site_output)
             if config.cpe == 'cpe-primary':
@@ -207,8 +222,8 @@ class ServiceDataCustomization:
                 entity = 'cpe_secondary_dual'
             elif config.cpe == 'cpe-secondary-only':
                 entity = 'cpe_secondary_only_dual'
-        elif obj.dps_services.triple_cpe_site == "true":
-            site = obj.dps_services.triple_cpe_sites
+        elif triple_cpe_site == 'true':
+            site = getattr(obj.dps_services, 'triple_cpe_sites', None)
             site_output = yang.Sdk.getData(url+"/triple-cpe-site/triple-cpe-site-services="+str(site), '', sdata.getTaskId())
             conf = util.parseXmlString(site_output)
             if config.cpe == 'cpe-primary-only':
@@ -485,14 +500,14 @@ def delete_route_map_from_redistribute_dps(entity, conf, sdata, **kwargs):
 
     if inputdict['bgp'] == 'true':
         vrf_bgp = inputdict['bgp_vrf']
-        bgpobj1 = devices.device.vrfs.vrf.router_bgp.router_bgp()
+        bgpobj1 = vrfs.vrf.router_bgp.router_bgp()
         if util.isNotEmpty(bgp_as):
             bgpobj1.as_number = bgp_as
             if bgp_address_family is not None:
                 bgpobj1.address_family = bgp_address_family
+        #bgpobj1.address_family = "ipv4"
         if util.isNotEmpty(inputdict['qppb_policy']):
             bgpobj1.qppb_policy._empty_tag = True
-
             if vrf_bgp is None:
                 vrf_global = 'GLOBAL'
                 router_bgp_url = device.url + '/vrfs/vrf=%s/router-bgp' % (vrf_global)
@@ -502,40 +517,50 @@ def delete_route_map_from_redistribute_dps(entity, conf, sdata, **kwargs):
                 yang.Sdk.patchData(router_bgp_url, bgpobj1.getxml(filter=True), sdata, add_reference=False)
 
         vrf = inputdict['bgp_vrf']
+	if vrf is None:
+	    vrf = lan_vrf
         if vrf is None:
             vrf = 'GLOBAL'
 
         if util.isNotEmpty(inputdict['redistribute_connected']) and redistribute_connected_route_policy is not None:
-            rebgpredisobj1 = devices.device.vrfs.vrf.router_bgp.redistribute.redistribute()
+            rebgpredisobj1 = vrfs.vrf.router_bgp.redistribute.redistribute()
             rebgpredisobj1.protocol = 'connected'
             rebgpredisobj1.route_map = redistribute_connected_route_policy
             route_map_ref_url = device.url + '/vrfs/vrf=%s/router-bgp' % (vrf)
             yang.Sdk.createData(route_map_ref_url, rebgpredisobj1.getxml(filter=True), sdata.getSession(), addReference=False)
         elif util.isNotEmpty(inputdict['redistribute_connected']) and redistribute_connected_route_policy is None:
-            # rebgpredisobj1 = devices.device.vrfs.vrf.router_bgp.redistribute.redistribute()
+            # rebgpredisobj1 = vrfs.vrf.router_bgp.redistribute.redistribute()
             # rebgpredisobj1.protocol = 'connected'
             # rebgpredisobj1.route_map = redistribute_connected_route_policy
-            try:
-                route_map_ref_url = device.url + '/l3features:vrfs/vrf=%s/router-bgp/redistribute=%s' % (vrf, 'connected')
-                yang.Sdk.deleteData(route_map_ref_url, '', sdata.getTaskId(), sdata.getSession())
-            except DataNodeNotFoundException:
+            #try:
+            route_map_ref_url = device.url + '/l3features:vrfs/vrf=%s/router-bgp/redistribute=%s' % (vrf, 'connected')
+            #    yang.Sdk.deleteData(route_map_ref_url, '', sdata.getTaskId(), sdata.getSession())
+            #except DataNodeNotFoundException:
+            #    print "Redistribute connected not configured already"
+            if not yang.Sdk.dataExists(route_map_ref_url):
                 print "Redistribute connected not configured already"
+            else:
+                yang.Sdk.deleteData(route_map_ref_url, '', sdata.getTaskId(), sdata.getSession())            
 
         if util.isNotEmpty(inputdict['redistribute_static']) and redistribute_static_route_policy is not None:
-            rebgpredisobj1 = devices.device.vrfs.vrf.router_bgp.redistribute.redistribute()
+            rebgpredisobj1 = vrfs.vrf.router_bgp.redistribute.redistribute()
             rebgpredisobj1.protocol = 'static'
             rebgpredisobj1.route_map = redistribute_static_route_policy
             route_map_static_ref_url = device.url + '/vrfs/vrf=%s/router-bgp' % (vrf)
             yang.Sdk.createData(route_map_static_ref_url, rebgpredisobj1.getxml(filter=True), sdata.getSession(), addReference=False)
         elif util.isNotEmpty(inputdict['redistribute_static']) and redistribute_static_route_policy is None:
-            # rebgpredisobj1 = devices.device.vrfs.vrf.router_bgp.redistribute.redistribute()
+            # rebgpredisobj1 = vrfs.vrf.router_bgp.redistribute.redistribute()
             # rebgpredisobj1.protocol = 'static'
             # rebgpredisobj1.route_map = redistribute_static_route_policy
-            try:
-                route_map_static_ref_url = device.url + '/l3features:vrfs/vrf=%s/router-bgp/redistribute=%s' % (vrf, 'static')
-                yang.Sdk.deleteData(route_map_static_ref_url, '', sdata.getTaskId(), sdata.getSession())
-            except DataNodeNotFoundException:
+            #try:
+            route_map_static_ref_url = device.url + '/l3features:vrfs/vrf=%s/router-bgp/redistribute=%s' % (vrf, 'static')
+            #    yang.Sdk.deleteData(route_map_static_ref_url, '', sdata.getTaskId(), sdata.getSession())
+            #except DataNodeNotFoundException:
+            #    print "Redistribute static not configured already"
+            if not yang.Sdk.dataExists(route_map_static_ref_url):
                 print "Redistribute static not configured already"
+            else:
+                yang.Sdk.deleteData(route_map_static_ref_url, '', sdata.getTaskId(), sdata.getSession())            
 
 
 def dps(entity, conf, sdata, **kwargs):
@@ -681,11 +706,11 @@ def dps(entity, conf, sdata, **kwargs):
     is_vrf_xml_output = yang.Sdk.getData(device.url, '', sdata.getTaskId())
     is_vrf_obj = util.parseXmlString(is_vrf_xml_output)
     util.log_debug("is_vrf_obj is:", is_vrf_obj)
-    #if not hasattr(is_vrf_obj.device, 'vrfs'):
-        #yang.Sdk.createData(device.url, '<vrfs/>', sdata.getSession(), False)
+    if not hasattr(is_vrf_obj.device, 'vrfs'):
+        yang.Sdk.createData(device.url, '<vrfs/>', sdata.getSession(), False)
 
     if util.isNotEmpty(vrf):
-        # vrfobj = devices.device.vrfs.vrf.vrf()
+        # vrfobj = vrfs.vrf.vrf()
         # vrfobj.name = vrf
         # if util.isNotEmpty(rd):
         #     vrfobj.rd = rd
@@ -707,7 +732,7 @@ def dps(entity, conf, sdata, **kwargs):
                 obj.vrfs.vrf = util.convert_to_list(obj.vrfs.vrf)
                 for vrf_local in obj.vrfs.vrf:
                     if vrf_local.vrf_name == vrf:
-                        vrfobj = devices.device.vrfs.vrf.vrf()
+                        vrfobj = vrfs.vrf.vrf()
                         vrfobj.name = vrf_local.vrf_name
                         if util.isNotEmpty(vrf_local.rd):
                             vrfobj.rd = vrf_local.rd
@@ -720,7 +745,7 @@ def dps(entity, conf, sdata, **kwargs):
                         if hasattr(vrf_local, 'rt_import'):
                             vrf_local.rt_import = util.convert_to_list(vrf_local.rt_import)
                             for rtimport in vrf_local.rt_import:
-                                vrfobj1 = devices.device.vrfs.vrf.rt_import.rt_import()
+                                vrfobj1 = vrfs.vrf.rt_import.rt_import()
                                 if util.isNotEmpty(rtimport.rt_import):
                                     vrfobj1.rt_import = rtimport.rt_import
                                 import_url = device.url + '/vrfs/vrf=%s' % (vrf)
@@ -728,7 +753,7 @@ def dps(entity, conf, sdata, **kwargs):
                         if hasattr(vrf_local, 'rt_export'):
                             vrf_local.rt_export = util.convert_to_list(vrf_local.rt_export)
                             for rtexport in vrf_local.rt_export:
-                                vrfobj1 = devices.device.vrfs.vrf.rt_export.rt_export()
+                                vrfobj1 = vrfs.vrf.rt_export.rt_export()
                                 if util.isNotEmpty(rtexport.rt_export):
                                     vrfobj1.rt_export = rtexport.rt_export
                                 export_url = device.url + '/vrfs/vrf=%s' % (vrf)
@@ -736,7 +761,7 @@ def dps(entity, conf, sdata, **kwargs):
                         if hasattr(vrf_local, 'import_map'):
                             vrf_local.import_map = util.convert_to_list(vrf_local.import_map)
                             for importmap in vrf_local.import_map:
-                                vrfobj1 = devices.device.vrfs.vrf.import_map.import_map()
+                                vrfobj1 = vrfs.vrf.import_map.import_map()
                                 if util.isNotEmpty(importmap.import_map):
                                     route_maps(importmap.import_map, device, sdata)
                                     vrfobj1.import_map = importmap.import_map
@@ -753,7 +778,7 @@ def dps(entity, conf, sdata, **kwargs):
                         if hasattr(vrf_local, 'export_map'):
                             vrf_local.export_map = util.convert_to_list(vrf_local.export_map)
                             for exportmap in vrf_local.export_map:
-                                vrfobj1 = devices.device.vrfs.vrf.export_map.export_map()
+                                vrfobj1 = vrfs.vrf.export_map.export_map()
                                 if util.isNotEmpty(exportmap.export_map):
                                     route_maps(exportmap.export_map, device, sdata)
                                     vrfobj1.export_map = exportmap.export_map
@@ -768,25 +793,26 @@ def dps(entity, conf, sdata, **kwargs):
                                 importmap_url = device.url + '/vrfs/vrf=%s' % (vrf)
                                 yang.Sdk.createData(importmap_url, vrfobj1.getxml(filter=True), sdata.getSession())
         else:
-            vrfobj = devices.device.vrfs.vrf.vrf()
+            vrfobj = vrfs.vrf.vrf()
             vrfobj.name = vrf
             yang.Sdk.createData(device.url + '/vrfs', vrfobj.getxml(filter=True), sdata.getSession())
 
     if inputdict['lan_interface'] == 'true':
-        intf_obj = devices.device.interfaces.interface.interface()
+        intf_obj = interfaces.interface.interface()
         if util.isEmpty(interface_name) or interface_name is None:
             raise Exception('Please check lan interface on site')
         intf_obj.name = interface_name
         intf_obj.long_name = interface_name
         intf_obj.mode = mode
         if inputdict['hierarchical_inbound_policy'] == 'false':
-            if util.isNotEmpty(inputdict['inbound_policy']):
-                qos_child(entity, inputdict['inbound_policy'], device, sdata)
-                intf_obj.inbound_qos = inputdict['inbound_policy']
+            if util.isNotEmpty(inputdict['hierarchical_policy']):
+                hierarchical_policy_class(entity, inputdict['hierarchical_policy'], device, sdata)
+                intf_obj.inbound_qos = inputdict['hierarchical_policy']
         elif inputdict['hierarchical_inbound_policy'] == 'true':
             if util.isNotEmpty(inputdict['hierarchical_policy']):
                 hierarchical_policy_class(entity, inputdict['hierarchical_policy'], device, sdata)
                 intf_obj.inbound_qos = inputdict['hierarchical_policy']
+
         if inputdict['vrf_receive'] == 'true':
             if vrf is not None and vrf != 'GLOBAL':
                 intf_obj.vrf_receive = vrf
@@ -853,7 +879,7 @@ def dps(entity, conf, sdata, **kwargs):
         payload = "<interface-ip>%s</interface-ip>" % interface_ip
         serv_uri = sdata.getRcPath()
         yang.Sdk.createData(serv_uri, payload, sdata.getSession())
-        intf_obj = devices.device.interfaces.interface.interface()
+        intf_obj = interfaces.interface.interface()
         if util.isEmpty(interface_name):
             raise Exception('Please check b2b interface on site')
         intf_obj.name = interface_name
@@ -894,7 +920,7 @@ def dps(entity, conf, sdata, **kwargs):
         payload = "<loopback-ip>%s</loopback-ip>" % loopback_ip
         serv_uri = sdata.getRcPath()
         yang.Sdk.createData(serv_uri, payload, sdata.getSession())
-        intf_obj = devices.device.interfaces.interface.interface()
+        intf_obj = interfaces.interface.interface()
         if util.isNotEmpty(loopback_int_id):
             print 'loopback_int_id:', loopback_int_id
             intf_obj.name = loopback_int_id
@@ -910,7 +936,7 @@ def dps(entity, conf, sdata, **kwargs):
         if entity == 'cpe_primary' or entity == 'cpe_primary_dual':
             if lan_vrf is not None:
                 vrf = lan_vrf
-        ospf_obj = devices.device.vrfs.vrf.router_ospf.router_ospf()
+        ospf_obj = vrfs.vrf.router_ospf.router_ospf()
         ospf_obj.process_id = inputdict['ospf_id']
         ospf_obj.router_id = inputdict['router_id']
         if inputdict['vrf_lite'] == 'true':
@@ -921,7 +947,7 @@ def dps(entity, conf, sdata, **kwargs):
         yang.Sdk.createData(ospf_url1, '<redistribute/>', sdata.getSession())
         if util.isNotEmpty(inputdict['static_route_map']):
             route_maps(inputdict['static_route_map'], device, sdata)
-            ospf_static_obj = devices.device.vrfs.vrf.router_ospf.redistribute.ospf_redistribute.ospf_redistribute()
+            ospf_static_obj = vrfs.vrf.router_ospf.redistribute.ospf_redistribute.ospf_redistribute()
             ospf_static_obj.protocol = 'static'
             ospf_static_obj.route_map = inputdict['static_route_map']
             ospf_static_url = device.url + '/vrfs/vrf=%s/router-ospf=%s/redistribute' % (vrf, inputdict['ospf_id'])
@@ -931,7 +957,7 @@ def dps(entity, conf, sdata, **kwargs):
             if util.isEmpty(interface_name):
                 raise Exception('Please check interface on cpe in site')
             route_maps(inputdict['connected_route_map'], device, sdata, interface_name)
-            ospf_connect_obj = devices.device.vrfs.vrf.router_ospf.redistribute.ospf_redistribute.ospf_redistribute()
+            ospf_connect_obj = vrfs.vrf.router_ospf.redistribute.ospf_redistribute.ospf_redistribute()
             ospf_connect_obj.protocol = 'connected'
             ospf_connect_obj.route_map = inputdict['connected_route_map']
             ospf_connect_url = device.url + '/vrfs/vrf=%s/router-ospf=%s/redistribute' % (vrf, inputdict['ospf_id'])
@@ -939,7 +965,7 @@ def dps(entity, conf, sdata, **kwargs):
 
         if inputdict['lan_ospf_redistribution'] == 'true':
             if util.isNotEmpty(inputdict['ospf_redistribution_id']):
-                ospf_obj = devices.device.vrfs.vrf.router_ospf.router_ospf()
+                ospf_obj = vrfs.vrf.router_ospf.router_ospf()
                 ospf_obj.process_id = inputdict['ospf_redistribution_id']
                 ospf_obj.router_id = inputdict['router_id']
                 ospf_url = device.url + '/vrfs/vrf=%s' % (vrf)
@@ -947,7 +973,7 @@ def dps(entity, conf, sdata, **kwargs):
             else:
                 inputdict['ospf_redistribution_id'] = inputdict['ospf_id']
 
-            ospf_static_obj = devices.device.vrfs.vrf.router_ospf.redistribute.ospf_redistribute.ospf_redistribute()
+            ospf_static_obj = vrfs.vrf.router_ospf.redistribute.ospf_redistribute.ospf_redistribute()
             ospf_static_obj.protocol = 'ospf'
             ospf_static_obj.process_id_entry = inputdict['ospf_redistribution_id']
             if util.isNotEmpty(inputdict['ospf_route_map']):
@@ -965,7 +991,7 @@ def dps(entity, conf, sdata, **kwargs):
         if inputdict['lan_ebgp_redistribution'] == 'true':
             if util.isNotEmpty(inputdict['bgp_route_map']):
                 route_maps(inputdict['bgp_route_map'], device, sdata)
-            ospf_static_obj = devices.device.vrfs.vrf.router_ospf.redistribute.ospf_redistribute.ospf_redistribute()
+            ospf_static_obj = vrfs.vrf.router_ospf.redistribute.ospf_redistribute.ospf_redistribute()
             ospf_static_obj.protocol = 'bgp'
             ospf_static_obj.bgp_as_number = bgp_as
             ospf_static_obj.route_map = inputdict['bgp_route_map']
@@ -979,32 +1005,31 @@ def dps(entity, conf, sdata, **kwargs):
             yang.Sdk.createData(ospf_static_url, ospf_static_obj.getxml(filter=True), sdata.getSession())
 
     if inputdict['bgp'] == 'true':
-        bgpobj1 = devices.device.vrfs.vrf.router_bgp.router_bgp()
+        bgpobj1 = vrfs.vrf.router_bgp.router_bgp()
         if util.isNotEmpty(bgp_as):
             bgpobj1.as_number = bgp_as
             if bgp_address_family is not None:
                 bgpobj1.address_family = bgp_address_family
+        #bgpobj1.address_family = "ipv4"
         if util.isNotEmpty(inputdict['qppb_policy']):
             route_maps(inputdict['qppb_policy'], device, sdata)
             bgpobj1.qppb_policy = inputdict['qppb_policy']
-
         if inputdict['bgp_vrf'] is None:
             vrf_global = 'GLOBAL'
             router_bgp_url = device.url + '/vrfs/vrf=%s' % (vrf_global)
         else:
             vrf_bgp = inputdict['bgp_vrf']
             router_bgp_url = device.url + '/vrfs/vrf=%s' % (vrf_bgp)
+
         yang.Sdk.createData(router_bgp_url, bgpobj1.getxml(filter=True), sdata.getSession(), False)
-        """
         if entity != 'cpe_primary':
-            bgpobj2 = devices.device.vrfs.vrf.router_bgp.router_bgp()
+            bgpobj2 = vrfs.vrf.router_bgp.router_bgp()
             if util.isNotEmpty(bgp_as):
                 bgpobj2.as_number = bgp_as
             if vrf != "GLOBAL":
                 bgpobj2.address_family = "ipv4"
             router_bgp_url = device.url + '/vrfs/vrf=%s' % (vrf)
             yang.Sdk.createData(router_bgp_url, bgpobj2.getxml(filter=True), sdata.getSession())
-        """
         vrf1 = inputdict['bgp_vrf']
 
         if vrf1 is None:
@@ -1014,7 +1039,7 @@ def dps(entity, conf, sdata, **kwargs):
             if util.isEmpty(interface_name):
                 raise Exception('Please check interface on cpe in site')
             route_maps(inputdict['redistribute_connected'], device, sdata, interface_name)
-            rebgpredisobj1 = devices.device.vrfs.vrf.router_bgp.redistribute.redistribute()
+            rebgpredisobj1 = vrfs.vrf.router_bgp.redistribute.redistribute()
             rebgpredisobj1.protocol = 'connected'
             rebgpredisobj1.route_map = inputdict['redistribute_connected']
             router_bgp_redist_url = device.url + '/vrfs/vrf=%s/router-bgp' % (vrf1)
@@ -1022,7 +1047,7 @@ def dps(entity, conf, sdata, **kwargs):
 
         if util.isNotEmpty(inputdict['redistribute_static']):
             route_maps(inputdict['redistribute_static'], device, sdata)
-            rebgpredisobj1 = devices.device.vrfs.vrf.router_bgp.redistribute.redistribute()
+            rebgpredisobj1 = vrfs.vrf.router_bgp.redistribute.redistribute()
             rebgpredisobj1.protocol = 'static'
             rebgpredisobj1.route_map = inputdict['redistribute_static']
             router_bgp_redist_url = device.url + '/vrfs/vrf=%s/router-bgp' % (vrf1)
@@ -1044,8 +1069,8 @@ def dps(entity, conf, sdata, **kwargs):
 
         xml_output = yang.Sdk.getData(url+"/dmvpn-tunnel-profiles/dmvpn-tunnel-profile="+str(dmvpn_profile), '', sdata.getTaskId())
         obj_dmvpn = util.parseXmlString(xml_output)
-        #yang.Sdk.createData(device.url, '<dmvpntunnels/>', sdata.getSession(), False)
-        dmvpn_obj = devices.device.dmvpntunnels.dmvpntunnel.dmvpntunnel()
+        yang.Sdk.createData(device.url, '<dmvpntunnels/>', sdata.getSession(), False)
+        dmvpn_obj = dmvpntunnels.dmvpntunnel.dmvpntunnel()
         if vrf != 'GLOBAL':
             uri1 = sdata.getRcPath()
             uri_list1 = uri1.split('/',5)
@@ -1055,9 +1080,9 @@ def dps(entity, conf, sdata, **kwargs):
             util.log_debug("obj_local: ", obj_local)
             dmvpn_obj.vrf_definition_mode = obj_local.vrf.vrf_definition_mode
             dmvpn_obj.vrf_name = vrf
-        
+
         if tunnel_fvrf is not None:
-               dmvpn_obj.front_vrf_name = tunnel_fvrf
+            dmvpn_obj.front_vrf_name = tunnel_fvrf
 
         if hasattr(obj_dmvpn.dmvpn_tunnel_profile, 'delay'):
             delay = obj_dmvpn.dmvpn_tunnel_profile.delay
@@ -1121,6 +1146,14 @@ def dps(entity, conf, sdata, **kwargs):
             tunnel_keepalive_retries = None
         if tunnel_keepalive_retries is not None:
             dmvpn_obj.tunnel_keepalive_retries = tunnel_keepalive_retries
+
+        if hasattr(obj_dmvpn.dmvpn_tunnel_profile, 'if_state_nhrp'):
+            if_state_nhrp = obj_dmvpn.dmvpn_tunnel_profile.if_state_nhrp
+        else:
+            if_state_nhrp = None
+        if if_state_nhrp is not None:
+            dmvpn_obj.if_state_nhrp = if_state_nhrp
+
         if util.isNotEmpty(bandwidth):
             dmvpn_obj.bandwidth = bandwidth
         if inputdict['hub'] == 'true':
@@ -1181,7 +1214,7 @@ def dps(entity, conf, sdata, **kwargs):
         yang.Sdk.createData(device.url+'/dmvpntunnels', dmvpn_obj.getxml(filter=True), sdata.getSession())
 
         if inputdict['hub'] != 'true':
-            dmvpn_obj_nhrp = devices.device.dmvpntunnels.dmvpntunnel.nhrp_maps.nhrp_maps()
+            dmvpn_obj_nhrp = dmvpntunnels.dmvpntunnel.nhrp_maps.nhrp_maps()
             dmvpn_obj_nhrp.sourceip = obj_dmvpn.dmvpn_tunnel_profile.wan_tunnel_ip
             dmvpn_obj_nhrp.nhrp_type = 'nhs'
             dmvpn_obj_nhrp.destip = obj_dmvpn.dmvpn_tunnel_profile.wan_public_ip
@@ -1205,7 +1238,7 @@ def hierarchical_policy_class(entity, hierarchical_policy, device, sdata):
     util.log_debug( "obj: ",obj)
     device.addQosPolicyMapsContainer(sdata.getSession())
 
-    map_obj = devices.device.policy_maps.policy_map.policy_map()
+    map_obj = policy_maps.policy_map.policy_map()
     map_obj.name = obj.policy.name
     yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession())
 
@@ -1213,7 +1246,7 @@ def hierarchical_policy_class(entity, hierarchical_policy, device, sdata):
         obj.policy.classes = util.convert_to_list(obj.policy.classes)
         log("classes sequence:%s" %(obj.policy.classes))
         for class_entry in obj.policy.classes:
-            cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+            cls_obj = policy_maps.policy_map.class_entry.class_entry()
             if util.isNotEmpty(class_entry.class_name):
                 class_map(entity, url, class_entry.class_name, device, sdata)
                 cls_obj.class_name = class_entry.class_name
@@ -1234,11 +1267,11 @@ def qos_child(entity, qos_policy, dev, sdata):
     print "xml of policy map obj: ",obj.toXml()
     dev.addQosPolicyMapsContainer(sdata.getSession())
     policy_name = obj.policy.name
-    map_obj = devices.device.policy_maps.policy_map.policy_map()
+    map_obj = policy_maps.policy_map.policy_map()
     map_obj.name = policy_name
     yang.Sdk.createData(dev.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession())
     for cls in obj.policy.classes.get_field_value('class_name', True):
-        cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+        cls_obj = policy_maps.policy_map.class_entry.class_entry()
         cls_name = cls.name
         # Generates Configs for Class Maps
         if cls_name != 'class-default' and cls_name != 'CLASS-DEFAULT':
@@ -1298,7 +1331,7 @@ def qos_child(entity, qos_policy, dev, sdata):
         yang.Sdk.createData(dev.url+"/policy-maps/policy-map=%s"%(policy_name), cls_obj.getxml(filter=True), sdata.getSession())
 
         if cls.get_field_value('queue_limit') is not None:
-            queue_limit_obj = devices.device.policy_maps.policy_map.class_entry.queue_limit.queue_limit()
+            queue_limit_obj = policy_maps.policy_map.class_entry.queue_limit.queue_limit()
             queue_limit = cls.queue_limit.get_field_value('queue_limit')
             packets = cls.queue_limit.get_field_value('packets')
             if util.isNotEmpty(queue_limit):
@@ -1308,7 +1341,7 @@ def qos_child(entity, qos_policy, dev, sdata):
             yang.Sdk.createData(dev.url+"/policy-maps/policy-map=%s/class-entry=%s"%(policy_name,cls_name), queue_limit_obj.getxml(filter=True), sdata.getSession())
 
         if cls.get_field_value('qos_group') is not None:
-            #qos_group_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+            #qos_group_obj = policy_maps.policy_map.class_entry.class_entry()
             qos_group_value = cls.qos_group.get_field_value('qos_group')
             if util.isNotEmpty(qos_group_value):
                 cls_obj.qos_group = qos_group_value
@@ -1326,7 +1359,7 @@ def class_map(entity, url, cls_name, dev, sdata):
 
     dev.addQOSClassMapsContainer(sdata.getSession())
 
-    cls_map_obj = devices.device.class_maps.class_map.class_map()
+    cls_map_obj = class_maps.class_map.class_map()
     cls_map_obj.name = cls_name
     if util.isNotEmpty(description):
         cls_map_obj.description = description
@@ -1336,7 +1369,7 @@ def class_map(entity, url, cls_name, dev, sdata):
     dscp = obj_class.class_map.get_field_value("dscp")
     if util.isNotEmpty(dscp):
         for ds in util.convert_to_list(dscp):
-            match_obj = devices.device.class_maps.class_map.class_match_condition.class_match_condition()
+            match_obj = class_maps.class_map.class_match_condition.class_match_condition()
             match_obj.condition_type = "ip dscp"
             match_obj.match_value = ds
             yang.Sdk.createData(dev.url+"/class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession())
@@ -1344,7 +1377,7 @@ def class_map(entity, url, cls_name, dev, sdata):
     # protocol = obj_class.class_map.get_field_value("protocol")
     # if util.isNotEmpty(protocol):
     #     for pr in util.convert_to_list(protocol):
-    #         match_obj = devices.device.class_maps.class_map.class_match_condition.class_match_condition()
+    #         match_obj = class_maps.class_map.class_match_condition.class_match_condition()
     #         match_obj.condition_type = "protocol"
     #         match_obj.match_value = pr
     #         yang.Sdk.createData(dev.url+"/class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession())
@@ -1352,12 +1385,12 @@ def class_map(entity, url, cls_name, dev, sdata):
     protocol = obj_class.class_map.get_field_value("protocol")
     if util.isNotEmpty(protocol):
         for pr in util.convert_to_list(protocol):
-            match_obj = devices.device.class_maps.class_map.class_match_condition.class_match_condition()
+            match_obj = class_maps.class_map.class_match_condition.class_match_condition()
             match_obj.condition_type = "protocol"
             match_obj.match_value = pr
             yang.Sdk.createData(dev.url+"/class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession())
             if pr == "http":
-                match_object = devices.device.class_maps.class_map.class_match_condition.http_url.http_url()
+                match_object = class_maps.class_map.class_match_condition.http_url.http_url()
                 http_url = obj_class.class_map.get_field_value("http_url")
                 print "http_url is:",http_url
                 if util.isNotEmpty(http_url):
@@ -1372,14 +1405,14 @@ def class_map(entity, url, cls_name, dev, sdata):
     if util.isNotEmpty(access_group):
         for each_access_group in util.convert_to_list(access_group):
             access_group_def(url, each_access_group, dev, sdata)
-            match_obj = devices.device.class_maps.class_map.class_match_condition.class_match_condition()
+            match_obj = class_maps.class_map.class_match_condition.class_match_condition()
             match_obj.condition_type = "access-group"
             match_obj.match_value = each_access_group
             yang.Sdk.createData(dev.url+"/class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession())
 
     qos_group = obj_class.class_map.get_field_value("qos_group")
     if util.isNotEmpty(qos_group):
-        match_obj = devices.device.class_maps.class_map.class_match_condition.class_match_condition()
+        match_obj = class_maps.class_map.class_match_condition.class_match_condition()
         match_obj.condition_type = "qos-group"
         match_obj.match_value = qos_group
         yang.Sdk.createData(dev.url+"/class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession())
@@ -1470,7 +1503,7 @@ def delete_interface(entity, smodelctx, sdata, conf, **kwargs):
             else:
                 interface_name,mode = endpoint_def(endpoint)
 
-    intf_obj_phy = devices.device.interfaces.interface.interface()
+    intf_obj_phy = interfaces.interface.interface()
     intf_obj_phy.name = interface_name
     intf_obj_phy.long_name = interface_name
     intf_obj_phy.mode = mode

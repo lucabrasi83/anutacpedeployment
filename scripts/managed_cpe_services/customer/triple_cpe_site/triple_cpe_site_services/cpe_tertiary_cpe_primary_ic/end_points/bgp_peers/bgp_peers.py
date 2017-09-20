@@ -48,7 +48,7 @@ from cpedeployment.cpedeployment_lib import ServiceModelContext
 from cpedeployment.cpedeployment_lib import getParentObject
 from cpedeployment.cpedeployment_lib import log
 
-from servicemodel.controller import devices
+
 import service_customization
 
 
@@ -98,15 +98,15 @@ class BgpPeers(yang.AbstractYangServiceHandler):
           inputdict['send_community'] = 'True'
         inputdict['advertisement_interval'] = config.get_field_value('advertisement_interval')
         inputdict['time_in_sec'] = config.get_field_value('time_in_sec')
-        #if inputdict.get('time_in_sec') is None:
-          #inputdict['time_in_sec'] = '5'
+        if inputdict.get('time_in_sec') is None:
+          inputdict['time_in_sec'] = '5'
         inputdict['timers'] = config.get_field_value('timers')
         inputdict['keepalive_interval'] = config.get_field_value('keepalive_interval')
-        #if inputdict.get('keepalive_interval') is None:
-          #inputdict['keepalive_interval'] = '10'
+        if inputdict.get('keepalive_interval') is None:
+          inputdict['keepalive_interval'] = '10'
         inputdict['holdtime'] = config.get_field_value('holdtime')
-        #if inputdict.get('holdtime') is None:
-          #inputdict['holdtime'] = '30'
+        if inputdict.get('holdtime') is None:
+          inputdict['holdtime'] = '30'
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'end-points')
@@ -116,9 +116,9 @@ class BgpPeers(yang.AbstractYangServiceHandler):
         dev = getDeviceObject(device_mgmt_ip_address, sdata)
 
         # START OF FETCHING THE PARENT KEY LEAF PARAMETERS
-        #inputkeydict['managed_cpe_services_customer_triple_cpe_site_triple_cpe_site_services_cpe_tertiary_cpe_primary_ic_end_points_endpoint_name'] = sdata.getRcPath().split('/')[-2].split('=')[1]
-        #inputkeydict['managed_cpe_services_customer_triple_cpe_site_triple_cpe_site_services_site_name'] = sdata.getRcPath().split('/')[-4].split('=')[1]
-        #inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-6].split('=')[1]
+        inputkeydict['managed_cpe_services_customer_triple_cpe_site_triple_cpe_site_services_cpe_tertiary_cpe_primary_ic_end_points_endpoint_name'] = sdata.getRcPath().split('/')[-2].split('=')[1]
+        inputkeydict['managed_cpe_services_customer_triple_cpe_site_triple_cpe_site_services_site_name'] = sdata.getRcPath().split('/')[-4].split('=')[1]
+        inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-6].split('=')[1]
         # END OF FETCHING THE PARENT KEY LEAF PARAMETERS
 
         #Use the custom methods to process the data
@@ -166,15 +166,15 @@ class BgpPeers(yang.AbstractYangServiceHandler):
           inputdict['send_community'] = 'True'
         inputdict['advertisement_interval'] = config.get_field_value('advertisement_interval')
         inputdict['time_in_sec'] = config.get_field_value('time_in_sec')
-        #if inputdict.get('time_in_sec') is None:
-          #inputdict['time_in_sec'] = '5'
+        if inputdict.get('time_in_sec') is None:
+          inputdict['time_in_sec'] = '5'
         inputdict['timers'] = config.get_field_value('timers')
         inputdict['keepalive_interval'] = config.get_field_value('keepalive_interval')
-        #if inputdict.get('keepalive_interval') is None:
-          #inputdict['keepalive_interval'] = '10'
+        if inputdict.get('keepalive_interval') is None:
+          inputdict['keepalive_interval'] = '10'
         inputdict['holdtime'] = config.get_field_value('holdtime')
-        #if inputdict.get('holdtime') is None:
-          #inputdict['holdtime'] = '30'
+        if inputdict.get('holdtime') is None:
+          inputdict['holdtime'] = '30'
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'end-points')
@@ -225,15 +225,15 @@ class BgpPeers(yang.AbstractYangServiceHandler):
           inputdict['send_community'] = 'True'
         inputdict['advertisement_interval'] = config.get_field_value('advertisement_interval')
         inputdict['time_in_sec'] = config.get_field_value('time_in_sec')
-        #if inputdict.get('time_in_sec') is None:
-          #inputdict['time_in_sec'] = '5'
+        if inputdict.get('time_in_sec') is None:
+          inputdict['time_in_sec'] = '5'
         inputdict['timers'] = config.get_field_value('timers')
         inputdict['keepalive_interval'] = config.get_field_value('keepalive_interval')
-        #if inputdict.get('keepalive_interval') is None:
-          #inputdict['keepalive_interval'] = '10'
+        if inputdict.get('keepalive_interval') is None:
+          inputdict['keepalive_interval'] = '10'
         inputdict['holdtime'] = config.get_field_value('holdtime')
-        #if inputdict.get('holdtime') is None:
-          #inputdict['holdtime'] = '30'
+        if inputdict.get('holdtime') is None:
+          inputdict['holdtime'] = '30'
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'end-points')

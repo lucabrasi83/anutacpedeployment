@@ -42,7 +42,7 @@ Names of Leafs for this Yang Entity
 from servicemodel import util
 from servicemodel import yang
 from servicemodel import devicemgr
-from servicemodel.controller import devices
+from servicemodel.controller.devices.device import policy_maps
 
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject
@@ -175,7 +175,7 @@ def update_percentage(site, policy_name, class_name, packet_handling_input, perc
     print "xml of policy map obj: ",obj.toXml()
     policy_name = obj.policy.name
     print "policy_name is:",policy_name
-    map_obj = devices.device.policy_maps.policy_map.policy_map()
+    map_obj = policy_maps.policy_map.policy_map()
     map_obj.name = policy_name
     policy_name_exist = None
     if hasattr(conf.single_cpe_site_services.cpe_wan, 'child_qos_policy'):
@@ -186,7 +186,7 @@ def update_percentage(site, policy_name, class_name, packet_handling_input, perc
     if policy_name_exist == policy_name:
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
         for cls in obj.policy.classes.get_field_value('class_name', True):
-            cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+            cls_obj = policy_maps.policy_map.class_entry.class_entry()
             cls_name = cls.name
             if cls_name == class_name:
                 cls_obj.class_name = cls_name
@@ -221,7 +221,7 @@ def update_percentage_dual(site, policy_name, class_name, packet_handling_input,
     print "obj: ",obj
     print "xml of policy map obj: ",obj.toXml()
     policy_name = obj.policy.name
-    map_obj = devices.device.policy_maps.policy_map.policy_map()
+    map_obj = policy_maps.policy_map.policy_map()
     map_obj.name = policy_name
     policy_name_exist = None
     if hasattr(conf.dual_cpe_site_services.cpe_primary_wan, 'child_qos_policy'):
@@ -232,7 +232,7 @@ def update_percentage_dual(site, policy_name, class_name, packet_handling_input,
         device = devicemgr.getDeviceById(conf.dual_cpe_site_services.cpe_primary.device_ip)
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
         for cls in obj.policy.classes.get_field_value('class_name', True):
-            cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+            cls_obj = policy_maps.policy_map.class_entry.class_entry()
             cls_name = cls.name
             if cls_name == class_name:
                 cls_obj.class_name = cls_name
@@ -259,7 +259,7 @@ def update_percentage_dual(site, policy_name, class_name, packet_handling_input,
         device = devicemgr.getDeviceById(conf.dual_cpe_site_services.cpe_secondary.device_ip)
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
         for cls in obj.policy.classes.get_field_value('class_name', True):
-            cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+            cls_obj = policy_maps.policy_map.class_entry.class_entry()
             cls_name = cls.name
             if cls_name == class_name:
                 cls_obj.class_name = cls_name
@@ -295,7 +295,7 @@ def update_percentage_single_dual(site, policy_name, class_name, packet_handling
     print "obj: ",obj
     print "xml of policy map obj: ",obj.toXml()
     policy_name = obj.policy.name
-    map_obj = devices.device.policy_maps.policy_map.policy_map()
+    map_obj = policy_maps.policy_map.policy_map()
     map_obj.name = policy_name
     policy_name_exist = None
     if hasattr(conf.single_cpe_dual_wan_site_services.cpe_primary_wan, 'child_qos_policy'):
@@ -306,7 +306,7 @@ def update_percentage_single_dual(site, policy_name, class_name, packet_handling
         device = devicemgr.getDeviceById(conf.single_cpe_dual_wan_site_services.cpe.device_ip)
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
         for cls in obj.policy.classes.get_field_value('class_name', True):
-            cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+            cls_obj = policy_maps.policy_map.class_entry.class_entry()
             cls_name = cls.name
             if cls_name == class_name:
                 cls_obj.class_name = cls_name
@@ -334,7 +334,7 @@ def update_percentage_single_dual(site, policy_name, class_name, packet_handling
         device = devicemgr.getDeviceById(conf.single_cpe_dual_wan_site_services.cpe.device_ip)
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
         for cls in obj.policy.classes.get_field_value('class_name', True):
-            cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+            cls_obj = policy_maps.policy_map.class_entry.class_entry()
             cls_name = cls.name
             if cls_name == class_name:
                 cls_obj.class_name = cls_name
@@ -370,7 +370,7 @@ def update_percentage_dual_dual(site, policy_name, class_name, packet_handling_i
     print "obj: ",obj
     print "xml of policy map obj: ",obj.toXml()
     policy_name = obj.policy.name
-    map_obj = devices.device.policy_maps.policy_map.policy_map()
+    map_obj = policy_maps.policy_map.policy_map()
     map_obj.name = policy_name
     policy_name_exist = None
     if hasattr(conf.dual_cpe_dual_wan_site_services.cpe_primary_inet_wan, 'child_qos_policy'):
@@ -381,7 +381,7 @@ def update_percentage_dual_dual(site, policy_name, class_name, packet_handling_i
         device = devicemgr.getDeviceById(conf.dual_cpe_dual_wan_site_services.cpe_primary.device_ip)
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
         for cls in obj.policy.classes.get_field_value('class_name', True):
-            cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+            cls_obj = policy_maps.policy_map.class_entry.class_entry()
             cls_name = cls.name
             if cls_name == class_name:
                 cls_obj.class_name = cls_name
@@ -409,7 +409,7 @@ def update_percentage_dual_dual(site, policy_name, class_name, packet_handling_i
         device = devicemgr.getDeviceById(conf.dual_cpe_dual_wan_site_services.cpe_primary.device_ip)
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
         for cls in obj.policy.classes.get_field_value('class_name', True):
-            cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+            cls_obj = policy_maps.policy_map.class_entry.class_entry()
             cls_name = cls.name
             if cls_name == class_name:
                 cls_obj.class_name = cls_name
@@ -437,7 +437,7 @@ def update_percentage_dual_dual(site, policy_name, class_name, packet_handling_i
         device = devicemgr.getDeviceById(conf.dual_cpe_dual_wan_site_services.cpe_secondary.device_ip)
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
         for cls in obj.policy.classes.get_field_value('class_name', True):
-            cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+            cls_obj = policy_maps.policy_map.class_entry.class_entry()
             cls_name = cls.name
             if cls_name == class_name:
                 cls_obj.class_name = cls_name
@@ -465,7 +465,7 @@ def update_percentage_dual_dual(site, policy_name, class_name, packet_handling_i
         device = devicemgr.getDeviceById(conf.dual_cpe_dual_wan_site_services.cpe_secondary.device_ip)
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
         for cls in obj.policy.classes.get_field_value('class_name', True):
-            cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+            cls_obj = policy_maps.policy_map.class_entry.class_entry()
             cls_name = cls.name
             if cls_name == class_name:
                 cls_obj.class_name = cls_name
@@ -501,7 +501,7 @@ def update_percentage_triple(site, policy_name, class_name, packet_handling_inpu
     print "obj: ",obj
     print "xml of policy map obj: ",obj.toXml()
     policy_name = obj.policy.name
-    map_obj = devices.device.policy_maps.policy_map.policy_map()
+    map_obj = policy_maps.policy_map.policy_map()
     map_obj.name = policy_name
     policy_name_exist = None
     if hasattr(conf.triple_cpe_site_services.cpe_primary_inet_wan, 'child_qos_policy'):
@@ -512,7 +512,7 @@ def update_percentage_triple(site, policy_name, class_name, packet_handling_inpu
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_primary.device_ip)
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
         for cls in obj.policy.classes.get_field_value('class_name', True):
-            cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+            cls_obj = policy_maps.policy_map.class_entry.class_entry()
             cls_name = cls.name
             if cls_name == class_name:
                 cls_obj.class_name = cls_name
@@ -540,7 +540,7 @@ def update_percentage_triple(site, policy_name, class_name, packet_handling_inpu
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_primary.device_ip)
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
         for cls in obj.policy.classes.get_field_value('class_name', True):
-            cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+            cls_obj = policy_maps.policy_map.class_entry.class_entry()
             cls_name = cls.name
             if cls_name == class_name:
                 cls_obj.class_name = cls_name
@@ -568,7 +568,7 @@ def update_percentage_triple(site, policy_name, class_name, packet_handling_inpu
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_secondary.device_ip)
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
         for cls in obj.policy.classes.get_field_value('class_name', True):
-            cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+            cls_obj = policy_maps.policy_map.class_entry.class_entry()
             cls_name = cls.name
             if cls_name == class_name:
                 cls_obj.class_name = cls_name
@@ -596,7 +596,7 @@ def update_percentage_triple(site, policy_name, class_name, packet_handling_inpu
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_secondary.device_ip)
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
         for cls in obj.policy.classes.get_field_value('class_name', True):
-            cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+            cls_obj = policy_maps.policy_map.class_entry.class_entry()
             cls_name = cls.name
             if cls_name == class_name:
                 cls_obj.class_name = cls_name
@@ -624,7 +624,7 @@ def update_percentage_triple(site, policy_name, class_name, packet_handling_inpu
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_tertiary.device_ip)
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
         for cls in obj.policy.classes.get_field_value('class_name', True):
-            cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+            cls_obj = policy_maps.policy_map.class_entry.class_entry()
             cls_name = cls.name
             if cls_name == class_name:
                 cls_obj.class_name = cls_name
@@ -652,7 +652,7 @@ def update_percentage_triple(site, policy_name, class_name, packet_handling_inpu
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_tertiary.device_ip)
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
         for cls in obj.policy.classes.get_field_value('class_name', True):
-            cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+            cls_obj = policy_maps.policy_map.class_entry.class_entry()
             cls_name = cls.name
             if cls_name == class_name:
                 cls_obj.class_name = cls_name

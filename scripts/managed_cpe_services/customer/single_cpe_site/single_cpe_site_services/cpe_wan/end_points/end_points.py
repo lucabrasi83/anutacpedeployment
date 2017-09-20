@@ -46,7 +46,7 @@ from cpedeployment.cpedeployment_lib import ServiceModelContext
 from cpedeployment.cpedeployment_lib import getParentObject
 from cpedeployment.cpedeployment_lib import log
 
-from servicemodel.controller import devices
+
 import service_customization
 
 class EndPoints(yang.AbstractYangServiceHandler):
@@ -100,6 +100,8 @@ class EndPoints(yang.AbstractYangServiceHandler):
         inputdict['nat_outside'] = config.get_field_value('nat_outside')
         inputdict['nat_inside'] = config.get_field_value('nat_inside')
         inputdict['tunnel_mss'] = config.get_field_value('tunnel_mss')
+        inputdict['delay'] = config.get_field_value('delay')
+        inputdict['mace_enable'] = config.get_field_value('mace_enable')
         # END OF FETCHING THE LEAF PARAMETERS
 
         #Fetch Device Object
@@ -107,8 +109,8 @@ class EndPoints(yang.AbstractYangServiceHandler):
 
         inputkeydict = {}
         # START OF FETCHING THE PARENT KEY LEAF PARAMETERS
-        #inputkeydict['managed_cpe_services_customer_single_cpe_site_single_cpe_site_services_site_name'] = sdata.getRcPath().split('/')[-3].split('=')[1]
-        #inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-5].split('=')[1]
+        inputkeydict['managed_cpe_services_customer_single_cpe_site_single_cpe_site_services_site_name'] = sdata.getRcPath().split('/')[-3].split('=')[1]
+        inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-5].split('=')[1]
         # END OF FETCHING THE PARENT KEY LEAF PARAMETERS
 
         #Use the custom methods to process the data
@@ -118,11 +120,9 @@ class EndPoints(yang.AbstractYangServiceHandler):
         service_customization.ServiceDataCustomization.process_service_device_bindings(smodelctx, sdata, dev, inputdict=inputdict, parentobj=parentobj, config=config, devbindobjs=devbindobjs)
 
     def update(self, id, sdata):
-
-         #Fetch Local Config Object
+        #Fetch Local Config Object
         config = getCurrentObjectConfig(id, sdata, 'end_points')
 
-       
         #Fetch Service Model Context Object
         smodelctx = None
 
@@ -130,9 +130,7 @@ class EndPoints(yang.AbstractYangServiceHandler):
         parentobj = getParentObject(sdata)
 
         #Fetch Device Object
-        #dev = getDeviceObject(config.get_field_value('device_ip'), sdata)
-        dev = None
-        
+        dev = getDeviceObject(config.get_field_value('device_ip'), sdata)
 
         #Use the custom method to process the data
         service_customization.ServiceDataCustomization.process_service_update_data(smodelctx, sdata, dev=dev, parentobj=parentobj, config=config)

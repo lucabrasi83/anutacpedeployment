@@ -48,7 +48,7 @@ nhrp-authentication-key
 from servicemodel import util
 from servicemodel import yang
 from servicemodel import devicemgr
-from servicemodel.controller import devices
+from servicemodel.controller.devices.device import dmvpntunnels
 
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject
@@ -338,7 +338,7 @@ def delete_dmvpn(entity, conf, sdata, **kwargs):
                     if nhrp.sourceip == wan_tunnel_ip and nhrp.destip == wan_public_ip:
                         device_tunnel_nhrp.append(nhrp.sourceip)
             if wan_tunnel_ip in device_tunnel_nhrp:
-                dmvpn_obj_nhrp = devices.device.dmvpntunnels.dmvpntunnel.nhrp_maps.nhrp_maps()
+                dmvpn_obj_nhrp = dmvpntunnels.dmvpntunnel.nhrp_maps.nhrp_maps()
                 dmvpn_obj_nhrp.sourceip = wan_tunnel_ip
                 dmvpn_obj_nhrp.nhrp_type = 'nhs'
                 dmvpn_obj_nhrp.destip = wan_public_ip
@@ -430,7 +430,7 @@ def create_dmvpn(entity, conf, sdata, smodelctx, **kwargs):
                 device_tunnel.append(tunnel.name)
 
         if tunnel_id in device_tunnel:
-            dmvpn_obj = devices.device.dmvpntunnels.dmvpntunnel.dmvpntunnel()
+            dmvpn_obj = dmvpntunnels.dmvpntunnel.dmvpntunnel()
             dmvpn_obj.name = tunnel_id
             if util.isNotEmpty(tunnel_bandwidth):
                 dmvpn_obj.bandwidth = tunnel_bandwidth

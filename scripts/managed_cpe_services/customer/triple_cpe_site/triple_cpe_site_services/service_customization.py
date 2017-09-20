@@ -41,7 +41,7 @@ Names of Leafs for this Yang Entity
 from servicemodel import util
 from servicemodel import yang
 from servicemodel import devicemgr
-from servicemodel.controller import devices
+
 
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject
@@ -82,7 +82,7 @@ class ServiceDataCustomization:
     @staticmethod
     def process_service_update_data(smodelctx, sdata, **kwargs):
       """callback called for update operation"""
-      #raise Exception('Update forbidden for node triple-cpe-site-services at path managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services')
+      raise Exception('Update forbidden for node triple-cpe-site-services at path managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services')
       modify = True
       if modify and kwargs is not None:
         for key, value in kwargs.iteritems():
@@ -110,16 +110,17 @@ class DeletePreProcessor(yang.SessionPreProcessor):
         operations = session.getOperations()
         """Add any move operations for Deletion"""
         log('operations: %s' % (operations))
-        yang.moveOperations(operations, ['DeleteRouteMap'], ['UpdateInterface'], True)
-        yang.moveOperations(operations, ['DeleteRouterBGPAggregateSummaryNetwork', 'DeleteRouterBGPNetwork', 'DeleteRouterEigrpNetwork'], ['DeleteRouterBGPRedistribute'], True)
+        yang.moveOperations(operations, ['DeleteRouteMap'], ['DeleteRouteMapActions', 'DeleteRouteMapConditions', 'UpdateInterface'], True)
+        yang.moveOperations(operations, ['DeleteRouterBGPAggregateSummaryNetwork', 'DeleteRouterBGPNetwork', 'DeleteRouterEigrpRedistribute', 'DeleteRouterEigrpSummaryMetric','deleteVrfRouterEigrpNetwork', 'DeleteRouterEigrpNetwork'], ['DeleteRouterBGPRedistribute'], True)
         print 'pass: operations: %s' % (operations)
-        yang.moveOperations(operations, ['DeleteRouterBGPNeighbor', 'removeRouterEigrp'], ['DeleteRouterEigrpNetwork', 'DeleteRouterBGPAggregateSummaryNetwork', 'DeleteRouterBGPNetwork'], True)
+
+        yang.moveOperations(operations, ['DeleteRouterBGPNeighbor', 'deleteVrfRouterEigrp', 'removeRouterEigrp'], ['DeleteRouterEigrpDistributeList', 'DeleteRouterEigrpRedistribute', 'DeleteRouterEigrpSummaryMetric', 'deleteVrfRouterEigrpNetwork', 'DeleteRouterEigrpNetwork', 'DeleteRouterBGPAggregateSummaryNetwork', 'DeleteRouterBGPNetwork'], True)
         print 'pass0: operations: %s' % (operations)
         print 'pass01: operations: %s' % (operations)
-        yang.moveOperations(operations, ['DeleteInterface', 'DeleteInterfaceOspf', 'DeleteInterfaceHSRP', 'UpdateInterface'], ['DeleteRouterOspf', 'DeleteRoute', 'DeleteVrfRouteEntry'], True)
+        yang.moveOperations(operations, ['DeleteInterface', 'DeleteInterfaceEigrp', 'DeleteInterfaceEigrpSummaryNetwork', 'DeleteInterfaceOspf', 'DeleteInterfaceHSRP', 'UpdateInterface'], ['DeleteRouterOspf'], True)
         print 'pass12: operations: %s' % (operations)
-        yang.moveOperations(operations, ['DeleteInterface'], ['DeleteInterfaceOspf', 'DeleteInterfaceHSRP'], True)
-        yang.moveOperations(operations, ['DeleteQClassMapMatchCondition','DeleteQClassMapMatchConditionHttpUrl','DeleteVrf'], ['DeleteRouterBGPRedistribute', 'DeleteVrfImportMap', 'DeleteVrfExportMap', 'DeleteVrfRTImport', 'DeleteVrfRTExport', 'DeleteVrfRouteEntry', 'DeleteIpNatTranslationInterface', 'DeleteIpNatTranslationPool', 'UpdateInterface','DeleteInterface'], True)
+        yang.moveOperations(operations, ['DeleteInterface'], ['DeleteInterfaceEigrp', 'DeleteInterfaceEigrpSummaryNetwork', 'DeleteInterfaceOspf', 'DeleteInterfaceHSRP'], True)
+        yang.moveOperations(operations, ['DeleteQClassMapMatchCondition','DeleteQClassMapMatchConditionHttpUrl','DeleteVrf'], ['DeleteSLA', 'DeleteCryptoWithIKE', 'DeleteRouterBGPNeighbor', 'DeleteVrfImportMap', 'DeleteVrfExportMap', 'DeleteVrfRTImport', 'DeleteVrfRTExport', 'DeleteVrfRouteEntry', 'DeleteIpNatTranslationInterface', 'DeleteIpNatTranslationPool', 'UpdateInterface','DeleteInterface'], True)
         print 'pass13: operations: %s' % (operations)
         # yang.moveOperations(operations, ['DeleteQClassMapMatchCondition'], ['DeleteQClassMapMatchConditionHttpUrl'], True)
         # print 'pass1: operations: %s' % (operations)
@@ -144,11 +145,9 @@ class DeletePreProcessor(yang.SessionPreProcessor):
         yang.moveOperations(operations, ['DeleteCryptoPreSharedKeyWithIKE'], ['DeleteCryptoPolicyWithIKE'], True)
         print 'pass10: operations: %s' % (operations)
         yang.moveOperations(operations, ['DeleteCryptoWithIKE'], ['DeleteCryptoPreSharedKeyWithIKE'], True)
+        #yang.moveOperations(operations, ['DeleteVrf'], ['DeleteCryptoWithIKE'], True)
         print 'pass11: operations: %s' % (operations)
-        yang.moveOperations(operations, ['DeleteRoute', 'DeleteVrfRouteEntry'], ['DeleteDmvpnTunnel', 'DeleteInterface'], False)
-        print 'pass12: operations: %s' % (operations)
-        yang.moveOperations(operations, ['DeleteQPolicyMap'], ['DeleteQPolicyMapClassEntry'], True)
-        yang.moveOperations(operations, ['UpdateInterface'], ['DeleteAclRule'], False)
+        yang.moveOperations(operations, ['DeleteSLA'], ['DeleteTrack', 'Deletelistobject', 'DeleteSLASchedule'], True)
 
 
 class CreatePreProcessor(yang.SessionPreProcessor):
@@ -156,41 +155,30 @@ class CreatePreProcessor(yang.SessionPreProcessor):
         operations = session.getOperations()
         """Add any move operations for creation"""
         log('operations: %s' % (operations))
-        yang.moveOperations(operations, ['CreateQPolicyMap', 'CreateVrf'], ['CreateInterface'], False)
-        print 'pass01: operations: %s' % (operations)
-        yang.moveOperations(operations, ['CreateVrf'], ['CreateInterface'], False)
-        print 'pass02: operations: %s' % (operations)
-        yang.moveOperations(operations, ['CreateQPolicyMap'], ['CreateVrf'], True)
-        print 'pass03: operations: %s' % (operations)
-        yang.moveOperations(operations, ['CreateInterface'], ['UpdateVrf'], True)
-        print 'pass04: operations: %s' % (operations)
-        yang.moveOperations(operations, ['CreateAccessList'], ['CreateVrf'], True)
-        print 'pass05: operations: %s' % (operations)
-        yang.moveOperations(operations, ['CreateAclRule'], ['CreateAccessList'], True)
-        print 'pass06: operations: %s' % (operations)
-        yang.moveOperations(operations, ['CreateVrf'], ['CreateRouterBGP'], False)
-        print 'pass05: operations: %s' % (operations)
-        yang.moveOperations(operations, ['CreateInterface'], ['CreateRouteMap'], False)
-        print 'pass07: operations: %s' % (operations)
-        yang.moveOperations(operations, ['CreateInterface'], ['CreateRoute'], False)
-        print 'pass08: operations: %s' % (operations)
-        yang.moveOperations(operations, ['CreateDmvpnTunnel'], ['CreateVrfRouteEntry', 'CreateRoute'], False)
-        print 'pass09: operations: %s' % (operations)
-        yang.moveOperations(operations, ['CreateInterface'], ['CreateVrfRouteEntry', 'CreateRoute'], False)
-        print 'pass10: operations: %s' % (operations)
-        #yang.moveOperations(operations, ['CreateRoute'], ['CreateDmvpnTunnel','CreateInterface'], True)
-        #print 'pass10: operations: %s' % (operations)
-        #yang.moveOperations(operations, ['CreateRoute','CreateVrfRouteEntry'], ['createRouterEigrp','createRouterEigrpNetwork'], True)
-        #print 'pass11: operations: %s' % (operations)
-        yang.moveOperations(operations, ['CreateRouterBGPNeighbor'], ['CreateRouterBGP'], True)
-        print 'pass12: operations: %s' % (operations)
-        yang.moveOperations(operations, ['CreateRouterBGPRedistribute'], ['CreateRouterBGP'], True)
-        print 'pass13: operations: %s' % (operations)
-        yang.moveOperations(operations, ['CreateInterface'], ['CreateQPolicyMap', 'CreateVrf'], True)
-        print 'pass14: operations: %s' % (operations)
-        yang.moveOperations(operations, ['CreateAclRule'], ['CreateAccessList'], True)
-        print 'pass15: operations: %s' % (operations)
-        yang.moveOperations(operations, ['CreateAclRule'], ['UpdateInterface'], False)
-        print 'pass16: operations: %s' % (operations)
-        yang.moveOperations(operations, ['CreateObjectGroup', 'CreateNetworkGroup'], ['CreateAccessList'], False)
-        print 'pass17: operations: %s' % (operations)
+        yang.moveOperations(operations, ['CreateInterface', 'UpdateInterface'], ['CreateQPolicyMap'], True)
+        # yang.moveOperations(operations, ['CreateInterface'], ['UpdateVrf'], True)
+        # print 'pass01: operations: %s' % (operations)
+        # yang.moveOperations(operations, ['CreateInterface'], ['CreateVrf'], True)
+        # print 'pass02: operations: %s' % (operations)
+        # yang.moveOperations(operations, ['CreateAccessList'], ['CreateVrf'], True)
+        # print 'pass03: operations: %s' % (operations)
+        # yang.moveOperations(operations, ['CreateAclRule'], ['CreateAccessList'], True)
+        # print 'pass04: operations: %s' % (operations)
+        # yang.moveOperations(operations, ['CreateQPolicyMap'], ['CreateVrf'], True)
+        # print 'pass05: operations: %s' % (operations)
+        # #yang.moveOperations(operations, ['CreateVrf'], ['CreateRouterBGP'], False)
+        # #print 'pass05: operations: %s' % (operations)
+        # yang.moveOperations(operations, ['CreateInterface'], ['CreateRouteMap'], False)
+        # print 'pass06: operations: %s' % (operations)
+        # yang.moveOperations(operations, ['CreateInterface'], ['CreateRoute'], False)
+        # print 'pass07: operations: %s' % (operations)
+        # yang.moveOperations(operations, ['CreateVrfRouteEntry'], ['CreateDmvpnTunnel','CreateInterface'], True)
+        # print 'pass08: operations: %s' % (operations)
+        # yang.moveOperations(operations, ['CreateRoute'], ['CreateDmvpnTunnel','CreateInterface'], True)
+        # print 'pass09: operations: %s' % (operations)
+        # yang.moveOperations(operations, ['CreateRoute','CreateVrfRouteEntry'], ['createRouterEigrpNetwork'], True)
+        # print 'pass10: operations: %s' % (operations)
+        # yang.moveOperations(operations, ['CreateRouterBGPNeighbor'], ['CreateRouterBGP'], True)
+        # print 'pass11: operations: %s' % (operations)
+        # yang.moveOperations(operations, ['CreateRouterBGPRedistribute'], ['CreateRouterBGP'], True)
+        # print 'pass12: operations: %s' % (operations)

@@ -44,7 +44,7 @@ from cpedeployment.cpedeployment_lib import ServiceModelContext
 from cpedeployment.cpedeployment_lib import getParentObject
 from cpedeployment.cpedeployment_lib import log
 
-from servicemodel.controller import devices
+
 import service_customization
 
 class AccessListRules(yang.AbstractYangServiceHandler):
@@ -75,7 +75,6 @@ class AccessListRules(yang.AbstractYangServiceHandler):
         inputdict['action'] = config.get_field_value('action')
         inputdict['protocol'] = config.get_field_value('protocol')
         inputdict['service_obj_name'] = config.get_field_value('service_obj_name')
-        inputdict['acl_sequence_num'] = config.get_field_value('acl_sequence_num')
         inputdict['source_condition'] = config.get_field_value('source_condition')
         inputdict['source_object'] = config.get_field_value('source_object')
         inputdict['destination_condition'] = config.get_field_value('destination_condition')
@@ -87,10 +86,10 @@ class AccessListRules(yang.AbstractYangServiceHandler):
         inputdict['destination_object_group'] = config.get_field_value('destination_object_group')
         # END OF FETCHING THE LEAF PARAMETERS
 
-        #inputkeydict = {}
+        inputkeydict = {}
         # START OF FETCHING THE PARENT KEY LEAF PARAMETERS
-        #inputkeydict['managed_cpe_services_customer_access_lists_access_list_name'] = sdata.getRcPath().split('/')[-2].split('=')[1]
-        #inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-4].split('=')[1]
+        inputkeydict['managed_cpe_services_customer_access_lists_access_list_name'] = sdata.getRcPath().split('/')[-2].split('=')[1]
+        inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-4].split('=')[1]
         # END OF FETCHING THE PARENT KEY LEAF PARAMETERS
 
         #Use the custom methods to process the data

@@ -59,13 +59,14 @@ single-cpe-dual-wan-sites
 from servicemodel import util
 from servicemodel import yang
 from servicemodel import devicemgr
-from servicemodel.controller import devices
+from servicemodel.controller.devices.device import object_groups_acl
+from servicemodel.controller.devices.device import access_lists
 
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject
 from cpedeployment.cpedeployment_lib import getCurrentObjectConfig
 from cpedeployment.cpedeployment_lib import ServiceModelContext
-from cpedeployment.cpedeployment_lib import getParentObject 
+from cpedeployment.cpedeployment_lib import getParentObject
 from cpedeployment.cpedeployment_lib import log
 import re
 
@@ -303,7 +304,7 @@ def object_group_def(source_object_group, dev, sdata):
     url = '/'.join(uri_list[0:4])
     xml_output = yang.Sdk.getData(url+"/object-groups/object-group="+str(source_object_group), '', sdata.getTaskId())
     obj = util.parseXmlString(xml_output)
-    objectgroup_obj = devices.device.object_groups_acl.object_group.object_group()
+    objectgroup_obj = object_groups_acl.object_group.object_group()
     objectgroup_obj.name = obj.object_group.name
     objectgroup_obj.type = obj.object_group.type
     if hasattr(obj.object_group, 'description'):
@@ -315,13 +316,13 @@ def object_group_def(source_object_group, dev, sdata):
     if hasattr(obj.object_group, 'networks'):
         if hasattr(obj.object_group.networks, 'network'):
             for objectgroup in util.convert_to_list(obj.object_group.networks.network):
-                network_obj = devices.device.object_groups_acl.object_group.networks.network.network()
+                network_obj = object_groups_acl.object_group.networks.network.network()
                 net_url = dev.url + '/object-groups-acl/object-group=%s' %(obj.object_group.name)
                 yang.Sdk.createData(net_url, '<networks/>', sdata.getSession(), False)
 
                 if hasattr(objectgroup, 'group_object'):
                     if util.isNotEmpty(objectgroup.group_object):
-                        network_obj = devices.device.object_groups_acl.object_group.networks.network.network()
+                        network_obj = object_groups_acl.object_group.networks.network.network()
                         network_obj.group_object = objectgroup.group_object
                         network_obj.name = "group-object" + " " + objectgroup.group_object
                         network_url = dev.url + '/object-groups-acl/object-group=%s/networks' %(obj.object_group.name)
@@ -329,7 +330,7 @@ def object_group_def(source_object_group, dev, sdata):
 
                 if hasattr(objectgroup, 'host'):
                     if util.isNotEmpty(objectgroup.host):
-                        network_obj1 = devices.device.object_groups_acl.object_group.networks.network.network()
+                        network_obj1 = object_groups_acl.object_group.networks.network.network()
                         network_obj1.host = objectgroup.host
                         network_obj1.name = "host" + " " + objectgroup.host
                         network_url = dev.url + '/object-groups-acl/object-group=%s/networks' %(obj.object_group.name)
@@ -337,7 +338,7 @@ def object_group_def(source_object_group, dev, sdata):
 
                 if hasattr(objectgroup, 'prefix'):
                     if util.isNotEmpty(objectgroup.prefix):
-                        network_obj2 = devices.device.object_groups_acl.object_group.networks.network.network()
+                        network_obj2 = object_groups_acl.object_group.networks.network.network()
                         prefix = util.IPPrefix(objectgroup.prefix)
                         ip_address = prefix.address
                         netmask = prefix.netmask
@@ -400,14 +401,17 @@ def create_acl(entity, conf, sdata, **kwargs):
             device_acl.append(acl.name)
 
     if access_list_name in device_acl:
-        access_rule_obj = devices.device.access_lists.access_list.acl_rules.acl_rule.acl_rule()
+        access_rule_obj = access_lists.access_list.acl_rules.acl_rule.acl_rule()
         access_rule_obj.action = action
         access_rule_obj.layer4protocol = protocol
         if util.isNotEmpty(acl_sequence_num):
             access_rule_obj.linenumber = acl_sequence_num
-            name_rule = acl_sequence_num + ' ' + action + ' ' + protocol
-        else:
+            #name_rule = acl_sequence_num + ' ' + action + ' ' + protocol
+            #name_rule = action + ' ' + protocol
+        if util.isNotEmpty(protocol):
             name_rule = action + ' ' + protocol
+        else:
+            name_rule = action
         if util.isNotEmpty(service_obj_name):
             object_group_def(service_obj_name, device, sdata)
             access_rule_obj.service_obj_name = service_obj_name
@@ -577,7 +581,7 @@ def delete_acl(entity, conf, sdata, **kwargs):
         dscp = inputdict['dscp']
         source_port = inputdict['source_port']
 
-        access_rule_obj = devices.device.access_lists.access_list.acl_rules.acl_rule.acl_rule()
+        access_rule_obj = access_lists.access_list.acl_rules.acl_rule.acl_rule()
         access_rule_obj.action = action
         access_rule_obj.layer4protocol = protocol
         if util.isNotEmpty(acl_sequence_num):

@@ -48,7 +48,8 @@ single-cpe-dual-wan-sites
 from servicemodel import util
 from servicemodel import yang
 from servicemodel import devicemgr
-from servicemodel.controller import devices
+from servicemodel.controller.devices.device import extcommunity_lists
+from servicemodel.controller.devices.device import community_lists
 
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject
@@ -325,7 +326,7 @@ def delete_community(entity, conf, sdata, **kwargs):
                         device_com.append(com.extcommunity_list_name)
 
             if community_list_name in device_com:
-                community_obj = devices.device.extcommunity_lists.extcommunity_list.extcommunity_list()
+                community_obj = extcommunity_lists.extcommunity_list.extcommunity_list()
                 community_obj.extcommunity_list_name = community_list_name
                 community_obj.value = value
                 value = value.replace(':', '%3A')
@@ -358,7 +359,7 @@ def delete_community(entity, conf, sdata, **kwargs):
                         device_com.append(com.community_list_name)
 
             if community_list_name in device_com:
-                community_obj = devices.device.community_lists.community_list.community_list()
+                community_obj = community_lists.community_list.community_list()
                 community_obj.community_list_name = community_list_name
                 community_obj.value = value
                 value = value.replace(':', '%3A')
@@ -419,7 +420,7 @@ def create_community(entity, conf, sdata, **kwargs):
                     device_com.append(com.extcommunity_list_name)
 
             if community_list_name in device_com:
-                community_list_obj = devices.device.extcommunity_lists.extcommunity_list.extcommunity_list()
+                community_list_obj = extcommunity_lists.extcommunity_list.extcommunity_list()
                 if util.isNotEmpty(community_list_entry):
                     community_list_obj.extcommunity_list_entry = community_list_entry
                 if util.isNotEmpty(community_list_name):
@@ -448,7 +449,7 @@ def create_community(entity, conf, sdata, **kwargs):
                     device_com.append(com.community_list_name)
 
             if community_list_name in device_com:
-                community_list_obj = devices.device.community_lists.community_list.community_list()
+                community_list_obj = community_lists.community_list.community_list()
                 if util.isNotEmpty(community_list_entry):
                     community_list_obj.community_list_entry = community_list_entry
                 if util.isNotEmpty(community_list_name):

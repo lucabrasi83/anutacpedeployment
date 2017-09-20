@@ -42,7 +42,7 @@ from cpedeployment.cpedeployment_lib import ServiceModelContext
 from cpedeployment.cpedeployment_lib import getParentObject
 from cpedeployment.cpedeployment_lib import log
 
-from servicemodel.controller import devices
+
 import service_customization
 
 
@@ -76,9 +76,9 @@ class UpdateAccessList(yang.AbstractYangServiceHandler):
         inputdict['id'] = config.get_field_value('id')
         inputdict['access_list_name'] = config.get_field_value('access_list_name')
         inputdict['access_list_entry'] = config.get_field_value('access_list_entry')
+        inputdict['acl_sequence_num'] = config.get_field_value('acl_sequence_num')
         inputdict['operation'] = config.get_field_value('operation')
         inputdict['acl_name'] = config.get_field_value('acl_name')
-        inputdict['acl_sequence_num'] = config.get_field_value('acl_sequence_num')
         inputdict['action'] = config.get_field_value('action')
         inputdict['protocol'] = config.get_field_value('protocol')
         inputdict['service_obj_name'] = config.get_field_value('service_obj_name')
@@ -116,7 +116,7 @@ class UpdateAccessList(yang.AbstractYangServiceHandler):
         # END OF FETCHING THE LEAF PARAMETERS
 
         # START OF FETCHING THE PARENT KEY LEAF PARAMETERS
-        #inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-3].split('=')[1]
+        inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-3].split('=')[1]
         # END OF FETCHING THE PARENT KEY LEAF PARAMETERS
 
         #Use the custom methods to process the data
@@ -148,6 +148,7 @@ class UpdateAccessList(yang.AbstractYangServiceHandler):
         inputdict['id'] = config.get_field_value('id')
         inputdict['access_list_name'] = config.get_field_value('access_list_name')
         inputdict['access_list_entry'] = config.get_field_value('access_list_entry')
+        inputdict['acl_sequence_num'] = config.get_field_value('acl_sequence_num')
         inputdict['operation'] = config.get_field_value('operation')
         inputdict['acl_name'] = config.get_field_value('acl_name')
         inputdict['action'] = config.get_field_value('action')
@@ -212,6 +213,7 @@ class UpdateAccessList(yang.AbstractYangServiceHandler):
         inputdict['id'] = config.get_field_value('id')
         inputdict['access_list_name'] = config.get_field_value('access_list_name')
         inputdict['access_list_entry'] = config.get_field_value('access_list_entry')
+        inputdict['acl_sequence_num'] = config.get_field_value('acl_sequence_num')
         inputdict['operation'] = config.get_field_value('operation')
         inputdict['acl_name'] = config.get_field_value('acl_name')
         inputdict['action'] = config.get_field_value('action')

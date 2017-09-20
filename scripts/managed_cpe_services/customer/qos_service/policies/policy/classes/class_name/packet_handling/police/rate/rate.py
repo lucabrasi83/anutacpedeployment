@@ -54,7 +54,7 @@ from cpedeployment.cpedeployment_lib import ServiceModelContext
 from cpedeployment.cpedeployment_lib import getParentObject
 from cpedeployment.cpedeployment_lib import log
 
-from servicemodel.controller import devices
+
 import service_customization
 
 class Rate(yang.AbstractYangServiceHandler):
@@ -86,14 +86,13 @@ class Rate(yang.AbstractYangServiceHandler):
         inputdict['excess_burst'] = config.get_field_value('excess_burst')
         inputdict['time_excess_burst'] = config.get_field_value('time_excess_burst')
         inputdict['bit_rate'] = config.get_field_value('bit_rate')
-        inputdict['bit_rate_percent'] = config.get_field_value('bit_rate_percent')
         # END OF FETCHING THE LEAF PARAMETERS
 
         inputkeydict = {}
         # START OF FETCHING THE PARENT KEY LEAF PARAMETERS
-        #inputkeydict['managed_cpe_services_customer_qos_service_policies_policy_classes_class_name_name'] = sdata.getRcPath().split('/')[-4].split('=')[1]
-        #inputkeydict['managed_cpe_services_customer_qos_service_policies_policy_name'] = sdata.getRcPath().split('/')[-6].split('=')[1]
-        #inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-9].split('=')[1]
+        inputkeydict['managed_cpe_services_customer_qos_service_policies_policy_classes_class_name_name'] = sdata.getRcPath().split('/')[-4].split('=')[1]
+        inputkeydict['managed_cpe_services_customer_qos_service_policies_policy_name'] = sdata.getRcPath().split('/')[-6].split('=')[1]
+        inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-9].split('=')[1]
         # END OF FETCHING THE PARENT KEY LEAF PARAMETERS
 
         #Use the custom methods to process the data

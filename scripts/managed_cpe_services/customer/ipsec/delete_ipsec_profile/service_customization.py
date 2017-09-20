@@ -37,7 +37,7 @@ Names of Leafs for this Yang Entity
 from servicemodel import util
 from servicemodel import yang
 from servicemodel import devicemgr
-from servicemodel.controller import devices
+from servicemodel.controller.devices.device import ipsec_profiles
 
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject
@@ -260,10 +260,6 @@ def delete_ipsec(entity, conf, sdata, **kwargs):
                 device_tunnel.append(ipsec.ipsec_profile_name)
 
         if ipsec_profile_name in device_tunnel:
-            ipsec_payload = devices.device.ipsec_profiles.ipsec_profile.ipsec_profile()
-            ipsec_payload.ipsec_profile_name = ipsec_profile_name
-            ipsec_url = device.url + '/dmvpn:ipsec-profiles/ipsec-profile=%s' % (ipsec_profile_name)
-            yang.Sdk.deleteData(ipsec_url, ipsec_payload.getxml(filter=True), sdata.getTaskId(), sdata.getSession())
 
             ipsec_url = '/controller:devices/device=%s/dmvpn:ipsec-profiles/ipsec-profile=%s' %(device.device.id, ipsec_profile_name)
             ipsec = yang.Sdk.getData(ipsec_url, '', sdata.getTaskId())
@@ -271,6 +267,14 @@ def delete_ipsec(entity, conf, sdata, **kwargs):
             if hasattr(obj_ipsec.ipsec_profile, 'transform_set'):
                 transform_set = obj_ipsec.ipsec_profile.transform_set
                 transform_url = device.url + '/dmvpn:transform-sets/transform-set=%s' % (transform_set)
+                output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+transform_url+'</rc-path></input>')
+                ref = util.parseXmlString(output)
+                log("xml_op:%s" %(ref))
+                if hasattr(ref.output, 'references'):
+                    if hasattr(ref.output.references, 'reference'):
+                        if hasattr(ref.output.references.reference, 'src_node'):
+                            for each_ref in util.convert_to_list(ref.output.references.reference.src_node):
+                                yang.Sdk.removeReference(each_ref, transform_url)
                 yang.Sdk.deleteData(transform_url, '', sdata.getTaskId(), sdata.getSession())
             if hasattr(obj_ipsec.ipsec_profile, 'ike_profile_name'):
                 ike_profile_name = obj_ipsec.ipsec_profile.ike_profile_name
@@ -282,16 +286,57 @@ def delete_ipsec(entity, conf, sdata, **kwargs):
                 obj = util.parseXmlString(xml_output)
                 if hasattr(obj.crypto_profile, 'keyring'):
                     key_ring_name = obj.crypto_profile.keyring
-                    crypto_profile_url = device.url + '/dmvpn:crypto-keyrings/crypto-keyring=%s' % (key_ring_name)
-                    yang.Sdk.deleteData(crypto_profile_url, '', sdata.getTaskId(), sdata.getSession())
+                    #crypto_profile_url = device.url + '/dmvpn:crypto-keyrings/crypto-keyring=%s' % (key_ring_name)
+                    crypto_profile_url = '/controller:devices/device=%s/dmvpn:crypto-keyrings/crypto-keyring=%s' % (device.device.id, key_ring_name)
+                    if yang.Sdk.dataExists(crypto_profile_url):
+                        output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+crypto_profile_url+'</rc-path></input>')
+                        ref = util.parseXmlString(output)
+                        log("xml_op:%s" %(ref))
+                        if hasattr(ref.output, 'references'):
+                            if hasattr(ref.output.references, 'reference'):
+                                if hasattr(ref.output.references.reference, 'src_node'):
+                                    for each_ref in util.convert_to_list(ref.output.references.reference.src_node):
+                                        yang.Sdk.removeReference(each_ref, crypto_profile_url)
+                        yang.Sdk.deleteData(crypto_profile_url, '', sdata.getTaskId(), sdata.getSession())
 
                 crypto_profile_url = device.url + '/dmvpn:crypto/crypto-profile=%s' % (ike_profile_name)
+                output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+crypto_profile_url+'</rc-path></input>')
+                ref = util.parseXmlString(output)
+                log("xml_op:%s" %(ref))
+                if hasattr(ref.output, 'references'):
+                    if hasattr(ref.output.references, 'reference'):
+                        if hasattr(ref.output.references.reference, 'src_node'):
+                            for each_ref in util.convert_to_list(ref.output.references.reference.src_node):
+                                yang.Sdk.removeReference(each_ref, crypto_profile_url)
                 yang.Sdk.deleteData(crypto_profile_url, '', sdata.getTaskId(), sdata.getSession())
 
                 if hasattr(obj.crypto_profile, 'policy_number'):
                     policy_number = obj.crypto_profile.policy_number
-                    policy_number_url = device.url + '/dmvpn:crypto-policies/crypto-policy=%s' % (policy_number)
-                    yang.Sdk.deleteData(policy_number_url, '', sdata.getTaskId(), sdata.getSession())
+                    #policy_number_url = device.url + '/dmvpn:crypto-policies/crypto-policy=%s' % (policy_number)
+                    policy_number_url = '/controller:devices/device=%s/dmvpn:crypto-policies/crypto-policy=%s' % (device.device.id, policy_number)
+                    if yang.Sdk.dataExists(policy_number_url):
+                        output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+policy_number_url+'</rc-path></input>')
+                        ref = util.parseXmlString(output)
+                        log("xml_op:%s" %(ref))
+                        if hasattr(ref.output, 'references'):
+                            if hasattr(ref.output.references, 'reference'):
+                                if hasattr(ref.output.references.reference, 'src_node'):
+                                    for each_ref in util.convert_to_list(ref.output.references.reference.src_node):
+                                        yang.Sdk.removeReference(each_ref, policy_number_url)
+                        yang.Sdk.deleteData(policy_number_url, '', sdata.getTaskId(), sdata.getSession())
+
+            ipsec_payload = ipsec_profiles.ipsec_profile.ipsec_profile()
+            ipsec_payload.ipsec_profile_name = ipsec_profile_name
+            ipsec_url = device.url + '/dmvpn:ipsec-profiles/ipsec-profile=%s' % (ipsec_profile_name)
+            output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+ipsec_url+'</rc-path></input>')
+            ref = util.parseXmlString(output)
+            log("xml_op:%s" %(ref))
+            if hasattr(ref.output, 'references'):
+                if hasattr(ref.output.references, 'reference'):
+                    if hasattr(ref.output.references.reference, 'src_node'):
+                        for each_ref in util.convert_to_list(ref.output.references.reference.src_node):
+                            yang.Sdk.removeReference(each_ref, ipsec_url)
+            yang.Sdk.deleteData(ipsec_url, ipsec_payload.getxml(filter=True), sdata.getTaskId(), sdata.getSession())
         else:
             print "Ipsec profile is not in device: ", device
     else:

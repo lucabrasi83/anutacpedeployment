@@ -13,7 +13,19 @@ from servicemodel import yang
 from servicemodel import util
 from servicemodel import ipam
 from servicemodel import devicemgr
-from servicemodel.controller import devices
+from servicemodel.controller.devices.device import policy_maps
+from servicemodel.controller.devices.device import interfaces
+from servicemodel.controller.devices.device import dmvpntunnels
+from servicemodel.controller.devices.device import crypto_keyrings
+from servicemodel.controller.devices.device import crypto_policies
+from servicemodel.controller.devices.device import crypto
+from servicemodel.controller.devices.device import transform_sets
+from servicemodel.controller.devices.device import ipsec_profiles
+from servicemodel.controller.devices.device import class_maps
+from servicemodel.controller.devices.device import object_groups_acl
+from servicemodel.controller.devices.device import access_lists
+from servicemodel.controller.devices.device import vrfs
+
 import re
 from com.anuta.api import DataNodeNotFoundException
 from operator import attrgetter
@@ -23,7 +35,7 @@ from cpedeployment_lib import ServiceModelContext
 from cpedeployment_lib import route_maps
 from ipaddr_lib import IPAddress
 from ipaddr_lib import IPNetwork
-managed_cpe_services_debug = False
+managed_cpe_services_debug = True
 
 def log(s):
     if managed_cpe_services_debug:
@@ -123,11 +135,14 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
     out_queue_length = None
     auto_negotiation = None
     dmvpn_obj = None
-
+    mace_enable = None
     inputdict = kwargs['inputdict']
     interface_type = inputdict['interface_type']
     interface_name = inputdict['interface_name']
     interface_description = inputdict['interface_description']
+    mace_enable = inputdict['mace_enable']
+    print "mace_enable value"
+    print mace_enable
     if entity == 'cpe':
         obj = getLocalObject(sdata, 'cpe-wan')
         full_obj = obj.cpe_wan
@@ -177,6 +192,8 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
     outbound_policy = None
     class_entry = None
     hierarchical_policy = None
+    bits_sustained = None
+    bits_excess = None
     if hasattr(full_obj, 'outbound_policy'):
         outbound_policy = full_obj.outbound_policy
     if hasattr(full_obj, 'hierarchical_outbound_policy'):
@@ -185,6 +202,10 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
         policy_name = full_obj.policy_name
     if hasattr(full_obj, 'shape_average'):
         shape_average = full_obj.shape_average
+    if hasattr(full_obj, 'bits_sustained'):
+        bits_sustained = full_obj.bits_sustained
+    if hasattr(full_obj, 'bits_excess'):
+        bits_excess = full_obj.bits_excess
     if hasattr(full_obj, 'child_qos_policy'):
         child_qos_policy = full_obj.child_qos_policy
     if hasattr(full_obj, 'class_entry'):
@@ -195,6 +216,7 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
         hierarchical_policy = full_obj.hierarchical_policy
     if hasattr(full_obj, 'auto_negotiation'):
         auto_negotiation = full_obj.auto_negotiation
+
     speed = None
     duplex = None
     if hasattr(full_obj, 'speed'):
@@ -225,6 +247,7 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
     site_outbound_acl = inputdict['site_outbound_acl']
     nat_inside = inputdict['nat_inside']
     nat_outside = inputdict['nat_outside']
+    delay = inputdict['delay']
     if interface_type == "Sub-Interface" or interface_type == "SVI":
         if '.' not in interface_name:
             vlan_id = inputdict['vlan_id']
@@ -380,14 +403,18 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
             class_entry = 'false'
             if class_entry == 'false':
                 if util.isNotEmpty(policy_name):
-                    map_obj = devices.device.policy_maps.policy_map.policy_map()
+                    map_obj = policy_maps.policy_map.policy_map()
                     map_obj.name = policy_name
                     yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession())
 
-                    cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+                    cls_obj = policy_maps.policy_map.class_entry.class_entry()
                     cls_obj.class_name = 'class-default'
                     if util.isNotEmpty(shape_average):
                         cls_obj.shape_average = shape_average
+                    if util.isNotEmpty(bits_sustained) and bits_sustained is not None:
+                        cls_obj.bits_sustained = bits_sustained
+                        if util.isNotEmpty(bits_excess) and bits_excess is not None:
+                            cls_obj.bits_excess = bits_excess
                     if util.isNotEmpty(child_qos_policy):
                         cls_obj.service_policy = child_qos_policy
                         qos_child(entity, child_qos_policy, device, sdata)
@@ -407,25 +434,23 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
             mode = "l3-interface"
         elif interface_type == "Sub-Interface":
             mode = "sub-interface"
-            if vlan_id is not None:
+            if vlan_id is not None and '.' not in interface_name:
                 interface_name = interface_name + '.' + str(vlan_id)
         elif interface_type == "SVI":
             mode = "vlan"
         if auto_negotiation == "true":
             link_negotiation = "auto"
 
-        intf_obj = devices.device.interfaces.interface.interface()
+        intf_obj = interfaces.interface.interface()
         if mode == "sub-interface" or mode == "l3-interface":
             intf_obj.name = interface_name
             intf_obj.long_name = interface_name
         intf_obj.description = interface_description
-
+        intf_obj.mace_enable = mace_enable
         if nat_inside == 'true':
             intf_obj.nat_name = 'inside'
         if nat_outside == 'true':
             intf_obj.nat_name = 'outside'
-
-
         if mode == "sub-interface":
             if not device.isInterfaceInDeviceExists(interface_name):
                 intf_obj.mode = "sub-interface"
@@ -438,6 +463,8 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
         else:
             intf_obj.mode = "l3-interface"
         if mode == "sub-interface" or mode == "l3-interface":
+            if util.isNotEmpty(delay):
+                intf_obj.delay = delay
             if vrf is not None and vrf != 'GLOBAL':
                 uri = sdata.getRcPath()
                 uri_list = uri.split('/', 5)
@@ -478,12 +505,10 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
         if interface_type == "Physical":
             if link_negotiation is not None:
                 intf_obj.link_negotiation = link_negotiation
-
             if nat_inside == 'true':
                 intf_obj.nat_name = 'inside'
             if nat_outside == 'true':
                 intf_obj.nat_name = 'outside'
-                
             if auto_negotiation != "true":
                 if util.isNotEmpty(speed):
                     intf_obj.speed = speed
@@ -503,7 +528,7 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
             yang.Sdk.createData(device.url+'/interfaces', intf_obj.getxml(filter=True), sdata.getSession(), False)
 
         if mode == "sub-interface":
-            intf_obj_phy = devices.device.interfaces.interface.interface()
+            intf_obj_phy = interfaces.interface.interface()
             intf_obj_phy.name = int_name_phy
             intf_obj_phy.long_name = int_name_phy
             intf_obj_phy.mode = "l3-interface"
@@ -684,8 +709,8 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
             obj = util.parseXmlString(xml_output)
             util.log_debug( "obj: ", obj)
             #if util.isNotEmpty(dmvpn_profile):
-                #yang.Sdk.createData(device.url, '<dmvpntunnels/>', sdata.getSession(), False)
-            dmvpn_obj = devices.device.dmvpntunnels.dmvpntunnel.dmvpntunnel()
+            yang.Sdk.createData(device.url, '<dmvpntunnels/>', sdata.getSession(), False)
+            dmvpn_obj = dmvpntunnels.dmvpntunnel.dmvpntunnel()
             if util.isNotEmpty(fvrf) and fvrf != 'GLOBAL':
                 dmvpn_obj.front_vrf_name = fvrf
         else:
@@ -695,10 +720,10 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
             tunnel_id = inputdict['tunnel_interface_id']
             tunnel_destination = inputdict['tunnel_interface_destination']
             if util.isEmpty(tunnel_id):
-                 raise Exception("Tunnel id should not be empty when interface_type is Tunnel & dmvpn profile is not selected")
+                raise Exception("Tunnel id should not be empty when interface_type is Tunnel & dmvpn profile is not selected")
 
-            #yang.Sdk.createData(device.url, '<dmvpntunnels/>', sdata.getSession(), False)
-            dmvpn_obj = devices.device.dmvpntunnels.dmvpntunnel.dmvpntunnel()
+            yang.Sdk.createData(device.url, '<dmvpntunnels/>', sdata.getSession(), False)
+            dmvpn_obj = dmvpntunnels.dmvpntunnel.dmvpntunnel()
             if util.isNotEmpty(fvrf) and fvrf != 'GLOBAL':
                 dmvpn_obj.front_vrf_name = fvrf
             if util.isNotEmpty(ivrf) and ivrf != 'GLOBAL':
@@ -710,10 +735,9 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
                 xml_output = yang.Sdk.getData(url+"/vrfs/vrf="+str(ivrf), '', sdata.getTaskId())
                 obj_local = util.parseXmlString(xml_output)
                 dmvpn_obj.vrf_definition_mode = obj_local.vrf.vrf_definition_mode
-            
+
             dmvpn_obj.name = tunnel_id
             dmvpn_obj.description = interface_description
-            print 'tcp mss is: ' + str(tcp_mss)
             if tcp_mss is not None:
                 dmvpn_obj.tcp_adjust_mss = tcp_mss
             else:
@@ -722,6 +746,10 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
             dmvpn_obj.netmask = tunnel_mask
             dmvpn_obj.tunnel_destination = tunnel_destination
             #dmvpn_obj.tunnel_mode = 'gre'
+            if nat_inside == 'true':
+                dmvpn_obj.nat_name = 'inside'
+            if nat_outside == 'true':
+                dmvpn_obj.nat_name = 'outside'
             dmvpn_obj.tunnel_keepalive_period = '10'
             dmvpn_obj.tunnel_keepalive_retries = '3'
             tunnel_source = inputdict['tunnel_source']
@@ -797,6 +825,13 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
         if tunnel_keepalive_retries is not None:
             dmvpn_obj.tunnel_keepalive_retries = tunnel_keepalive_retries
 
+        if hasattr(obj.dmvpn_tunnel_profile, 'if_state_nhrp'):
+            if_state_nhrp = obj.dmvpn_tunnel_profile.if_state_nhrp
+        else:
+            if_state_nhrp = None
+        if if_state_nhrp is not None:
+            dmvpn_obj.if_state_nhrp = if_state_nhrp
+
         if ivrf != 'GLOBAL':
             uri = sdata.getRcPath()
             uri_list = uri.split('/', 5)
@@ -818,6 +853,10 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
         dmvpn_obj.nhrp_network_id = obj.dmvpn_tunnel_profile.nhrp_nw_id
         dmvpn_obj.tunnel_key = obj.dmvpn_tunnel_profile.tunnel_key
         dmvpn_obj.description = interface_description
+        if nat_inside == 'true':
+            dmvpn_obj.nat_name = 'inside'
+        if nat_outside == 'true':
+            dmvpn_obj.nat_name = 'outside'
         if hasattr(obj.dmvpn_tunnel_profile, 'mtu'):
             mtu = obj.dmvpn_tunnel_profile.mtu
         else:
@@ -842,9 +881,43 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
             tunnel_ip_address = get_freeip_from_cidr(ip_addr_obj.cidr, used_ips_list)
             add_ipaddress_entries(ip_addr_obj.name, tunnel_ip_address, sdata)
         else:
+            used_ips_list = get_used_ip_list_from_ippool(ip_addr_obj.name, sdata)
+            if used_ips_list.__len__() >= 0:
+                prefix = util.IPPrefix(ip_addr_obj.cidr)
+                if str(prefix.masklen) != str(32):
+                    if tunnel_ip_address in used_ips_list:
+                        raise Exception("Tunnel: IP given is already used in the given pool")
+                used_ips_list.sort()
+                cidr = ip_addr_obj.cidr
+                ip = IPAddress(tunnel_ip_address)
+                network_given = IPNetwork(cidr)
+                (addrStr, cidrStr) = cidr.split('/')
+                addr = addrStr.split('.')
+                cidr = int(cidrStr)
+                mask = [0, 0, 0, 0]
+                for i in range(cidr):
+                    mask[i/8] = mask[i/8] + (1 << (7 - i % 8))
+                net = []
+                for i in range(4):
+                    net.append(int(addr[i]) & mask[i])
+                network = ".".join(map(str, net))
+                ip_address = network
+
+                broad = list(net)
+                brange = 32 - cidr
+                for i in range(brange):
+                    broad[3 - i/8] = broad[3 - i/8] + (1 << (i % 8))
+                last_ip_address = ".".join(map(str, broad))
+                if str(prefix.masklen) != str(32):
+                    if tunnel_ip_address == last_ip_address:
+                        raise Exception('Tunnel: Broadcast IP cant be used')
+                if not network_given.Contains(ip):
+                    raise Exception('Tunnel: Invalid IP address for this cidr')
             add_ipaddress_entries(ip_addr_obj.name, tunnel_ip_address, sdata)
 
         if obj.dmvpn_tunnel_profile.wan_public_ip == tunnel_ip_address:
+            used_ips_list = get_used_ip_list_from_ippool(ip_addr_obj.name, sdata)
+            tunnel_ip_address = get_freeip_from_cidr(ip_addr_obj.cidr, used_ips_list)
             add_ipaddress_entries(ip_addr_obj.name, tunnel_ip_address, sdata)
         dmvpn_obj.ipaddress = tunnel_ip_address
 
@@ -873,7 +946,7 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
         nhrp_maps_obj_2.nhrp_type = 'nhs'
         yang.Sdk.createData(device.url+'/dmvpntunnels', dmvpn_obj.getxml(filter=True), sdata.getSession())
         if hasattr(obj.dmvpn_tunnel_profile, 'nhrp_maps'):
-            dmvpn_obj_nhrp = devices.device.dmvpntunnels.dmvpntunnel.nhrp_maps.nhrp_maps()
+            dmvpn_obj_nhrp = dmvpntunnels.dmvpntunnel.nhrp_maps.nhrp_maps()
             obj.dmvpn_tunnel_profile.nhrp_maps = util.convert_to_list(obj.dmvpn_tunnel_profile.nhrp_maps)
             for nhrpmaps in obj.dmvpn_tunnel_profile.nhrp_maps:
                 dmvpn_obj_nhrp.sourceip = nhrpmaps.wan_tunnel_ip
@@ -948,7 +1021,7 @@ def IpsecCreation(sdata, device, ipsecProfileSelected, fvrf, wan_public_ip, smod
     else:
         ipaddress = wan_public_ip
         netmask = '255.255.255.255'
-    keyring_payload = devices.device.crypto_keyrings.crypto_keyring.crypto_keyring()
+    keyring_payload = crypto_keyrings.crypto_keyring.crypto_keyring()
     keyring_payload.key_ring_name = key_ring_name
     keyring_payload.ike_version = crpto_type
     #keyring_payload.auth_type = auth_type
@@ -961,7 +1034,7 @@ def IpsecCreation(sdata, device, ipsecProfileSelected, fvrf, wan_public_ip, smod
     yang.Sdk.createData(device.url, '<crypto-keyrings/>', sdata.getSession())
     yang.Sdk.createData(device.url+'/crypto-keyrings', keyring_payload.getxml(filter=True), sdata.getSession())
 
-    policy_payload = devices.device.crypto_policies.crypto_policy.crypto_policy()
+    policy_payload = crypto_policies.crypto_policy.crypto_policy()
     policy_payload.policy_number = policy_number
     policy_payload.ike_version = crpto_type
     policy_payload.auth_type = auth_type
@@ -972,7 +1045,7 @@ def IpsecCreation(sdata, device, ipsecProfileSelected, fvrf, wan_public_ip, smod
     yang.Sdk.createData(device.url, '<crypto-policies/>', sdata.getSession())
     yang.Sdk.createData(device.url+'/crypto-policies', policy_payload.getxml(filter=True), sdata.getSession())
 
-    profile_payload = devices.device.crypto.crypto_profile.crypto_profile()
+    profile_payload = crypto.crypto_profile.crypto_profile()
     profile_payload.ike_profile_name = ike_profile_name
     profile_payload.life_time = life_time
     profile_payload.ike_version = crpto_type
@@ -985,7 +1058,7 @@ def IpsecCreation(sdata, device, ipsecProfileSelected, fvrf, wan_public_ip, smod
     yang.Sdk.createData(device.url, '<crypto/>', sdata.getSession())
     yang.Sdk.createData(device.url+'/crypto', profile_payload.getxml(filter=True), sdata.getSession())
 
-    transform_payload = devices.device.transform_sets.transform_set.transform_set()
+    transform_payload = transform_sets.transform_set.transform_set()
     transform_payload.transform_set = transform_set
     transform_payload.ipsec_encryption_type = ipsec_encryption_type
     transform_payload.ipsec_authentication_type = ipsec_authentication_type
@@ -993,7 +1066,7 @@ def IpsecCreation(sdata, device, ipsecProfileSelected, fvrf, wan_public_ip, smod
     yang.Sdk.createData(device.url, '<transform-sets/>', sdata.getSession())
     yang.Sdk.createData(device.url+'/transform-sets', transform_payload.getxml(filter=True), sdata.getSession())
 
-    ipsec_payload = devices.device.ipsec_profiles.ipsec_profile.ipsec_profile()
+    ipsec_payload = ipsec_profiles.ipsec_profile.ipsec_profile()
     ipsec_payload.ipsec_profile_name = ipsecProfileSelected
     if util.isNotEmpty(sa_lifetime):
         ipsec_payload.life_time = sa_lifetime
@@ -1014,7 +1087,7 @@ def hierarchical_policy_class(entity, hierarchical_policy, device, sdata):
     util.log_debug( "obj: ",obj)
     device.addQosPolicyMapsContainer(sdata.getSession())
 
-    map_obj = devices.device.policy_maps.policy_map.policy_map()
+    map_obj = policy_maps.policy_map.policy_map()
     map_obj.name = obj.policy.name
     yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession())
 
@@ -1022,7 +1095,7 @@ def hierarchical_policy_class(entity, hierarchical_policy, device, sdata):
         obj.policy.classes = util.convert_to_list(obj.policy.classes)
         log("classes sequence:%s" %(obj.policy.classes))
         for class_entry in obj.policy.classes:
-            cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+            cls_obj = policy_maps.policy_map.class_entry.class_entry()
             if util.isNotEmpty(class_entry.class_name):
                 class_map(entity, url, class_entry.class_name, device, sdata)
                 cls_obj.class_name = class_entry.class_name
@@ -1042,11 +1115,11 @@ def qos_child(entity, qos_policy, dev, sdata):
     util.log_debug( "obj: ",obj)
     dev.addQosPolicyMapsContainer(sdata.getSession())
     policy_name = obj.policy.name
-    map_obj = devices.device.policy_maps.policy_map.policy_map()
+    map_obj = policy_maps.policy_map.policy_map()
     map_obj.name = policy_name
     yang.Sdk.createData(dev.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession())
     for cls in sorted(obj.policy.classes.get_field_value('class_name', True), key=attrgetter('name')):
-        cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+        cls_obj = policy_maps.policy_map.class_entry.class_entry()
         cls_name = cls.name
         # Generates Configs for Class Maps
         if cls_name != 'class-default' and cls_name != 'CLASS-DEFAULT':
@@ -1109,7 +1182,7 @@ def qos_child(entity, qos_policy, dev, sdata):
         yang.Sdk.createData(dev.url+"/policy-maps/policy-map=%s"%(policy_name), cls_obj.getxml(filter=True), sdata.getSession())
 
         if cls.get_field_value('queue_limit') is not None:
-            queue_limit_obj = devices.device.policy_maps.policy_map.class_entry.queue_limit.queue_limit()
+            queue_limit_obj = policy_maps.policy_map.class_entry.queue_limit.queue_limit()
             queue_limit = cls.queue_limit.get_field_value('queue_limit')
             packets = cls.queue_limit.get_field_value('packets')
             if util.isNotEmpty(queue_limit):
@@ -1119,7 +1192,7 @@ def qos_child(entity, qos_policy, dev, sdata):
             yang.Sdk.createData(dev.url+"/policy-maps/policy-map=%s/class-entry=%s"%(policy_name,cls_name), queue_limit_obj.getxml(filter=True), sdata.getSession())
 
         if cls.get_field_value('qos_group') is not None:
-            #qos_group_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+            #qos_group_obj = policy_maps.policy_map.class_entry.class_entry()
             qos_group_value = cls.qos_group.get_field_value('qos_group')
             if util.isNotEmpty(qos_group_value):
                 cls_obj.qos_group = qos_group_value
@@ -1136,7 +1209,7 @@ def class_map(entity, url, cls_name, dev, sdata):
 
     dev.addQOSClassMapsContainer(sdata.getSession())
 
-    cls_map_obj = devices.device.class_maps.class_map.class_map()
+    cls_map_obj = class_maps.class_map.class_map()
     cls_map_obj.name = cls_name
     if util.isNotEmpty(description):
         cls_map_obj.description = description
@@ -1146,7 +1219,7 @@ def class_map(entity, url, cls_name, dev, sdata):
     dscp = obj_class.class_map.get_field_value("dscp")
     if util.isNotEmpty(dscp):
         for ds in util.convert_to_list(dscp):
-            match_obj = devices.device.class_maps.class_map.class_match_condition.class_match_condition()
+            match_obj = class_maps.class_map.class_match_condition.class_match_condition()
             match_obj.condition_type = "ip dscp"
             match_obj.match_value = ds
             yang.Sdk.createData(dev.url+"/class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession())
@@ -1154,12 +1227,12 @@ def class_map(entity, url, cls_name, dev, sdata):
     protocol = obj_class.class_map.get_field_value("protocol")
     if util.isNotEmpty(protocol):
         for pr in util.convert_to_list(protocol):
-            match_obj = devices.device.class_maps.class_map.class_match_condition.class_match_condition()
+            match_obj = class_maps.class_map.class_match_condition.class_match_condition()
             match_obj.condition_type = "protocol"
             match_obj.match_value = pr
             yang.Sdk.createData(dev.url+"/class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession())
             if pr == "http":
-                match_object = devices.device.class_maps.class_map.class_match_condition.http_url.http_url()
+                match_object = class_maps.class_map.class_match_condition.http_url.http_url()
                 http_url = obj_class.class_map.get_field_value("http_url")
                 print "http_url is:",http_url
                 if util.isNotEmpty(http_url):
@@ -1244,14 +1317,14 @@ def class_map(entity, url, cls_name, dev, sdata):
         access_group = class_map_access_list
     if util.isNotEmpty(access_group):
         for each_access_group in util.convert_to_list(access_group):
-            match_obj = devices.device.class_maps.class_map.class_match_condition.class_match_condition()
+            match_obj = class_maps.class_map.class_match_condition.class_match_condition()
             match_obj.condition_type = "access-group"
             match_obj.match_value = each_access_group
             yang.Sdk.createData(dev.url+"/class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession())
 
     qos_group = obj_class.class_map.get_field_value("qos_group")
     if util.isNotEmpty(qos_group):
-        match_obj = devices.device.class_maps.class_map.class_match_condition.class_match_condition()
+        match_obj = class_maps.class_map.class_match_condition.class_match_condition()
         match_obj.condition_type = "qos-group"
         match_obj.match_value = qos_group
         yang.Sdk.createData(dev.url+"/class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession())
@@ -1263,24 +1336,24 @@ def object_group_def(source_object_group, dev, sdata):
     url = '/'.join(uri_list[0:4])
     xml_output = yang.Sdk.getData(url+"/object-groups/object-group="+str(source_object_group), '', sdata.getTaskId())
     obj = util.parseXmlString(xml_output)
-    objectgroup_obj = devices.device.object_groups_acl.object_group.object_group()
+    objectgroup_obj = object_groups_acl.object_group.object_group()
     objectgroup_obj.name = obj.object_group.name
     objectgroup_obj.type = obj.object_group.type
     if hasattr(obj.object_group, 'description'):
         if util.isNotEmpty(obj.object_group.description):
             objectgroup_obj.description = obj.object_group.description
     objectgroup_url = dev.url + '/object-groups-acl'
-    #yang.Sdk.createData(dev.url, '<object-groups-acl/>', sdata.getSession())
+    yang.Sdk.createData(dev.url, '<object-groups-acl/>', sdata.getSession())
     yang.Sdk.createData(objectgroup_url, objectgroup_obj.getxml(filter=True), sdata.getSession())
     if hasattr(obj.object_group, 'networks'):
         if hasattr(obj.object_group.networks, 'network'):
             for objectgroup in util.convert_to_list(obj.object_group.networks.network):
                 net_url = dev.url + '/object-groups-acl/object-group=%s' %(obj.object_group.name)
-                #yang.Sdk.createData(net_url, '<networks/>', sdata.getSession())
+                yang.Sdk.createData(net_url, '<networks/>', sdata.getSession())
 
                 if hasattr(objectgroup, 'group_object'):
                     if util.isNotEmpty(objectgroup.group_object):
-                        network_obj = devices.device.object_groups_acl.object_group.networks.network.network()
+                        network_obj = object_groups_acl.object_group.networks.network.network()
                         network_obj.group_object = objectgroup.group_object
                         network_obj.name = "group-object" + " " + objectgroup.group_object
                         network_url = dev.url + '/object-groups-acl/object-group=%s/networks' %(obj.object_group.name)
@@ -1288,7 +1361,7 @@ def object_group_def(source_object_group, dev, sdata):
 
                 if hasattr(objectgroup, 'host'):
                     if util.isNotEmpty(objectgroup.host):
-                        network_obj1 = devices.device.object_groups_acl.object_group.networks.network.network()
+                        network_obj1 = object_groups_acl.object_group.networks.network.network()
                         network_obj1.host = objectgroup.host
                         network_obj1.name = "host" + " " + objectgroup.host
                         network_url = dev.url + '/object-groups-acl/object-group=%s/networks' %(obj.object_group.name)
@@ -1296,18 +1369,8 @@ def object_group_def(source_object_group, dev, sdata):
 
                 if hasattr(objectgroup, 'prefix'):
                     if util.isNotEmpty(objectgroup.prefix):
-                        network_obj2 = devices.device.object_groups_acl.object_group.networks.network.network()
-                        #Haulotte Specific Dual CPE Sites. Keyword 'GUEST_LAN_PROFILE' to be replaced by GUEST LAN Profile CIDR
-                        if objectgroup.prefix == 'HAULOTTE-GUESTS':
-                            obj_haulotte_guests = getLocalObject(sdata, 'dual-cpe-site-services')
-                            log("haulotte guest obj is: %s" % (obj_haulotte_guests))
-                            obj_haulotte_guests.dual_cpe_site_services.cpe_lan.lan_profile = util.convert_to_list(obj_haulotte_guests.dual_cpe_site_services.cpe_lan.lan_profile)
-                            for lanprof in obj_haulotte_guests.dual_cpe_site_services.cpe_lan.lan_profile:
-                                if lanprof.profile_name == 'GUEST_LAN_PROFILE':
-                                    haulotte_guests_prefix = lanprof.get_field_value('cidr')
-                                    prefix = util.IPPrefix(haulotte_guests_prefix)
-                        else:
-                            prefix = util.IPPrefix(objectgroup.prefix)
+                        network_obj2 = object_groups_acl.object_group.networks.network.network()
+                        prefix = util.IPPrefix(objectgroup.prefix)
                         ip_address = prefix.address
                         netmask = prefix.netmask
                         network_obj2.ip_address = ip_address
@@ -1323,7 +1386,7 @@ def access_group_def(url, access_group, dev, sdata):
     util.log_debug("obj: ", obj)
     name = obj.access_list.name
     access_list_entry = obj.access_list.access_list_entry
-    access_obj = devices.device.access_lists.access_list.access_list()
+    access_obj = access_lists.access_list.access_list()
     if access_list_entry == 'extended':
         access_obj.acl_type = access_list_entry
         if name is not None:
@@ -1332,8 +1395,7 @@ def access_group_def(url, access_group, dev, sdata):
         access_obj.acl_type = access_list_entry
         if name is not None:
             access_obj.name = name
-
-    #yang.Sdk.createData(dev.url, '<access-lists/>', sdata.getSession(), False)
+    yang.Sdk.createData(dev.url, '<access-lists/>', sdata.getSession(), False)
 
     access_obj_url = dev.url + '/access-lists'
     yang.Sdk.createData(access_obj_url, access_obj.getxml(filter=True), sdata.getSession())
@@ -1351,9 +1413,13 @@ def access_group_def(url, access_group, dev, sdata):
         source_condition = rule.source_condition
         if hasattr(rule, 'source_object') and util.isNotEmpty(rule.source_object):
             source_object = rule.source_object
+        else:
+            source_object = None
         destination_condition = rule.destination_condition
         if hasattr(rule, 'destination_object') and util.isNotEmpty(rule.destination_object):
             destination_object = rule.destination_object
+        else:
+            destination_object = None
         if hasattr(rule, 'port_number') and util.isNotEmpty(rule.port_number):
             port_number = rule.port_number
         else:
@@ -1383,38 +1449,41 @@ def access_group_def(url, access_group, dev, sdata):
         else:
             destination_object_group = None
         #name_rule = rule.name
-        access_rule_obj = devices.device.access_lists.access_list.acl_rules.acl_rule.acl_rule()
-
+        access_rule_obj = access_lists.access_list.acl_rules.acl_rule.acl_rule()
         port_dict = {
-        '23': 'telnet',
-        '80': 'www',
-        '179': 'bgp',
-        '500': 'isakmp',
-        '53': 'domain',
-        '21': 'ftp',
-        '20': 'ftp-data',
-        '135': 'msrpc',
-        '110': 'pop3',
-        '25': 'smtp',
-        '514': 'syslog',
-        '49': 'tacacs'
+            '23': 'telnet',
+            '80': 'www',
+            '179': 'bgp',
+            '500': 'isakmp',
+            '53': 'domain',
+            '21': 'ftp',
+            '20': 'ftp-data',
+            '135': 'msrpc',
+            '110': 'pop3',
+            '25': 'smtp',
+            '514': 'syslog',
+            '49': 'tacacs'
         }
-
         access_rule_obj.action = action
         access_rule_obj.layer4protocol = protocol
         if util.isNotEmpty(acl_sequence_num):
             access_rule_obj.linenumber = acl_sequence_num
             #name_rule = acl_sequence_num + ' ' + action + ' ' + protocol
+            # name_rule = action + ' ' + protocol
+
+        if util.isNotEmpty(protocol):
             name_rule = action + ' ' + protocol
         else:
-            name_rule = action + ' ' + protocol
+            name_rule = action
         if util.isNotEmpty(service_obj_name):
             object_group_def(service_obj_name, dev, sdata)
             access_rule_obj.service_obj_name = service_obj_name
             name_rule += ' ' + service_obj_name
         access_rule_obj.source_condition_type = source_condition
         if source_condition == 'cidr':
-            cidr_pattern = '^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}' + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])' + '/(([0-9])|([1-2][0-9])|(3[0-2]))$'; 
+            cidr_pattern = '^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}' + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])' + '/(([0-9])|([1-2][0-9])|(3[0-2]))$';
+            if source_object is None:
+                raise Exception ("Please provide valid CIDR for source-object in access-list")
             if re.match(cidr_pattern,source_object) == None:
                 raise Exception ("Please provide valid CIDR for source-object in access-list")
             prefix = util.IPPrefix(source_object)
@@ -1436,6 +1505,8 @@ def access_group_def(url, access_group, dev, sdata):
             access_rule_obj.source_ip = network
         if source_condition == 'host':
             host_pattern = '^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}' + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$';
+            if source_object is None:
+                raise Exception ("Please provide valid ip-address for source-object in access-list")
             if re.match(host_pattern,source_object) == None:
                 raise Exception ("Please provide valid ip-address for source-object in access-list")
             access_rule_obj.source_ip = source_object
@@ -1449,14 +1520,15 @@ def access_group_def(url, access_group, dev, sdata):
             name_rule += ' ' + 'any'
         if util.isNotEmpty(source_port):
             access_rule_obj.source_port_operator = 'eq'
-            if source_port in port_dict:
+            if source_port in port_dict and protocol == 'tcp':
                 source_port = port_dict[source_port]
-
             access_rule_obj.source_port = source_port
             name_rule += ' eq ' + source_port
         access_rule_obj.dest_condition_type = destination_condition
         if destination_condition == 'cidr':
             cidr_pattern = '^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}' + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])' + '/(([0-9])|([1-2][0-9])|(3[0-2]))$';
+            if destination_object is None:
+                raise Exception ("Please provide valid CIDR for destination-object in access-list")
             if re.match(cidr_pattern,destination_object) == None:
                 raise Exception ("Please provide valid CIDR for destination-object in access-list")
             prefix = util.IPPrefix(destination_object)
@@ -1478,6 +1550,8 @@ def access_group_def(url, access_group, dev, sdata):
             access_rule_obj.dest_ip = network
         if destination_condition == 'host':
             host_pattern = '^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}' + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$';
+            if destination_object is None:
+                raise Exception ("Please provide valid ip-address for destination-object in access-list")
             if re.match(host_pattern,destination_object) == None:
                 raise Exception ("Please provide valid ip-address for destination-object in access-list")
             access_rule_obj.dest_ip = destination_object
@@ -1491,7 +1565,7 @@ def access_group_def(url, access_group, dev, sdata):
             name_rule += ' ' + 'any'
         if util.isNotEmpty(port_number):
             access_rule_obj.dest_port_operator = 'eq'
-            if port_number in port_dict:
+            if port_number in port_dict and protocol == 'tcp':
                 port_number = port_dict[port_number]
             access_rule_obj.dest_port = port_number
             name_rule += ' eq ' + port_number
@@ -1509,7 +1583,7 @@ def access_group_def(url, access_group, dev, sdata):
         print "ACL_RULE_NAME: ", name_rule
         access_rule_obj.name = name_rule
         access_rules_url = dev.url + "/access-lists/access-list=%s" %(name)
-        #yang.Sdk.createData(access_rules_url, '<acl-rules/>', sdata.getSession())
+        yang.Sdk.createData(access_rules_url, '<acl-rules/>', sdata.getSession())
 
         access_rule_url = dev.url + '/access-lists/access-list=%s/acl-rules' %(name)
         yang.Sdk.createData(access_rule_url, access_rule_obj.getxml(filter=True), sdata.getSession())
@@ -1813,6 +1887,7 @@ def delete_physical_interface(entity, smodelctx, sdata, device, **kwarg):
     interface_name = config.get_field_value('interface_name')
     interface_description = config.get_field_value('interface_description')
     interface_ip = config.get_field_value('interface_ip')
+    mace_enable = config.get_field_value('mace_enable')
     if hasattr(parent_entity, 'auto_negotiation'):
         auto_negotiation = parent_entity.auto_negotiation
     else:
@@ -1868,18 +1943,20 @@ def delete_physical_interface(entity, smodelctx, sdata, device, **kwarg):
 
     if entity == 'cpe_primary_cpe_secondary_ic' or entity == 'cpe_lan' or entity == 'customer_lan_ic' or entity == 'cpe_lan_dual' or entity == 'customer_lan_ic_dual' or entity == 'cpe_primary_cpe_secondary_ic_dual' or entity == 'cpe_primary_cpe_secondary_ic_triple' or entity == 'cpe_secondary_cpe_tertiary_ic_triple' or entity == 'cpe_tertiary_cpe_primary_ic_triple' or entity == 'customer_lan_ic_triple':
         if interface_type == "Sub-Interface":
-            intf_obj = devices.device.interfaces.interface.interface()
+            intf_obj = interfaces.interface.interface()
             interface_name1 = interface_name + '.' + str(vlan_id)
             intf_obj.name = interface_name1
+            intf_obj.mace_enable = mace_enable
             intf_obj.long_name = interface_name1
             intf_obj.mode = "sub-interface"
             uri = device.url + '/interface:interfaces/interface=%s' % (str(interface_name1).replace('/', '%2F'))
             payload = intf_obj.getxml(filter=True)
             if device.isInterfaceInDeviceExists(interface_name1):
                 yang.Sdk.deleteData(uri, payload, sdata.getTaskId(), sdata.getSession())
-            intf_obj_phy = devices.device.interfaces.interface.interface()
+            intf_obj_phy = interfaces.interface.interface()
             intf_obj_phy.name = interface_name
             intf_obj_phy.long_name = interface_name
+            intf_obj_phy.mace_enable = mace_enable
             intf_obj_phy.mode = "l3-interface"
             intf_obj_phy.vrf._empty_tag = True
             intf_obj_phy.link_negotiation._empty_tag = True
@@ -1899,14 +1976,14 @@ def delete_physical_interface(entity, smodelctx, sdata, device, **kwarg):
             if device.isInterfaceInDeviceExists(interface_name):
                 #yang.Sdk.deleteData(uri, payload, sdata.getTaskId(), sdata.getSession())
                 yang.Sdk.patchData(uri, payload, sdata, add_reference=False)
-                intf_obj_phy1 = devices.device.interfaces.interface.interface()
+                intf_obj_phy1 = interfaces.interface.interface()
                 intf_obj_phy1.name = interface_name
                 intf_obj_phy1.long_name = interface_name
                 intf_obj_phy1.mode._empty_tag = True
                 payload1 = intf_obj_phy1.getxml(filter=True)
                 yang.Sdk.patchData(uri, payload1, sdata, add_reference=False)
         elif interface_type == "SVI":
-            intf_obj = devices.device.interfaces.interface.interface()
+            intf_obj = interfaces.interface.interface()
             interface_name1 = "Vlan" + str(vlan_id)
             intf_obj.name = interface_name1
             intf_obj.long_name = interface_name1
@@ -1916,7 +1993,7 @@ def delete_physical_interface(entity, smodelctx, sdata, device, **kwarg):
             if device.isInterfaceInDeviceExists(interface_name1):
                 yang.Sdk.deleteData(uri, payload, sdata.getTaskId(), sdata.getSession())
         else:
-            intf_obj = devices.device.interfaces.interface.interface()
+            intf_obj = interfaces.interface.interface()
             intf_obj.ip_address._empty_tag = True
             intf_obj.netmask._empty_tag = True
             intf_obj.name = interface_name
@@ -1937,13 +2014,14 @@ def delete_physical_interface(entity, smodelctx, sdata, device, **kwarg):
             intf_obj.in_queue_length._empty_tag = True
             #if out_queue_length is not None:
             intf_obj.out_queue_length._empty_tag = True
+            intf_obj.delay._empty_tag = True
             uri = device.url + '/interface:interfaces/interface=%s' % (str(interface_name).replace('/', '%2F'))
             payload = intf_obj.getxml(filter=True)
             print 'delete Interface: %s, payload = %s' % (uri, payload)
             if device.isInterfaceInDeviceExists(interface_name):
                 #yang.Sdk.deleteData(uri, payload, sdata.getTaskId(), sdata.getSession())
                 yang.Sdk.patchData(uri, payload, sdata, add_reference=False)
-                intf_obj_phy1 = devices.device.interfaces.interface.interface()
+                intf_obj_phy1 = interfaces.interface.interface()
                 intf_obj_phy1.name = interface_name
                 intf_obj_phy1.long_name = interface_name
                 intf_obj_phy1.mode._empty_tag = True
@@ -1953,26 +2031,30 @@ def delete_physical_interface(entity, smodelctx, sdata, device, **kwarg):
                 print "skipping delete for interface as it does not exists on device"
     else:
         if interface_type == "Sub-Interface":
-            intf_obj = devices.device.interfaces.interface.interface()
+            intf_obj = interfaces.interface.interface()
             interface_name1 = interface_name + '.' + str(vlan_id)
             intf_obj.name = interface_name1
             intf_obj.long_name = interface_name1
             intf_obj.mode = "sub-interface"
+            intf_obj.mace_enable._empty_tag = True
             intf_obj.outbound_qos._empty_tag = True
             intf_obj.inbound_qos._empty_tag = True
             intf_obj.acl_inbound_name._empty_tag = True
             intf_obj.acl_outbound_name._empty_tag = True
+            intf_obj.nat_name._empty_tag = True
+            intf_obj.delay._empty_tag = True
             #if ((vrf is not None and vrf != 'GLOBAL') or (ivrf is not None and ivrf != 'GLOBAL')) and inet_mpls == 'MPLS':
-            #intf_obj.vrf._empty_tag = False
+            #intf_obj.vrf._empty_tag = True
             uri = device.url + '/interface:interfaces/interface=%s' % (str(interface_name1).replace('/', '%2F'))
             payload = intf_obj.getxml(filter=True)
             if device.isInterfaceInDeviceExists(interface_name1):
                 yang.Sdk.patchData(uri, payload, sdata, add_reference=False)
-            intf_obj_phy = devices.device.interfaces.interface.interface()
+            intf_obj_phy = interfaces.interface.interface()
             intf_obj_phy.name = interface_name
             intf_obj_phy.long_name = interface_name
             intf_obj_phy.mode = "l3-interface"
-            #intf_obj_phy.vrf._empty_tag = False
+            intf_obj.mace_enable._empty_tag = True
+            #intf_obj_phy.vrf._empty_tag = True
             intf_obj_phy.link_negotiation._empty_tag = True
             intf_obj_phy.outbound_qos._empty_tag = True
             intf_obj_phy.inbound_qos._empty_tag = True
@@ -1990,14 +2072,14 @@ def delete_physical_interface(entity, smodelctx, sdata, device, **kwarg):
             if device.isInterfaceInDeviceExists(interface_name):
                 #yang.Sdk.deleteData(uri, payload, sdata.getTaskId(), sdata.getSession())
                 yang.Sdk.patchData(uri, payload, sdata, add_reference=False)
-                intf_obj_phy1 = devices.device.interfaces.interface.interface()
+                intf_obj_phy1 = interfaces.interface.interface()
                 intf_obj_phy1.name = interface_name
                 intf_obj_phy1.long_name = interface_name
                 intf_obj_phy1.mode._empty_tag = True
                 payload1 = intf_obj_phy1.getxml(filter=True)
                 yang.Sdk.patchData(uri, payload1, sdata, add_reference=False)
         elif interface_type == "SVI":
-            intf_obj = devices.device.interfaces.interface.interface()
+            intf_obj = interfaces.interface.interface()
             interface_name1 = "Vlan" + str(vlan_id)
             intf_obj.name = interface_name1
             intf_obj.long_name = interface_name1
@@ -2007,7 +2089,7 @@ def delete_physical_interface(entity, smodelctx, sdata, device, **kwarg):
             if device.isInterfaceInDeviceExists(interface_name1):
                 yang.Sdk.deleteData(uri, payload, sdata.getTaskId(), sdata.getSession())
         else:
-            intf_obj = devices.device.interfaces.interface.interface()
+            intf_obj = interfaces.interface.interface()
             intf_obj.name = interface_name
             intf_obj.long_name = interface_name
             intf_obj.description._empty_tag = True
@@ -2017,8 +2099,11 @@ def delete_physical_interface(entity, smodelctx, sdata, device, **kwarg):
             intf_obj.inbound_qos._empty_tag = True
             intf_obj.acl_inbound_name._empty_tag = True
             intf_obj.acl_outbound_name._empty_tag = True
+            intf_obj.nat_name._empty_tag = True
+            intf_obj.delay._empty_tag = True
+            intf_obj.mace_enable._empty_tag = True
             #if ((vrf is not None and vrf != 'GLOBAL') or (ivrf is not None and ivrf != 'GLOBAL')) and inet_mpls == 'MPLS':
-            #intf_obj.vrf._empty_tag = False
+            #intf_obj.vrf._empty_tag = True
             #if load_interval_delay is not None:
             intf_obj.load_interval_delay._empty_tag = True
             #if in_queue_length is not None:
@@ -2031,9 +2116,8 @@ def delete_physical_interface(entity, smodelctx, sdata, device, **kwarg):
             if device.isInterfaceInDeviceExists(interface_name):
                 #yang.Sdk.deleteData(uri, payload, sdata.getTaskId(), sdata.getSession())
                 yang.Sdk.patchData(uri, payload, sdata, add_reference=False)
-                intf_obj_phy1 = devices.device.interfaces.interface.interface()
+                intf_obj_phy1 = interfaces.interface.interface()
                 intf_obj_phy1.name = interface_name
-                #intf_obj_phy1.vrf._empty_tag = False
                 intf_obj_phy1.long_name = interface_name
                 intf_obj_phy1.mode._empty_tag = True
                 payload1 = intf_obj_phy1.getxml(filter=True)
@@ -2057,16 +2141,18 @@ def back_endpoint(entity, smodelctx, sdata, device, **kwargs):
 
     interface_description = inputdict['interface_description']
     interface_ip = inputdict['interface_ip']
+    mace_enable = inputdict['mace_enable']
     device_ip = inputdict['device_ip']
     global_inbound_acl = inputdict['global_inbound_acl']
     site_inbound_acl = inputdict['site_inbound_acl']
     global_outbound_acl = inputdict['global_outbound_acl']
     site_outbound_acl = inputdict['site_outbound_acl']
+    delay = inputdict['delay']
     nat_inside = None
     nat_outside = None
-    #if entity != "cpe_primary_cpe_secondary_ic":
-    nat_inside = inputdict['nat_inside']
-    nat_outside = inputdict['nat_outside']
+    if entity != "cpe_primary_cpe_secondary_ic":
+        nat_inside = inputdict['nat_inside']
+        nat_outside = inputdict['nat_outside']
     #vlan_id = None
     vlan_id = inputdict['vlan_id']
     if util.isNotEmpty(interface_name):
@@ -2218,8 +2304,6 @@ def back_endpoint(entity, smodelctx, sdata, device, **kwargs):
     ip_addr = None
     if entity == "cpe_primary_cpe_secondary_ic":
         ip_addr = IpamPoolID(sdata.getTaskId(), sdata, cidr)
-
-    #Seb's added    
     elif cidr is not None:
         prefix = util.IPPrefix(cidr)
         if str(prefix.masklen) == str(32):
@@ -2244,7 +2328,6 @@ def back_endpoint(entity, smodelctx, sdata, device, **kwargs):
         payload = '''<ipaddress-pool>
                     <name>'''+cidr_name+'''</name>
                     <cidr>'''+cidr+'''</cidr>
-                    <gateway>'''+cidr_gateway+'''</gateway>
                     <resource-pool>'''+rp+'''</resource-pool>
                     </ipaddress-pool>'''
         cidr_url = "/app/restconf/data/ipam:ipaddress-pools"
@@ -2258,22 +2341,17 @@ def back_endpoint(entity, smodelctx, sdata, device, **kwargs):
         except DataNodeNotFoundException:
             yang.Sdk.createData(cidr_url, payload, sdata.getSession())
         ip_addr = IpamPoolID(sdata.getTaskId(), sdata, cidr_name)
-
-        #Seb's added indent
         ip_addr_obj = ip_addr.ipam_pool_obj
         prefix = util.IPPrefix(ip_addr_obj.cidr)
         netmask = prefix.netmask
         wildcard = prefix.wildcard
-
-    #Seb's added
     if util.isEmpty(interface_ip) or interface_ip == None:
-        #used_ips_list = get_used_ip_list_from_ippool(ip_addr_obj.name, sdata)
-        #interface_ip = get_freeip_from_cidr(ip_addr_obj.cidr, used_ips_list)
-        #add_ipaddress_entries(ip_addr_obj.name, interface_ip, sdata)
+        # used_ips_list = get_used_ip_list_from_ippool(ip_addr_obj.name, sdata)
+        # interface_ip = get_freeip_from_cidr(ip_addr_obj.cidr, used_ips_list)
+        # add_ipaddress_entries(ip_addr_obj.name, interface_ip, sdata)
         # next_ip_address = ipam.IPAM.getInstance().allocateIpAddressInIpam(ip_addr_obj.name, kwargs['inputdict']['endpoint_name'])
         interface_ip = ""
         netmask = ""
-        print 'TEST OK'
     else:
         ip_addr_obj = ip_addr.ipam_pool_obj
         prefix = util.IPPrefix(ip_addr_obj.cidr)
@@ -2325,18 +2403,19 @@ def back_endpoint(entity, smodelctx, sdata, device, **kwargs):
         mode = "l3-interface"
     elif interface_type == "Sub-Interface":
         mode = "sub-interface"
-        if vlan_id is not None:
+        if vlan_id is not None and '.' not in interface_name:
             interface_name = interface_name + '.' + str(vlan_id)
     elif interface_type == "SVI":
         mode = "vlan"
     if auto_negotiation == "true":
         link_negotiation = "auto"
 
-    intf_obj = devices.device.interfaces.interface.interface()
+    intf_obj = interfaces.interface.interface()
     if mode == "sub-interface" or mode == "l3-interface":
         intf_obj.name = interface_name
         intf_obj.long_name = interface_name
     intf_obj.description = interface_description
+    intf_obj.mace_enable = mace_enable
     if mode == "sub-interface":
         intf_obj.mode = "sub-interface"
         intf_obj.vlan = vlan_id
@@ -2347,8 +2426,6 @@ def back_endpoint(entity, smodelctx, sdata, device, **kwargs):
         intf_obj.name = "Vlan" + str(vlan_id)
     else:
         intf_obj.mode = "l3-interface"
-
-    #Seb's added    
     if interface_ip is not None:
         intf_obj.ip_address = interface_ip
         intf_obj.netmask = netmask
@@ -2359,6 +2436,8 @@ def back_endpoint(entity, smodelctx, sdata, device, **kwargs):
     uri_list = uri.split('/',5)
     url = '/'.join(uri_list[0:4])
     if mode == "sub-interface" or mode == "l3-interface":
+        if util.isNotEmpty(delay):
+            intf_obj.delay = delay
         if vrf is not None and vrf != 'GLOBAL':
             xml_output = yang.Sdk.getData(url+"/vrfs/vrf="+str(vrf), '', sdata.getTaskId())
             obj_local = util.parseXmlString(xml_output)
@@ -2416,12 +2495,13 @@ def back_endpoint(entity, smodelctx, sdata, device, **kwargs):
         if hold_queue_out == 'true':
             if util.isNotEmpty(out_queue_length):
                 intf_obj.out_queue_length = out_queue_length
+
         yang.Sdk.createData(device.url+'/interfaces', intf_obj.getxml(filter=True), sdata.getSession(), False)
     else:
         yang.Sdk.createData(device.url+'/interfaces', intf_obj.getxml(filter=True), sdata.getSession(), False)
 
     if mode == "sub-interface":
-        intf_obj_phy = devices.device.interfaces.interface.interface()
+        intf_obj_phy = interfaces.interface.interface()
         intf_obj_phy.name = int_name_phy
         intf_obj_phy.long_name = int_name_phy
         intf_obj_phy.mode = "l3-interface"
@@ -2441,10 +2521,11 @@ def back_endpoint(entity, smodelctx, sdata, device, **kwargs):
         if hold_queue_out == 'true':
             if util.isNotEmpty(out_queue_length):
                 intf_obj_phy.out_queue_length = out_queue_length
+        #intf_obj_phy.mace_enable = mace_enable
         yang.Sdk.createData(device.url+'/interfaces', intf_obj_phy.getxml(filter=True), sdata.getSession(), False)
 
     # creating hsrp policy on the given interface
-    hsrp_obj = devices.device.interfaces.interface.hsrp.hsrp()
+    hsrp_obj = interfaces.interface.hsrp.hsrp()
 
     hsrp_obj.ip_address = parent_entity.get_field_value('hsrp_standby_ip')
     hsrp_obj.group = parent_entity.get_field_value('hsrp_group')
@@ -2484,9 +2565,9 @@ def back_endpoint(entity, smodelctx, sdata, device, **kwargs):
             hsrp_obj.version = parent_entity.get_field_value('hsrp_version')
             yang.Sdk.createData(hsrp_url, hsrp_obj.getxml(filter=True), sdata.getSession())
 
-    ospf_obj = devices.device.interfaces.interface.ospf.ospf()
-    ospf_new = devices.device.vrfs.vrf.router_ospf.router_ospf()
-    ospf_net_obj = devices.device.vrfs.vrf.router_ospf.network.network()
+    ospf_obj = interfaces.interface.ospf.ospf()
+    ospf_new = vrfs.vrf.router_ospf.router_ospf()
+    ospf_net_obj = vrfs.vrf.router_ospf.network.network()
     if 'ospf' in kwargs['inputdict']:
         if kwargs['inputdict']['ospf'] == 'true':
             if 'priority' in kwargs['inputdict']:
@@ -2532,10 +2613,21 @@ def back_endpoint(entity, smodelctx, sdata, device, **kwargs):
     # creating entities for update services
     if entity == "customer_lan_ic":
         uri = sdata.getRcPath()
-        parent_uri = uri[:uri.rfind(uri.split('/')[-2])]
-        print parent_uri
+        util.log_debug('URI:', uri)
+        parent_uri = uri[:uri.find(uri.split('/')[-2])]
+        util.log_debug('PARENT_URI:', parent_uri)
+        yang.Sdk.createData('%s' % parent_uri, '<policy-update-services/>', sdata.getSession(), False)
         yang.Sdk.createData('%spolicy-update-services' % parent_uri, '<hsrp-update-service/>', sdata.getSession(), False)
-
+        '''
+        uri = sdata.getRcPath()
+        uri_list = uri.split('/', 6)
+        log("uri_list is " + str(uri_list))
+        url = '/'.join(uri_list[0:6])
+        log("url is " + str(url))
+        #parent_uri = uri[:uri.rfind(uri.split('/')[-2])]
+        #print parent_uri
+        yang.Sdk.createData(url + '/policy-update-services', '<hsrp-update-service/>', sdata.getSession(), False)
+        '''
 
 def new_back_endpoint(entity, smodelctx, sdata, device, **kwargs):
     inputdict = kwargs['inputdict']
@@ -2545,6 +2637,7 @@ def new_back_endpoint(entity, smodelctx, sdata, device, **kwargs):
     vrf = inputdict['vrf']
     interface_type = inputdict['interface_type']
     interface_name = inputdict['interface_name']
+    mace_enable = inputdict['mace_enable']
     if interface_type == "Physical" or interface_type == "Sub-Interface":
         if util.isEmpty(interface_name):
             raise Exception("interface_name should not be empty when interface_type is Physical and sub-interface")
@@ -2556,6 +2649,7 @@ def new_back_endpoint(entity, smodelctx, sdata, device, **kwargs):
     site_inbound_acl = inputdict['site_inbound_acl']
     global_outbound_acl = inputdict['global_outbound_acl']
     site_outbound_acl = inputdict['site_outbound_acl']
+    delay = inputdict['delay']
     nat_inside = None
     nat_outside = None
     if entity == "customer_lan_ic_dual" or entity == "customer_lan_ic_triple":
@@ -2683,6 +2777,13 @@ def new_back_endpoint(entity, smodelctx, sdata, device, **kwargs):
                 if hasattr(obj.triple_cpe_site_services.cpe_secondary.access_lists, 'access_list'):
                     obj.triple_cpe_site_services.cpe_secondary.access_lists.access_list = util.convert_to_list(obj.triple_cpe_site_services.cpe_secondary.access_lists.access_list)
                     for access_list_dynamic in obj.triple_cpe_site_services.cpe_secondary.access_lists.access_list:
+                        access_list_name = access_list_dynamic.name
+                        access_lists.append(access_list_name)
+        if device_ip == obj.triple_cpe_site_services.cpe_tertiary.device_ip:
+            if hasattr(obj.triple_cpe_site_services.cpe_tertiary, 'access_lists'):
+                if hasattr(obj.triple_cpe_site_services.cpe_tertiary.access_lists, 'access_list'):
+                    obj.triple_cpe_site_services.cpe_tertiary.access_lists.access_list = util.convert_to_list(obj.triple_cpe_site_services.cpe_tertiary.access_lists.access_list)
+                    for access_list_dynamic in obj.triple_cpe_site_services.cpe_tertiary.access_lists.access_list:
                         access_list_name = access_list_dynamic.name
                         access_lists.append(access_list_name)
 
@@ -2845,7 +2946,6 @@ def new_back_endpoint(entity, smodelctx, sdata, device, **kwargs):
         payload = '''<ipaddress-pool>
                     <name>'''+cidr_name+'''</name>
                     <cidr>'''+cidr+'''</cidr>
-                    <gateway>'''+cidr_gateway+'''</gateway>
                     <resource-pool>'''+rp+'''</resource-pool>
                     </ipaddress-pool>'''
         cidr_url = "/app/restconf/data/ipam:ipaddress-pools"
@@ -2915,18 +3015,19 @@ def new_back_endpoint(entity, smodelctx, sdata, device, **kwargs):
         mode = "l3-interface"
     elif interface_type == "Sub-Interface":
         mode = "sub-interface"
-        if vlan_id is not None:
+        if vlan_id is not None and '.' not in interface_name:
             interface_name = interface_name + '.' + str(vlan_id)
     elif interface_type == "SVI":
         mode = "vlan"
     if auto_negotiation == "true":
         link_negotiation = "auto"
 
-    intf_obj = devices.device.interfaces.interface.interface()
+    intf_obj = interfaces.interface.interface()
     if mode == "sub-interface" or mode == "l3-interface":
         intf_obj.name = interface_name
         intf_obj.long_name = interface_name
     intf_obj.description = interface_description
+    intf_obj.mace_enable = mace_enable
     if mode == "sub-interface":
         intf_obj.mode = "sub-interface"
         intf_obj.vlan = vlan_id
@@ -2943,6 +3044,8 @@ def new_back_endpoint(entity, smodelctx, sdata, device, **kwargs):
     uri_list = uri.split('/',5)
     url = '/'.join(uri_list[0:4])
     if mode == "sub-interface" or mode == "l3-interface":
+        if util.isNotEmpty(delay):
+            intf_obj.delay = delay
         if vrf is not None and vrf != 'GLOBAL':
             xml_output = yang.Sdk.getData(url+"/vrfs/vrf="+str(vrf), '', sdata.getTaskId())
             obj_local = util.parseXmlString(xml_output)
@@ -2954,7 +3057,7 @@ def new_back_endpoint(entity, smodelctx, sdata, device, **kwargs):
                 route_maps(inputdict['pbr_policy'], device, sdata)
                 intf_obj.pbr_policy = inputdict['pbr_policy']
         else:
-             if util.isNotEmpty(inputdict['pbr_policy']):
+            if util.isNotEmpty(inputdict['pbr_policy']):
                 route_maps(inputdict['pbr_policy'], device, sdata)
                 intf_obj.pbr_policy = inputdict['pbr_policy']
         if hierarchical_inbound_policy == 'false':
@@ -3005,7 +3108,7 @@ def new_back_endpoint(entity, smodelctx, sdata, device, **kwargs):
         yang.Sdk.createData(device.url+'/interfaces', intf_obj.getxml(filter=True), sdata.getSession(), False)
 
     if mode == "sub-interface":
-        intf_obj_phy = devices.device.interfaces.interface.interface()
+        intf_obj_phy = interfaces.interface.interface()
         intf_obj_phy.name = int_name_phy
         intf_obj_phy.long_name = int_name_phy
         intf_obj_phy.mode = "l3-interface"
@@ -3025,10 +3128,11 @@ def new_back_endpoint(entity, smodelctx, sdata, device, **kwargs):
         if hold_queue_out == 'true':
             if util.isNotEmpty(out_queue_length):
                 intf_obj_phy.out_queue_length = out_queue_length
+        #intf_obj_phy.mace_enable = mace_enable
         yang.Sdk.createData(device.url+'/interfaces', intf_obj_phy.getxml(filter=True), sdata.getSession(), False)
 
     # creating hsrp policy on the given interface
-    hsrp_obj = devices.device.interfaces.interface.hsrp.hsrp()
+    hsrp_obj = interfaces.interface.hsrp.hsrp()
 
     hsrp_obj.ip_address = parent_entity.get_field_value('hsrp_standby_ip')
     hsrp_obj.group = parent_entity.get_field_value('hsrp_group')
@@ -3068,9 +3172,9 @@ def new_back_endpoint(entity, smodelctx, sdata, device, **kwargs):
             hsrp_obj.version = parent_entity.get_field_value('hsrp_version')
             yang.Sdk.createData(hsrp_url, hsrp_obj.getxml(filter=True), sdata.getSession())
 
-    ospf_obj = devices.device.interfaces.interface.ospf.ospf()
-    ospf_new = devices.device.vrfs.vrf.router_ospf.router_ospf()
-    ospf_net_obj = devices.device.vrfs.vrf.router_ospf.network.network()
+    ospf_obj = interfaces.interface.ospf.ospf()
+    ospf_new = vrfs.vrf.router_ospf.router_ospf()
+    ospf_net_obj = vrfs.vrf.router_ospf.network.network()
     if 'ospf' in kwargs['inputdict']:
         if kwargs['inputdict']['ospf'] == 'true':
             if 'priority' in kwargs['inputdict']:
@@ -3115,11 +3219,23 @@ def new_back_endpoint(entity, smodelctx, sdata, device, **kwargs):
 
     # creating entities for update services
     if entity == "customer_lan_ic_dual" or entity == "customer_lan_ic_triple":
+        
         uri = sdata.getRcPath()
-        parent_uri = uri[:uri.rfind(uri.split('/')[-2])]
-        print parent_uri
+        util.log_debug('URI:', uri)
+        parent_uri = uri[:uri.find(uri.split('/')[-2])]
+        util.log_debug('PARENT_URI:', parent_uri)
+        yang.Sdk.createData('%s' % parent_uri, '<policy-update-services/>', sdata.getSession(), False)
         yang.Sdk.createData('%spolicy-update-services' % parent_uri, '<hsrp-update-service/>', sdata.getSession(), False)
-
+        '''
+        uri = sdata.getRcPath()
+        uri_list = uri.split('/', 6)
+        log("uri_list is " + str(uri_list))
+        url = '/'.join(uri_list[0:6])
+        log("url is " + str(url))
+        #parent_uri = uri[:uri.rfind(uri.split('/')[-2])]
+        #print parent_uri
+        yang.Sdk.createData(url + '/policy-update-services', '<hsrp-update-service/>', sdata.getSession(), False)
+        '''
 
 def update_hsrp_priority(entity, smodelctx, sdata, device, **kwarg):
     config = util.parseXmlString(sdata.getPayload())
@@ -3164,11 +3280,11 @@ def update_hsrp_priority(entity, smodelctx, sdata, device, **kwarg):
         mode = "l3-interface"
     elif interface_type == "Sub-Interface":
         mode = "sub-interface"
-        if vlan_id is not None:
+        if vlan_id is not None and '.' not in interface_name:
             interface_name = interface_name + '.' + str(vlan_id)
 
     # creating hsrp policy on the given interface
-    hsrp_obj = devices.device.interfaces.interface.hsrp.hsrp()
+    hsrp_obj = interfaces.interface.hsrp.hsrp()
     if hsrp_priority != prev_hsrp_priority or track != prev_track or decrement != prev_decrement:
         hsrp_obj.priority = hsrp_priority
         hsrp_obj.track = track
@@ -3181,7 +3297,6 @@ def update_hsrp_priority(entity, smodelctx, sdata, device, **kwarg):
 
 
 def modifiedGetLocalObject(sdata, elem):
-    #smodelctx = None
     smodelctx = None
     rcpath = sdata.getRcPath() + '/'
     print 'rcpath = %s' % (rcpath)
@@ -3203,7 +3318,6 @@ def modifiedGetLocalObject(sdata, elem):
     rcpath = rcpath[:idx]
     print 'setting rcpath= %s' % (rcpath)
 
-    #xml_output = yang.Sdk.getData(rcpath, '', sdata.getTaskId())
     xml_output = yang.Sdk.getData(rcpath, '', sdata.getTaskId())
     obj = util.parseXmlString(xml_output)
     return obj
@@ -3232,7 +3346,6 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
-            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
     elif entity == 'cpe_primary':
         config = config.cpe_primary_wan
@@ -3241,7 +3354,6 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
-            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
     elif entity == 'cpe_secondary':
         config = config.cpe_secondary_wan
@@ -3250,7 +3362,6 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
-            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
     elif entity == 'cpe_primary_dual':
         config = config.cpe_primary_wan
@@ -3259,7 +3370,6 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
-            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
     elif entity == 'cpe_secondary_dual':
         config = config.cpe_secondary_wan
@@ -3268,7 +3378,6 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
-            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
     elif entity == 'cpe_primary_inet_dual':
         config = config.cpe_primary_inet_wan
@@ -3277,7 +3386,6 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
-            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
     elif entity == 'cpe_primary_mpls_dual':
         config = config.cpe_primary_mpls_wan
@@ -3286,7 +3394,6 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
-            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
     elif entity == 'cpe_secondary_inet_dual':
         config = config.cpe_secondary_inet_wan
@@ -3295,7 +3402,6 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
-            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
     elif entity == 'cpe_secondary_mpls_dual':
         config = config.cpe_secondary_mpls_wan
@@ -3304,7 +3410,6 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
-            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
     elif entity == 'cpe_primary_inet_triple':
         config = config.cpe_primary_inet_wan
@@ -3313,7 +3418,6 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
-            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
     elif entity == 'cpe_primary_mpls_triple':
         config = config.cpe_primary_mpls_wan
@@ -3322,7 +3426,6 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
-            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
     elif entity == 'cpe_secondary_inet_triple':
         config = config.cpe_secondary_inet_wan
@@ -3331,7 +3434,6 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
-            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
     elif entity == 'cpe_secondary_mpls_triple':
         config = config.cpe_secondary_mpls_wan
@@ -3340,7 +3442,6 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
-            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
     elif entity == 'cpe_tertiary_inet_triple':
         config = config.cpe_tertiary_inet_wan
@@ -3349,7 +3450,6 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
-            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
     elif entity == 'cpe_tertiary_mpls_triple':
         config = config.cpe_tertiary_mpls_wan
@@ -3358,49 +3458,26 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
-            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
-
     shape_average = config.get_field_value('shape_average')
-    child_qos_policy = config.get_field_value('child_qos_policy')
-    prev_child_qos_policy = prevconfig.get_field_value('child_qos_policy')
+    # child_qos_policy = config.get_field_value('child_qos_policy')
+
     prev_policy_name = prevconfig.get_field_value('policy_name')
-
-    if prev_policy_name is None:
-        prev_policy_name = config.get_field_value('policy_name')
-
     prev_shape_average = prevconfig.get_field_value('shape_average')
     print "prevpolicyname is:", prev_policy_name
     print "prevshapeavg is:", prev_shape_average
 
-    map_obj = devices.device.policy_maps.policy_map.policy_map()
+    map_obj = policy_maps.policy_map.policy_map()
     map_obj.name = prev_policy_name
     yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
 
-    cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+    cls_obj = policy_maps.policy_map.class_entry.class_entry()
     cls_obj.class_name = 'class-default'
     if util.isNotEmpty(shape_average):
         if shape_average != prev_shape_average:
             cls_obj.shape_average = shape_average
-
-    if util.isNotEmpty(child_qos_policy):
-        if child_qos_policy != prev_child_qos_policy:
-            cls_obj.service_policy = child_qos_policy
-            qos_child(entity, child_qos_policy, device, sdata)
-
     yang.Sdk.createData(device.url+"/policy-maps/policy-map=%s" %(prev_policy_name), cls_obj.getxml(filter=True), sdata.getSession())
 
-    #Seb's added. Apply HQOS again to WAN interface
-    intf_obj = devices.device.interfaces.interface.interface()
-    intf_obj.name = wan_intf
-    intf_obj.long_name = wan_intf
-    intf_obj.outbound_qos = prev_policy_name
-
-    uri = device.url + '/interface:interfaces/interface=%s' % (str(wan_intf).replace('/', '%2F'))
-
-    int_payload = intf_obj.getxml(filter=True)
-
-    yang.Sdk.patchData(uri, int_payload, sdata, add_reference=False)
 
 def loopback(smodelctx, sdata, dev, **kwargs):
     inputdict = kwargs["inputdict"]
@@ -3410,6 +3487,8 @@ def loopback(smodelctx, sdata, dev, **kwargs):
     cidr = inputdict['cidr']
     vrf = inputdict['vrf']
     description = inputdict['description']
+    if util.isEmpty(cidr):
+        raise Exception("Loopback: cidr can not be empty")
     ip_addr = IpamPoolID(sdata.getTaskId(), sdata, cidr)
     ip_addr_obj = ip_addr.ipam_pool_obj
     prefix = util.IPPrefix(ip_addr_obj.cidr)
@@ -3454,7 +3533,7 @@ def loopback(smodelctx, sdata, dev, **kwargs):
     payload = "<ip>%s</ip>" % loopback_ip
     serv_uri = sdata.getRcPath()
     yang.Sdk.createData(serv_uri, payload, sdata.getSession())
-    intf_obj = devices.device.interfaces.interface.interface()
+    intf_obj = interfaces.interface.interface()
     if util.isNotEmpty(loopback_int_id):
         print 'loopback_int_id:', loopback_int_id
         intf_obj.name = loopback_int_id

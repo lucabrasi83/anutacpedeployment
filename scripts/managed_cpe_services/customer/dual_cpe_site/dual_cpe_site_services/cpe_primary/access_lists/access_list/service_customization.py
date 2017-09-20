@@ -44,14 +44,14 @@ Names of Leafs for this Yang Entity
 from servicemodel import util
 from servicemodel import yang
 from servicemodel import devicemgr
-from servicemodel.controller import devices
+
 
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject
 from cpedeployment.cpedeployment_lib import getCurrentObjectConfig
 from cpedeployment.cpedeployment_lib import ServiceModelContext
 from cpedeployment.cpedeployment_lib import getParentObject 
-from cpedeployment.cpedeployment_lib import log,access_list
+from cpedeployment.cpedeployment_lib import log,access_list,acl_service_discovery
 
 class ServiceDataCustomization:
 

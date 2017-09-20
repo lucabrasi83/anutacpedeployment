@@ -44,7 +44,7 @@ Names of Leafs for this Yang Entity
 from servicemodel import util
 from servicemodel import yang
 from servicemodel import devicemgr
-from servicemodel.controller import devices
+
 
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject
@@ -71,9 +71,9 @@ class ServiceDataCustomization:
 
       if isinstance(dev, list) is True:
           for device in dev:
-              prefix_list_gen(smodelctx, sdata, device, 'cpe_secondary_dual',**kwargs)
+              prefix_list_gen(smodelctx, sdata, device,**kwargs)
       else:
-          prefix_list_gen(smodelctx, sdata, dev,'cpe_secondary_dual', **kwargs)
+          prefix_list_gen(smodelctx, sdata, dev,**kwargs)
 
     @staticmethod
     def process_service_device_bindings(smodelctx, sdata, dev, **kwargs):

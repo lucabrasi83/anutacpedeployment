@@ -44,7 +44,7 @@ Names of Leafs for this Yang Entity
 from servicemodel import util
 from servicemodel import yang
 from servicemodel import devicemgr
-from servicemodel.controller import devices
+from servicemodel.controller.devices.device import vrfs
 
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject
@@ -102,7 +102,7 @@ class ServiceDataCustomization:
         print parent_uri
 
         inputdict = {}
-        inputdict['end_point'] = prevconfig.cpe_primary.get_field_value('end_point')
+        inputdict['end_point'] = config.get_field_value('end_point')
         inputdict['import_route_map'] = config.get_field_value('import_route_map')
         inputdict['export_route_map'] = config.get_field_value('export_route_map')
 
@@ -149,7 +149,7 @@ class ServiceDataCustomization:
                     vrf = "GLOBAL"
             peer_ip = conf.end_points.bgp_peers.peer_ip
             remote_as = conf.end_points.bgp_peers.remote_as
-            bgp_neighbor_obj = devices.device.vrfs.vrf.router_bgp.neighbor.neighbor()
+            bgp_neighbor_obj = vrfs.vrf.router_bgp.neighbor.neighbor()
             if inputdict['import_route_map'] != "":
                 bgp_neighbor_obj.in_route_map = inputdict['import_route_map']
             if inputdict['export_route_map'] != "":
