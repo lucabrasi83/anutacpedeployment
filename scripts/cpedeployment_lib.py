@@ -21,7 +21,7 @@ import re
 from servicemodel.controller import devices
 from com.anuta.api import DataNodeNotFoundException
 
-managed_cpe_services_debug = False
+managed_cpe_services_debug = True
 
 
 def log(s):
@@ -227,6 +227,13 @@ def nat_trans_int(smodelctx, sdata, dev, **kwargs):
         list = None
     if hasattr(obj.address_translation, 'value'):
         value = obj.address_translation.value
+        '''
+        from endpoint_lib import access_group_def
+        uri = sdata.getRcPath()
+        uri_list = uri.split('/',5)
+        url = '/'.join(uri_list[0:4])
+        access_group_def(url, value, dev, sdata)
+        '''
     else:
         value = None
     natobj = devices.device.ip_nat.address_translation.address_translation()
@@ -703,7 +710,18 @@ def object_group_def(source_object_group, dev, sdata):
                 if hasattr(objectgroup, 'prefix'):
                     if util.isNotEmpty(objectgroup.prefix):
                         network_obj2 = devices.device.object_groups_acl.object_group.networks.network.network()
-                        prefix = util.IPPrefix(objectgroup.prefix)
+
+                        #Haulotte Specific Dual CPE Sites. Keyword 'GUEST_LAN_PROFILE' to be replaced by GUEST LAN Profile CIDR
+                        if objectgroup.prefix == 'HAULOTTE-GUESTS':
+                            obj_haulotte_guests = getLocalObject(sdata, 'dual-cpe-site-services')
+                            log("haulotte guest obj is: %s" % (obj_haulotte_guests))
+                            obj_haulotte_guests.dual_cpe_site_services.cpe_lan.lan_profile = util.convert_to_list(obj_haulotte_guests.dual_cpe_site_services.cpe_lan.lan_profile)
+                            for lanprof in obj_haulotte_guests.dual_cpe_site_services.cpe_lan.lan_profile:
+                                if lanprof.profile_name == 'GUEST_LAN_PROFILE':
+                                    haulotte_guests_prefix = lanprof.get_field_value('cidr')
+                                    prefix = util.IPPrefix(haulotte_guests_prefix)
+                        else:
+                            prefix = util.IPPrefix(objectgroup.prefix)
                         ip_address = prefix.address
                         netmask = prefix.netmask
                         network_obj2.ip_address = ip_address
@@ -790,7 +808,7 @@ def access_list_rule(smodelctx, sdata, dev, access_list_name, **kwargs):
         name_rule += ' ' + 'host' + ' ' + source_object
     if source_condition == 'objectgroup':
         if util.isNotEmpty(source_object_group):
-            object_group_def(source_object_group, device, sdata)
+            object_group_def(source_object_group, dev, sdata)
             access_rule_obj.source_obj_name = source_object_group
             name_rule += ' ' + 'object-group' + ' ' + source_object_group
     if source_condition == 'any':
@@ -833,7 +851,7 @@ def access_list_rule(smodelctx, sdata, dev, access_list_name, **kwargs):
         name_rule += ' ' + 'host' + ' ' + destination_object
     if destination_condition == 'objectgroup':
         if util.isNotEmpty(destination_object_group):
-            object_group_def(destination_object_group, device, sdata)
+            object_group_def(destination_object_group, dev, sdata)
             access_rule_obj.dest_obj_name = destination_object_group
             name_rule += ' ' + 'object-group' + ' ' + destination_object_group
     if destination_condition == 'any':
