@@ -1322,7 +1322,7 @@ def staticroute(smodelctx, sdata, dev, **kwarg):
 
                     #vrf_test_url = dev.url + 'vrfs/vrf=%s' % (vrf_name)
                     #try:
-
+                    
                     is_vrf_exists = False
                     is_vrf = yang.Sdk.getData(dev.url, '', sdata.getTaskId())
                     is_vrf_exists_obj = util.parseXmlString(is_vrf)
@@ -1336,8 +1336,9 @@ def staticroute(smodelctx, sdata, dev, **kwarg):
                     if not is_vrf_exists:
                         yang.Sdk.createData(dev.url + '/vrfs', vrfobj.getxml(filter=True), sdata.getSession())
 
-
                         #vrf_xml_output = yang.Sdk.getData(vrf_test_url, '', sdata.getTaskId())
+
+                        #vrf_xml_output = yang.Sdk.getData(vrf_test_url, '', smodelctx.task_id)
                         #vrf_obj_get = util.parseXmlString(vrf_xml_output)
                         #util.log_debug( "obj of vrf is: ",obj_get)
                     #except DataNodeNotFoundException:
