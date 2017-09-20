@@ -469,11 +469,14 @@ module cpedeployment {
   typedef protocol-def {
     type enumeration {
       enum "ftp";
+      enum "ftp-data";
+      enum "ftp-agent";
       enum "http";
       enum "https";
       enum "ntp";
       enum "bgp";
       enum "ospf";
+      enum "eigrp";
       enum "netflow";
       enum "snmp";
       enum "ssh";
@@ -489,8 +492,11 @@ module cpedeployment {
       enum "sip";
       enum "h323";
       enum "ms-lync";
+      enum "ms-lync-control";
+      enum "ms-lync-media";
       enum "ms-lync-audio";
       enum "ms-lync-video";
+      enum "ms-office-webapps";
       enum "rtp";
       enum "rtp video";
       enum "rtp audio";
@@ -505,7 +511,56 @@ module cpedeployment {
       enum "citrix-static";
       enum "teamviewer";
       enum "lwapp";
+      enum "amazon-web-services";
+      enum "apple-app-store";
+      enum "apple-ios-updates";
       enum "telnet";
+      enum "gmail";
+      enum "ms-wbt";
+      enum "youtube";
+      enum "windows-azure";
+      enum "windows-store";
+      enum "web-rtc";
+      enum "whatsapp";
+      enum "twitter";
+      enum "sqlserver";
+      enum "outlook-web-service";
+      enum "ora-srv";
+      enum "oracle-bi";
+      enum "oracle-ebsuite-unsecured";
+      enum "oracle-sqlnet";
+      enum "netflix";
+      enum "msexch-routing";
+      enum "mcafee-update";
+      enum "mcafee-antivirus";
+      enum "jabber";
+      enum "google-docs";
+      enum "google-earth";
+      enum "google-play";
+      enum "google-plus";
+      enum "google-services";
+      enum "google-services-audio";
+      enum "google-services-video";
+      enum "google-services-media";
+      enum "facebook";
+      enum "facebook-audio";
+      enum "facebook-media";
+      enum "facebook-video";
+      enum "facetime";
+      enum "cisco-collab-audio";
+      enum "cisco-collab-control";
+      enum "cisco-collab-video";
+      enum "cisco-collaboration";
+      enum "cisco-jabber-audio";
+      enum "cisco-jabber-control";
+      enum "cisco-jabber-video";
+      enum "cisco-media-audio";
+      enum "cisco-media-video";
+      enum "cisco-spark";
+      enum "cisco-spark-audio";
+      enum "cisco-spark-media";
+      enum "cisco-spark-video";
+      enum "skinny";
     }
   }
 
