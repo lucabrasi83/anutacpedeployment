@@ -1,7 +1,0 @@
-<service-features>
-  <feature>
-    <name>wanoptimizer</name>
-    <icon>/wanoptimizerfeature/vendor/wanoptimizer.png</icon>
-    <schema-grouping-name>wanop:wanoptimizer-def</schema-grouping-name>
-  </feature>
-</service-features>

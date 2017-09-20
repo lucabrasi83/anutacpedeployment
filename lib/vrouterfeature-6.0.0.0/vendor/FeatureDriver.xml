@@ -1,7 +1,0 @@
-<service-features>
-  <feature>
-    <name>vrouter</name>
-    <icon>/vrouterfeature/vendor/vrouter.png</icon>
-    <schema-grouping-name>vrf:vrouter-def</schema-grouping-name>
-  </feature>
-</service-features>
