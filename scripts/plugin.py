@@ -15,12 +15,13 @@
 #
 
 def get_plugin_info():
-    return Plugin('cpedeployment', '3.6.7')
+    return Plugin('cpedeployment', '1.0.0')
 
 from com.anuta.service.python.plugin import PythonPlugin
 from com.anuta.service.python.plugin import PythonPluginType
 
 from servicemodel import util
+from servicemodel.controller import devices
 import cpedeployment
 from cpedeployment_lib import log
 

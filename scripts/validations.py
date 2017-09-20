@@ -14,7 +14,7 @@ from servicemodel import yang
 from servicemodel import util
 from servicemodel import ipam
 from servicemodel import devicemgr
-from servicemodel.controller import devices
+
 
 from cpedeployment_lib import getLocalObject
 

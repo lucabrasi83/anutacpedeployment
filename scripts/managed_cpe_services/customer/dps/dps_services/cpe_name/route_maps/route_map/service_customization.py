@@ -43,7 +43,7 @@ Names of Leafs for this Yang Entity
 from servicemodel import util
 from servicemodel import yang
 from servicemodel import devicemgr
-from servicemodel.controller import devices
+from servicemodel.controller.devices.device import route_maps
 
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject
@@ -74,42 +74,47 @@ class ServiceDataCustomization:
             uri = sdata.getRcPath()
             uri_list = uri.split('/',5)
             url = '/'.join(uri_list[0:4])
-            if obj.dps_services.single_cpe_site == "true":
-                site = obj.dps_services.single_cpe_sites
-                site_output = yang.Sdk.getData(url+"/single-cpe-site/single-cpe-site-services="+str(site), '', sdata.getTaskId())
-                conf = util.parseXmlString(site_output)
-                entity = 'cpe'
-            elif obj.dps_services.dual_cpe_site == "true":
-                site = obj.dps_services.dual_cpe_sites
-                site_output = yang.Sdk.getData(url+"/dual-cpe-site/dual-cpe-site-services="+str(site), '', sdata.getTaskId())
-                conf = util.parseXmlString(site_output)
-                if obj_cpe.cpe_name.cpe == 'cpe-primary':
-                    entity = 'cpe_primary'
-                elif obj_cpe.cpe_name.cpe == 'cpe-secondary':
-                    entity = 'cpe_secondary'
-                elif obj_cpe.cpe_name.cpe == 'cpe-secondary-only':
-                    entity = 'cpe_secondary_only'
-            elif obj.dps_services.single_cpe_dual_wan_site == "true":
-                site = obj.dps_services.single_cpe_dual_wan_sites
-                site_output = yang.Sdk.getData(url+"/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
-                conf = util.parseXmlString(site_output)
-                entity = 'cpe_dual'
-            elif obj.dps_services.dual_cpe_dual_wan_site == "true":
-                site = obj.dps_services.dual_cpe_dual_wan_sites
-                site_output = yang.Sdk.getData(url+"/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
-                conf = util.parseXmlString(site_output)
-                if obj_cpe.cpe_name.cpe == 'cpe-primary':
-                    entity = 'cpe_primary_dual'
-                elif obj_cpe.cpe_name.cpe == 'cpe-secondary':
-                    entity = 'cpe_secondary_dual'
-                elif obj_cpe.cpe_name.cpe == 'cpe-secondary-only':
-                    entity = 'cpe_secondary_only_dual'
-            elif obj.dps_services.triple_cpe_site == "true":
-                site = obj.dps_services.triple_cpe_sites
-                site_output = yang.Sdk.getData(url+"/triple-cpe-site/triple-cpe-site-services="+str(site), '', sdata.getTaskId())
-                conf = util.parseXmlString(site_output)
-                if obj_cpe.cpe_name.cpe == 'cpe-primary-only':
-                    entity = 'cpe_primary_triple'
+            if hasattr(obj.dps_services, 'single_cpe_site'):
+                if obj.dps_services.single_cpe_site == "true":
+                    site = obj.dps_services.single_cpe_sites
+                    site_output = yang.Sdk.getData(url+"/single-cpe-site/single-cpe-site-services="+str(site), '', sdata.getTaskId())
+                    conf = util.parseXmlString(site_output)
+                    entity = 'cpe'
+            elif hasattr(obj.dps_services, 'dual_cpe_site'):
+                if obj.dps_services.dual_cpe_site == "true":
+                    site = obj.dps_services.dual_cpe_sites
+                    site_output = yang.Sdk.getData(url+"/dual-cpe-site/dual-cpe-site-services="+str(site), '', sdata.getTaskId())
+                    conf = util.parseXmlString(site_output)
+                    if obj_cpe.cpe_name.cpe == 'cpe-primary':
+                        entity = 'cpe_primary'
+                    elif obj_cpe.cpe_name.cpe == 'cpe-secondary':
+                        entity = 'cpe_secondary'
+                    elif obj_cpe.cpe_name.cpe == 'cpe-secondary-only':
+                        entity = 'cpe_secondary_only'
+            elif hasattr(obj.dps_services, 'single_cpe_dual_wan_site'):
+                if obj.dps_services.single_cpe_dual_wan_site == "true":
+                    site = obj.dps_services.single_cpe_dual_wan_sites
+                    site_output = yang.Sdk.getData(url+"/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
+                    conf = util.parseXmlString(site_output)
+                    entity = 'cpe_dual'
+            elif hasattr(obj.dps_services, 'dual_cpe_dual_wan_site'):
+                if obj.dps_services.dual_cpe_dual_wan_site == "true":
+                    site = obj.dps_services.dual_cpe_dual_wan_sites
+                    site_output = yang.Sdk.getData(url+"/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
+                    conf = util.parseXmlString(site_output)
+                    if obj_cpe.cpe_name.cpe == 'cpe-primary':
+                        entity = 'cpe_primary_dual'
+                    elif obj_cpe.cpe_name.cpe == 'cpe-secondary':
+                        entity = 'cpe_secondary_dual'
+                    elif obj_cpe.cpe_name.cpe == 'cpe-secondary-only':
+                        entity = 'cpe_secondary_only_dual'
+            elif hasattr(obj.dps_services, 'triple_cpe_site'):
+                if obj.dps_services.triple_cpe_site == "true":
+                    site = obj.dps_services.triple_cpe_sites
+                    site_output = yang.Sdk.getData(url+"/triple-cpe-site/triple-cpe-site-services="+str(site), '', sdata.getTaskId())
+                    conf = util.parseXmlString(site_output)
+                    if obj_cpe.cpe_name.cpe == 'cpe-primary-only':
+                        entity = 'cpe_primary_triple'
             if entity == 'cpe':
                 device_ip = conf.single_cpe_site_services.cpe.device_ip
             elif entity == 'cpe_primary':
@@ -172,7 +177,8 @@ def route_maps(redistroutepolicy, device_ip, sdata, int_name=None):
             if redistroutepolicy == route_map_name :
                 print "route_map_name is:",route_map_name
                 route_maps_url = device.url + '/route-maps'
-                routemap_obj = devices.device.route_maps.route_map.route_map()
+		from servicemodel.controller.devices.device import route_maps
+                routemap_obj = route_maps.route_map.route_map()
                 if route_map_name is not None:
                     routemap_obj.name = route_map_name
                     yang.Sdk.createData(route_maps_url, routemap_obj.getxml(filter=True), sdata.getSession())

@@ -46,7 +46,7 @@ from cpedeployment.cpedeployment_lib import ServiceModelContext
 from cpedeployment.cpedeployment_lib import getParentObject
 from cpedeployment.cpedeployment_lib import log
 
-from servicemodel.controller import devices
+
 import service_customization
 
 
@@ -102,6 +102,9 @@ class EndPoints(yang.AbstractYangServiceHandler):
         inputdict['tunnel_bandwidth'] = config.get_field_value('tunnel_bandwidth')
         inputdict['nat_outside'] = config.get_field_value('nat_outside')
         inputdict['nat_inside'] = config.get_field_value('nat_inside')
+        inputdict['tunnel_mss'] = config.get_field_value('tunnel_mss')
+        inputdict['delay'] = config.get_field_value('delay')
+        inputdict['mace_enable'] = config.get_field_value('mace_enable')
         # END OF FETCHING THE LEAF PARAMETERS
 
         #Fetch Device Object
@@ -109,8 +112,8 @@ class EndPoints(yang.AbstractYangServiceHandler):
         self.opaque_args['hireachy_device'] = dev
 
         # START OF FETCHING THE PARENT KEY LEAF PARAMETERS
-        #inputkeydict['managed_cpe_services_customer_triple_cpe_site_triple_cpe_site_services_site_name'] = sdata.getRcPath().split('/')[-3].split('=')[1]
-        #inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-5].split('=')[1]
+        inputkeydict['managed_cpe_services_customer_triple_cpe_site_triple_cpe_site_services_site_name'] = sdata.getRcPath().split('/')[-3].split('=')[1]
+        inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-5].split('=')[1]
         # END OF FETCHING THE PARENT KEY LEAF PARAMETERS
 
         #Use the custom methods to process the data
@@ -164,6 +167,9 @@ class EndPoints(yang.AbstractYangServiceHandler):
         inputdict['tunnel_bandwidth'] = config.get_field_value('tunnel_bandwidth')
         inputdict['nat_outside'] = config.get_field_value('nat_outside')
         inputdict['nat_inside'] = config.get_field_value('nat_inside')
+        inputdict['tunnel_mss'] = config.get_field_value('tunnel_mss')
+        inputdict['delay'] = config.get_field_value('delay')
+        inputdict['mace_enable'] = config.get_field_value('mace_enable')
         # END OF FETCHING THE LEAF PARAMETERS
 
         #Fetch Device Object
@@ -218,6 +224,9 @@ class EndPoints(yang.AbstractYangServiceHandler):
         inputdict['tunnel_bandwidth'] = config.get_field_value('tunnel_bandwidth')
         inputdict['nat_outside'] = config.get_field_value('nat_outside')
         inputdict['nat_inside'] = config.get_field_value('nat_inside')
+        inputdict['tunnel_mss'] = config.get_field_value('tunnel_mss')
+        inputdict['delay'] = config.get_field_value('delay')
+        inputdict['mace_enable'] = config.get_field_value('mace_enable')
         # END OF FETCHING THE LEAF PARAMETERS
 
         #Fetch Device Object

@@ -44,7 +44,7 @@ from cpedeployment.cpedeployment_lib import ServiceModelContext
 from cpedeployment.cpedeployment_lib import getParentObject
 from cpedeployment.cpedeployment_lib import log
 
-from servicemodel.controller import devices
+
 import service_customization
 
 class CpeName(yang.AbstractYangServiceHandler):
@@ -117,7 +117,6 @@ class CpeName(yang.AbstractYangServiceHandler):
         inputdict['bgp_tag'] = config.get_field_value('bgp_tag')
         inputdict['vrf_lite'] = config.get_field_value('vrf_lite')
         inputdict['bgp'] = config.get_field_value('bgp')
-        inputdict['bgp_vrf'] = config.get_field_value('bgp_vrf')
         inputdict['qppb_policy'] = config.get_field_value('qppb_policy')
         inputdict['redistribute_connected'] = config.get_field_value('redistribute_connected')
         inputdict['redistribute_static'] = config.get_field_value('redistribute_static')
@@ -128,13 +127,14 @@ class CpeName(yang.AbstractYangServiceHandler):
         inputdict['tunnel_interface_ip_address'] = config.get_field_value('tunnel_interface_ip_address')
         inputdict['tunnel_interface_description'] = config.get_field_value('tunnel_interface_description')
         inputdict['tunnel_bandwidth'] = config.get_field_value('tunnel_bandwidth')
-        inputdict['tunnel_fvrf'] = config.get_field_value('tunnel_fvrf')
+	inputdict['bgp_vrf'] = config.get_field_value('bgp_vrf')
+	inputdict['tunnel_fvrf'] = config.get_field_value('tunnel_fvrf')
         # END OF FETCHING THE LEAF PARAMETERS
 
         inputkeydict = {}
         # START OF FETCHING THE PARENT KEY LEAF PARAMETERS
-        #inputkeydict['managed_cpe_services_customer_dps_dps_services_name'] = sdata.getRcPath().split('/')[-2].split('=')[1]
-        #inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-4].split('=')[1]
+        inputkeydict['managed_cpe_services_customer_dps_dps_services_name'] = sdata.getRcPath().split('/')[-2].split('=')[1]
+        inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-4].split('=')[1]
         # END OF FETCHING THE PARENT KEY LEAF PARAMETERS
 
         #Use the custom methods to process the data
@@ -199,7 +199,6 @@ class CpeName(yang.AbstractYangServiceHandler):
         inputdict['connected_route_map'] = config.get_field_value('connected_route_map')
         inputdict['vrf_lite'] = config.get_field_value('vrf_lite')
         inputdict['bgp'] = config.get_field_value('bgp')
-        inputdict['bgp_vrf'] = config.get_field_value('bgp_vrf')
         inputdict['qppb_policy'] = config.get_field_value('qppb_policy')
         inputdict['redistribute_connected'] = config.get_field_value('redistribute_connected')
         inputdict['redistribute_static'] = config.get_field_value('redistribute_static')
@@ -210,13 +209,14 @@ class CpeName(yang.AbstractYangServiceHandler):
         inputdict['tunnel_interface_ip_address'] = config.get_field_value('tunnel_interface_ip_address')
         inputdict['tunnel_interface_description'] = config.get_field_value('tunnel_interface_description')
         inputdict['tunnel_bandwidth'] = config.get_field_value('tunnel_bandwidth')
-        inputdict['tunnel_fvrf'] = config.get_field_value('tunnel_fvrf')
+	inputdict['bgp_vrf'] = config.get_field_value('bgp_vrf')
+	inputdict['tunnel_fvrf'] = config.get_field_value('tunnel_fvrf')
         # END OF FETCHING THE LEAF PARAMETERS
 
         inputkeydict = {}
         # START OF FETCHING THE PARENT KEY LEAF PARAMETERS
-        #inputkeydict['managed_cpe_services_customer_dps_dps_services_name'] = sdata.getRcPath().split('/')[-2].split('=')[1]
-        #inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-4].split('=')[1]
+        inputkeydict['managed_cpe_services_customer_dps_dps_services_name'] = sdata.getRcPath().split('/')[-2].split('=')[1]
+        inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-4].split('=')[1]
         # END OF FETCHING THE PARENT KEY LEAF PARAMETERS
         #Use the custom method to process the data
         service_customization.ServiceDataCustomization.process_service_delete_data(smodelctx, sdata, dev=dev, parentobj=parentobj, inputdict=inputdict, config=config)

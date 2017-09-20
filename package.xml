@@ -1,9 +1,56 @@
+
 <package>
-  <name>CPEDEPLOYMENT Service</name>
-  <module-name>cpedeployment</module-name>
-  <version>6.5.8</version>
-  <ncx-version>[5.8.7,)</ncx-version>
-  <type>SERVICE_MODEL</type>
-  <auto-start>true</auto-start>
-  <description>ASD CPEDEPLOYMENT Service Package</description>
+    <auto-start>true</auto-start>
+    <dependencies>
+        <dependency>
+            <group>com.anuta.ncx.packages</group>
+            <name>servicemodel</name>
+            <order>0</order>
+            <version>6.0.0.0</version>
+        </dependency>
+        <dependency>
+            <group>com.anuta.ncx.packages</group>
+            <name>vrouterfeature</name>
+            <order>1</order>
+            <version>6.0.0.0</version>
+        </dependency>
+        <dependency>
+            <group>com.anuta.ncx.packages</group>
+            <name>interconnect</name>
+            <order>2</order>
+            <version>6.0.0.0</version>
+        </dependency>
+        <dependency>
+            <group>com.anuta.ncx.packages</group>
+            <name>virtualnetworkfeature</name>
+            <order>3</order>
+            <version>6.0.0.0</version>
+        </dependency>
+        <dependency>
+            <group>com.anuta.ncx.packages</group>
+            <name>externalnetworkfeature</name>
+            <order>4</order>
+            <version>6.0.0.0</version>
+        </dependency>
+        <dependency>
+            <group>com.anuta.ncx.packages</group>
+            <name>cpe</name>
+            <order>5</order>
+            <version>6.0.0.0</version>
+        </dependency>
+        <dependency>
+            <group>com.anuta.ncx.packages</group>
+            <name>wanoptimizerfeature</name>
+            <order>6</order>
+            <version>6.0.0.0</version>
+        </dependency>
+    </dependencies>
+    <deploy-on-agent>false</deploy-on-agent>
+    <description>CPEDEPLOYMENT Service Package @servicePackageDescription@</description>
+    <module-name>cpedeployment</module-name>
+    <name>CPEDEPLOYMENT Service</name>
+    <ncx-version>[6.0.0.0,)</ncx-version>
+    <order>-1</order>
+    <type>SERVICE_MODEL</type>
+    <version>6.7.0.0</version>
 </package>

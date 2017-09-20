@@ -52,7 +52,7 @@ single-cpe-dual-wan-sites
 from servicemodel import util
 from servicemodel import yang
 from servicemodel import devicemgr
-from servicemodel.controller import devices
+from servicemodel.controller.devices.device import route_maps
 
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject
@@ -287,7 +287,7 @@ def delete_route_map(entity, conf, sdata, **kwargs):
     set_value = inputdict['set_value']
     if route_map_name in device_route:
         if entry == 'match-condition':
-            matchcondition_obj = devices.device.route_maps.route_map.route_map_entries.match_condition.match_condition()
+            matchcondition_obj = route_maps.route_map.route_map_entries.match_condition.match_condition()
             if condition_type is not None:
                 matchcondition_obj.condition_type = condition_type
             if condition_value is not None:
@@ -313,7 +313,7 @@ def delete_route_map(entity, conf, sdata, **kwargs):
                 print "Match condition is not in device: ", device
 
         if entry == 'set-action':
-            set_obj1 = devices.device.route_maps.route_map.route_map_entries.set_action.set_action()
+            set_obj1 = route_maps.route_map.route_map_entries.set_action.set_action()
             if set_type is not None:
                 set_obj1.set_type = set_type
                 if set_type == 'ip':

@@ -52,7 +52,8 @@ single-cpe-dual-wan-sites
 from servicemodel import util
 from servicemodel import yang
 from servicemodel import devicemgr
-from servicemodel.controller import devices
+from servicemodel.controller.devices.device import route_maps
+from servicemodel.controller.devices.device import as_path_acls
 
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject
@@ -60,7 +61,7 @@ from cpedeployment.cpedeployment_lib import getCurrentObjectConfig
 from cpedeployment.cpedeployment_lib import ServiceModelContext
 from cpedeployment.cpedeployment_lib import getParentObject 
 from cpedeployment.cpedeployment_lib import log
-
+from com.anuta.api import DataNodeNotFoundException
 
 
 class ServiceDataCustomization:
@@ -280,7 +281,7 @@ def create_route_map(entity, conf, sdata, **kwargs):
 
         if sequence_number in device_route_entries:
             if entry == 'match-condition':
-                matchcondition_obj = devices.device.route_maps.route_map.route_map_entries.match_condition.match_condition()
+                matchcondition_obj = route_maps.route_map.route_map_entries.match_condition.match_condition()
                 if condition_type is not None:
                     matchcondition_obj.condition_type = condition_type
                 if condition_value is not None:
@@ -289,27 +290,14 @@ def create_route_map(entity, conf, sdata, **kwargs):
                     as_path_acl(condition_value, device, sdata)
                 match_condition_url = device.url + '/route-maps/route-map=%s/route-map-entries=%s' % (route_map_name,sequence_number)
                 yang.Sdk.createData(match_condition_url, matchcondition_obj.getxml(filter=True), sdata.getSession(), False)
-            elif entry == 'set-action':
-                set_obj1 = devices.device.route_maps.route_map.route_map_entries.set_action.set_action()
-                if set_type is not None:
-                    set_obj1.set_type = set_type
-                    if set_type == 'ip':
-                        if set_ip is None:
-                            raise Exception("Please provide ip precedence/df/next-hop")
-                        else:
-                            set_obj1.ip = set_ip
-                if set_value is not None:
-                    set_obj1.value = set_value
-                set_action_url = device.url + '/route-maps/route-map=%s/route-map-entries=%s' % (route_map_name,sequence_number)
-                yang.Sdk.createData(set_action_url, set_obj1.getxml(filter=True), sdata.getSession(), False)
         else:
-            entries_obj = devices.device.route_maps.route_map.route_map_entries.route_map_entries()
+            entries_obj = route_maps.route_map.route_map_entries.route_map_entries()
             entries_obj.seq = sequence_number
             entries_obj.action = action
             route_map_entries_url = device.url + '/route-maps/route-map=%s' % (route_map_name)
             yang.Sdk.createData(route_map_entries_url, entries_obj.getxml(filter=True), sdata.getSession(), False)
             if entry == 'match-condition':
-                matchcondition_obj = devices.device.route_maps.route_map.route_map_entries.match_condition.match_condition()
+                matchcondition_obj = route_maps.route_map.route_map_entries.match_condition.match_condition()
                 if condition_type is not None:
                     matchcondition_obj.condition_type = condition_type
                 if condition_value is not None:
@@ -318,19 +306,20 @@ def create_route_map(entity, conf, sdata, **kwargs):
                     as_path_acl(condition_value, device, sdata)
                 match_condition_url = device.url + '/route-maps/route-map=%s/route-map-entries=%s' % (route_map_name,sequence_number)
                 yang.Sdk.createData(match_condition_url, matchcondition_obj.getxml(filter=True), sdata.getSession(), False)
-            elif entry == 'set-action':
-                set_obj1 = devices.device.route_maps.route_map.route_map_entries.set_action.set_action()
-                if set_type is not None:
-                    set_obj1.set_type = set_type
-                    if set_type == 'ip':
-                        if set_ip is None:
-                            raise Exception("Please provide ip precedence/df/next-hop")
-                        else:
-                            set_obj1.ip = set_ip
-                if set_value is not None:
-                    set_obj1.value = set_value
-                set_action_url = device.url + '/route-maps/route-map=%s/route-map-entries=%s' % (route_map_name,sequence_number)
-                yang.Sdk.createData(set_action_url, set_obj1.getxml(filter=True), sdata.getSession(), False)
+
+        if entry == 'set-action':
+            set_obj1 = route_maps.route_map.route_map_entries.set_action.set_action()
+            if set_type is not None:
+                set_obj1.set_type = set_type
+                if set_type == 'ip':
+                    if set_ip is None:
+                        raise Exception("Please provide ip precedence/df/next-hop")
+                    else:
+                        set_obj1.ip = set_ip
+            if set_value is not None:
+                set_obj1.value = set_value
+            set_action_url = device.url + '/route-maps/route-map=%s/route-map-entries=%s' % (route_map_name,sequence_number)
+            yang.Sdk.createData(set_action_url, set_obj1.getxml(filter=True), sdata.getSession(), False)
     else:
         print "Route-map is not in device: ", device
 
@@ -344,7 +333,7 @@ def as_path_acl(condition_value, device, sdata):
     obj = util.parseXmlString(xml_output)
     print "obj: ",obj
     print "xml of as path acl obj: ", obj.toXml()
-    yang.Sdk.createData(device.url, '<as-path-acls/>', sdata.getSession(), False)
+    yang.Sdk.createData(device.url, '<as-path-acls/>', sdata.getSession())
 
     if hasattr(obj.as_path_acls, 'as_path_acl'):
         obj.as_path_acls.as_path_acl = util.convert_to_list(obj.as_path_acls.as_path_acl)
@@ -353,7 +342,7 @@ def as_path_acl(condition_value, device, sdata):
             if condition_value == number:
                 condition = as_path_acl_obj.get_field_value('condition')
                 expression = as_path_acl_obj.get_field_value('expression')
-                as_path_obj = devices.device.as_path_acls.as_path_acl.as_path_acl()
+                as_path_obj = as_path_acls.as_path_acl.as_path_acl()
                 as_path_obj.number = number
                 as_path_obj.condition = condition
                 as_path_obj.expression = expression

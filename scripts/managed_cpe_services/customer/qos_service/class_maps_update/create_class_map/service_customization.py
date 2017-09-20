@@ -55,7 +55,7 @@ single-cpe-dual-wan-sites
 from servicemodel import util
 from servicemodel import yang
 from servicemodel import devicemgr
-from servicemodel.controller import devices
+from servicemodel.controller.devices.device import class_maps
 
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject
@@ -259,7 +259,7 @@ def create_match_condition(entity, conf, sdata, **kwargs):
     description = inputdict['description']
 
     device.addQOSClassMapsContainer(sdata.getSession())
-    cls_map_obj = devices.device.class_maps.class_map.class_map()
+    cls_map_obj = class_maps.class_map.class_map()
     cls_map_obj.name = cls_name
     if util.isNotEmpty(description):
         cls_map_obj.description = description
@@ -270,12 +270,12 @@ def create_match_condition(entity, conf, sdata, **kwargs):
     if len(inputdict['dscp']) > 0:
         if isinstance(inputdict['dscp'], list) is True:
             for ds in inputdict['dscp']:
-                match_obj = devices.device.class_maps.class_map.class_match_condition.class_match_condition()
+                match_obj = class_maps.class_map.class_match_condition.class_match_condition()
                 match_obj.condition_type = "ip-dscp"
                 match_obj.match_value = ds
                 yang.Sdk.createData(device.url+"/qos:class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession(), False)
         else:
-            match_obj = devices.device.class_maps.class_map.class_match_condition.class_match_condition()
+            match_obj = class_maps.class_map.class_match_condition.class_match_condition()
             match_obj.condition_type = "ip-dscp"
             match_obj.match_value = inputdict['dscp']
             yang.Sdk.createData(device.url+"/qos:class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession(), False)
@@ -283,12 +283,12 @@ def create_match_condition(entity, conf, sdata, **kwargs):
     if len(inputdict['protocol']) > 0:
         if isinstance(inputdict['protocol'], list) is True:
             for pr in inputdict['protocol']:
-                match_obj = devices.device.class_maps.class_map.class_match_condition.class_match_condition()
+                match_obj = class_maps.class_map.class_match_condition.class_match_condition()
                 match_obj.condition_type = "protocol"
                 match_obj.match_value = pr
                 yang.Sdk.createData(device.url+"/qos:class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession(), False)
                 if pr == "http":
-                    match_object = devices.device.class_maps.class_map.class_match_condition.http_url.http_url()
+                    match_object = class_maps.class_map.class_match_condition.http_url.http_url()
                     http_url = inputdict['http_url']
                     print "http_url is:",http_url
                     if util.isNotEmpty(http_url):
@@ -299,12 +299,12 @@ def create_match_condition(entity, conf, sdata, **kwargs):
                         match_obj.only_http = 'true'
                         yang.Sdk.createData(device.url+"/class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession(), False)
         else:
-            match_obj = devices.device.class_maps.class_map.class_match_condition.class_match_condition()
+            match_obj = class_maps.class_map.class_match_condition.class_match_condition()
             match_obj.condition_type = "protocol"
             match_obj.match_value = inputdict['protocol']
             yang.Sdk.createData(device.url+"/qos:class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession(), False)
             if inputdict['protocol'] == "http":
-                match_object = devices.device.class_maps.class_map.class_match_condition.http_url.http_url()
+                match_object = class_maps.class_map.class_match_condition.http_url.http_url()
                 http_url = inputdict['http_url']
                 print "http_url is:",http_url
                 if util.isNotEmpty(http_url):
@@ -332,13 +332,13 @@ def create_match_condition(entity, conf, sdata, **kwargs):
         if access_group not in device_access_group:
             access_group_def(url, access_group, device, sdata)
 
-        match_obj = devices.device.class_maps.class_map.class_match_condition.class_match_condition()
+        match_obj = class_maps.class_map.class_match_condition.class_match_condition()
         match_obj.condition_type = "access-group"
         match_obj.match_value = access_group
         yang.Sdk.createData(device.url+"/qos:class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession(), False)
 
     if util.isNotEmpty(qos_group):
-        match_obj = devices.device.class_maps.class_map.class_match_condition.class_match_condition()
+        match_obj = class_maps.class_map.class_match_condition.class_match_condition()
         match_obj.condition_type = "qos-group"
         match_obj.match_value = qos_group
         yang.Sdk.createData(device.url+"/qos:class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession(), False)

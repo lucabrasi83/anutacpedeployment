@@ -58,7 +58,7 @@ from cpedeployment.cpedeployment_lib import ServiceModelContext
 from cpedeployment.cpedeployment_lib import getParentObject
 from cpedeployment.cpedeployment_lib import log
 
-from servicemodel.controller import devices
+
 import service_customization
 
 class ExceedHandling(yang.AbstractYangServiceHandler):

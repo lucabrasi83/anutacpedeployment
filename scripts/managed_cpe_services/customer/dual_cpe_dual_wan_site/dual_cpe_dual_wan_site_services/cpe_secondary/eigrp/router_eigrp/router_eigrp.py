@@ -48,7 +48,7 @@ from cpedeployment.cpedeployment_lib import ServiceModelContext
 from cpedeployment.cpedeployment_lib import getParentObject
 from cpedeployment.cpedeployment_lib import log
 
-from servicemodel.controller import devices
+
 import service_customization
 
 
@@ -82,6 +82,8 @@ class RouterEigrp(yang.AbstractYangServiceHandler):
         inputdict['process_id'] = config.get_field_value('process_id')
         inputdict['vrf_name'] = config.get_field_value('vrf_name')
         inputdict['eigrp_stub'] = config.get_field_value('eigrp_stub')
+        inputdict['router_id'] = config.get_field_value('router_id')
+        inputdict['nsf'] = config.get_field_value('nsf')
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'cpe-secondary')
@@ -91,8 +93,8 @@ class RouterEigrp(yang.AbstractYangServiceHandler):
         dev = getDeviceObject(device_mgmt_ip_address, sdata)
 
         # START OF FETCHING THE PARENT KEY LEAF PARAMETERS
-        #inputkeydict['managed_cpe_services_customer_dual_cpe_dual_wan_site_dual_cpe_dual_wan_site_services_site_name'] = sdata.getRcPath().split('/')[-4].split('=')[1]
-        #inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-6].split('=')[1]
+        inputkeydict['managed_cpe_services_customer_dual_cpe_dual_wan_site_dual_cpe_dual_wan_site_services_site_name'] = sdata.getRcPath().split('/')[-4].split('=')[1]
+        inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-6].split('=')[1]
         # END OF FETCHING THE PARENT KEY LEAF PARAMETERS
 
         #Use the custom methods to process the data
@@ -124,6 +126,8 @@ class RouterEigrp(yang.AbstractYangServiceHandler):
         inputdict['process_id'] = config.get_field_value('process_id')
         inputdict['vrf_name'] = config.get_field_value('vrf_name')
         inputdict['eigrp_stub'] = config.get_field_value('eigrp_stub')
+        inputdict['router_id'] = config.get_field_value('router_id')
+        inputdict['nsf'] = config.get_field_value('nsf')
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'cpe-secondary')
@@ -158,6 +162,8 @@ class RouterEigrp(yang.AbstractYangServiceHandler):
         inputdict['process_id'] = config.get_field_value('process_id')
         inputdict['vrf_name'] = config.get_field_value('vrf_name')
         inputdict['eigrp_stub'] = config.get_field_value('eigrp_stub')
+        inputdict['router_id'] = config.get_field_value('router_id')
+        inputdict['nsf'] = config.get_field_value('nsf')
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'cpe-secondary')

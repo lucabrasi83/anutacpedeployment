@@ -43,7 +43,7 @@ single-cpe-dual-wan-sites
 from servicemodel import util
 from servicemodel import yang
 from servicemodel import devicemgr
-from servicemodel.controller import devices
+
 
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject

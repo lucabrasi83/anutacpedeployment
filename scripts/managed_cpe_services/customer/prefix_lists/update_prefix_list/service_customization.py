@@ -52,7 +52,7 @@ single-cpe-dual-wan-sites
 from servicemodel import util
 from servicemodel import yang
 from servicemodel import devicemgr
-from servicemodel.controller import devices
+from servicemodel.controller.devices.device import ip_prefixlist_list
 
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject
@@ -335,7 +335,7 @@ def delete_prefix(entity, conf, sdata, **kwargs):
                     device_pre_entry.append(entry.rule_num)
 
         if rule_num in device_pre_entry:
-            prefix_obj = devices.device.ip_prefixlist_list.ip_prefixlist.ip_prefixlist_entries.ip_prefixlist_entry.ip_prefixlist_entry()
+            prefix_obj = ip_prefixlist_list.ip_prefixlist.ip_prefixlist_entries.ip_prefixlist_entry.ip_prefixlist_entry()
             prefix_obj.rule_num = rule_num
             prefix_list_url = '/controller:devices/device=%s/l3features:ip-prefixlist-list/ip-prefixlist=%s/ip-prefixlist-entries/ip-prefixlist-entry=%s' % (device.device.id, prefix_list_name, rule_num)
             output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+prefix_list_url+'</rc-path></input>')
@@ -395,7 +395,7 @@ def create_prefix(entity, conf, sdata, **kwargs):
             device_pre.append(pre.name)
 
     if prefix_list_name in device_pre:
-        prefix_obj = devices.device.ip_prefixlist_list.ip_prefixlist.ip_prefixlist_entries.ip_prefixlist_entry.ip_prefixlist_entry()
+        prefix_obj = ip_prefixlist_list.ip_prefixlist.ip_prefixlist_entries.ip_prefixlist_entry.ip_prefixlist_entry()
         if util.isNotEmpty(prefix_name):
             prefix_obj.prefix_name = prefix_name
         if util.isNotEmpty(rule_num):

@@ -43,7 +43,7 @@ Names of Leafs for this Yang Entity
 from servicemodel import util
 from servicemodel import yang
 from servicemodel import devicemgr
-from servicemodel.controller import devices
+from servicemodel.controller.devices.device import vrfs
 
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject
@@ -120,12 +120,12 @@ class ServiceDataCustomization:
             if not inputdict['import_route_map']:
                 inputdict['import_route_map'] = ''
             payload = "%s<import-route-map>%s</import-route-map>%s" % (prefix, inputdict['import_route_map'], suffix)
-            yang.Sdk.patchData(rc_path, payload, sdata, False)
+            #yang.Sdk.patchData(rc_path, payload, sdata, False)
 
             if not inputdict['export_route_map']:
                 inputdict['export_route_map'] = ''
             payload = "%s<export-route-map>%s</export-route-map>%s" % (prefix, inputdict['export_route_map'], suffix)
-            yang.Sdk.patchData(rc_path, payload, sdata, False)
+            #yang.Sdk.patchData(rc_path, payload, sdata, False)
 
             site_output = yang.Sdk.getData(ep_uri, '', sdata.getTaskId())
             conf = util.parseXmlString(site_output)
@@ -143,7 +143,7 @@ class ServiceDataCustomization:
                     vrf = "GLOBAL"
             peer_ip = conf.end_points.bgp_peers.peer_ip
             remote_as = conf.end_points.bgp_peers.remote_as
-            bgp_neighbor_obj = devices.device.vrfs.vrf.router_bgp.neighbor.neighbor()
+            bgp_neighbor_obj = vrfs.vrf.router_bgp.neighbor.neighbor()
             if inputdict['import_route_map'] != "":
                 bgp_neighbor_obj.in_route_map = inputdict['import_route_map']
             if inputdict['export_route_map'] != "":
@@ -152,7 +152,7 @@ class ServiceDataCustomization:
             bgp_neighbor_obj.remote_as = remote_as
             #yang.Sdk.createData(device.url + '/vrfs/vrf=%s' % (vrf), '<router-bgp/>', sdata.getSession(), False)
             router_bgp_neighbor_url = device.url + '/vrfs/vrf=%s/router-bgp' % (vrf)
-            yang.Sdk.createData(router_bgp_neighbor_url, bgp_neighbor_obj.getxml(filter=True), sdata.getSession(), False)
+            #yang.Sdk.createData(router_bgp_neighbor_url, bgp_neighbor_obj.getxml(filter=True), sdata.getSession(), False)
 
     @staticmethod
     def process_service_delete_data(smodelctx, sdata, **kwargs):

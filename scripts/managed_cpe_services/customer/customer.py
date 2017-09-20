@@ -38,7 +38,7 @@ from cpedeployment.cpedeployment_lib import ServiceModelContext
 from cpedeployment.cpedeployment_lib import getParentObject
 from cpedeployment.cpedeployment_lib import log
 
-from servicemodel.controller import devices
+
 import service_customization
 
 class Customer(yang.AbstractYangServiceHandler):
@@ -55,7 +55,6 @@ class Customer(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'customer')
 
         #Fetch Service Model Context Object
-        #smodelctx = None
         smodelctx = None
 
         #Fetch Parent Object

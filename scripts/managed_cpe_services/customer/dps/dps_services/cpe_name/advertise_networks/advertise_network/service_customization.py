@@ -45,7 +45,7 @@ Names of Leafs for this Yang Entity
 from servicemodel import util
 from servicemodel import yang
 from servicemodel import devicemgr
-from servicemodel.controller import devices
+from servicemodel.controller.devices.device import vrfs
 
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject
@@ -76,42 +76,47 @@ class ServiceDataCustomization:
             uri = sdata.getRcPath()
             uri_list = uri.split('/',5)
             url = '/'.join(uri_list[0:4])
-            if obj.dps_services.single_cpe_site == "true":
-                site = obj.dps_services.single_cpe_sites
-                site_output = yang.Sdk.getData(url+"/single-cpe-site/single-cpe-site-services="+str(site), '', sdata.getTaskId())
-                conf = util.parseXmlString(site_output)
-                entity = 'cpe'
-            elif obj.dps_services.dual_cpe_site == "true":
-                site = obj.dps_services.dual_cpe_sites
-                site_output = yang.Sdk.getData(url+"/dual-cpe-site/dual-cpe-site-services="+str(site), '', sdata.getTaskId())
-                conf = util.parseXmlString(site_output)
-                if obj_cpe.cpe_name.cpe == 'cpe-primary':
-                    entity = 'cpe_primary'
-                elif obj_cpe.cpe_name.cpe == 'cpe-secondary':
-                    entity = 'cpe_secondary'
-                elif obj_cpe.cpe_name.cpe == 'cpe-secondary-only':
-                    entity = 'cpe_secondary_only'
-            elif obj.dps_services.single_cpe_dual_wan_site == "true":
-                site = obj.dps_services.single_cpe_dual_wan_sites
-                site_output = yang.Sdk.getData(url+"/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
-                conf = util.parseXmlString(site_output)
-                entity = 'cpe_dual'
-            elif obj.dps_services.dual_cpe_dual_wan_site == "true":
-                site = obj.dps_services.dual_cpe_dual_wan_sites
-                site_output = yang.Sdk.getData(url+"/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
-                conf = util.parseXmlString(site_output)
-                if obj_cpe.cpe_name.cpe == 'cpe-primary':
-                    entity = 'cpe_primary_dual'
-                elif obj_cpe.cpe_name.cpe == 'cpe-secondary':
-                    entity = 'cpe_secondary_dual'
-                elif obj_cpe.cpe_name.cpe == 'cpe-secondary-only':
-                    entity = 'cpe_secondary_only_dual'
-            elif obj.dps_services.triple_cpe_site == "true":
-                site = obj.dps_services.triple_cpe_sites
-                site_output = yang.Sdk.getData(url+"/triple-cpe-site/triple-cpe-site-services="+str(site), '', sdata.getTaskId())
-                conf = util.parseXmlString(site_output)
-                if obj_cpe.cpe_name.cpe == 'cpe-primary-only':
-                    entity = 'cpe_primary_triple'
+            if hasattr(obj.dps_services, 'single_cpe_site'):
+                if obj.dps_services.single_cpe_site == "true":
+                    site = obj.dps_services.single_cpe_sites
+                    site_output = yang.Sdk.getData(url+"/single-cpe-site/single-cpe-site-services="+str(site), '', sdata.getTaskId())
+                    conf = util.parseXmlString(site_output)
+                    entity = 'cpe'
+            elif hasattr(obj.dps_services, 'dual_cpe_site'):
+                if obj.dps_services.dual_cpe_site == "true":
+                    site = obj.dps_services.dual_cpe_sites
+                    site_output = yang.Sdk.getData(url+"/dual-cpe-site/dual-cpe-site-services="+str(site), '', sdata.getTaskId())
+                    conf = util.parseXmlString(site_output)
+                    if obj_cpe.cpe_name.cpe == 'cpe-primary':
+                        entity = 'cpe_primary'
+                    elif obj_cpe.cpe_name.cpe == 'cpe-secondary':
+                        entity = 'cpe_secondary'
+                    elif obj_cpe.cpe_name.cpe == 'cpe-secondary-only':
+                        entity = 'cpe_secondary_only'
+            elif hasattr(obj.dps_services, 'single_cpe_dual_wan_site'):
+                if obj.dps_services.single_cpe_dual_wan_site == "true":
+                    site = obj.dps_services.single_cpe_dual_wan_sites
+                    site_output = yang.Sdk.getData(url+"/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
+                    conf = util.parseXmlString(site_output)
+                    entity = 'cpe_dual'
+            elif hasattr(obj.dps_services, 'dual_cpe_dual_wan_site'):
+                if obj.dps_services.dual_cpe_dual_wan_site == "true":
+                    site = obj.dps_services.dual_cpe_dual_wan_sites
+                    site_output = yang.Sdk.getData(url+"/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
+                    conf = util.parseXmlString(site_output)
+                    if obj_cpe.cpe_name.cpe == 'cpe-primary':
+                        entity = 'cpe_primary_dual'
+                    elif obj_cpe.cpe_name.cpe == 'cpe-secondary':
+                        entity = 'cpe_secondary_dual'
+                    elif obj_cpe.cpe_name.cpe == 'cpe-secondary-only':
+                        entity = 'cpe_secondary_only_dual'
+            elif hasattr(obj.dps_services, 'triple_cpe_site'):
+                if obj.dps_services.triple_cpe_site == "true":
+                    site = obj.dps_services.triple_cpe_sites
+                    site_output = yang.Sdk.getData(url+"/triple-cpe-site/triple-cpe-site-services="+str(site), '', sdata.getTaskId())
+                    conf = util.parseXmlString(site_output)
+                    if obj_cpe.cpe_name.cpe == 'cpe-primary-only':
+                        entity = 'cpe_primary_triple'
             if entity == 'cpe':
                 device_ip = conf.single_cpe_site_services.cpe.device_ip
             elif entity == 'cpe_primary':
@@ -167,7 +172,7 @@ def adv_networks(entity, smodelctx, sdata, device_ip, **kwargs):
     prefix = util.IPPrefix(prefix)
     ip_address = prefix.address
     netmask = prefix.netmask
-    adv_networks_obj = devices.device.vrfs.vrf.router_bgp.network.network()
+    adv_networks_obj = vrfs.vrf.router_bgp.network.network()
     adv_networks_obj.ip_address = ip_address
     adv_networks_obj.netmask = netmask
     if util.isNotEmpty(route_map):
@@ -181,117 +186,122 @@ def adv_networks(entity, smodelctx, sdata, device_ip, **kwargs):
         uri = sdata.getRcPath()
         uri_list = uri.split('/',5)
         url = '/'.join(uri_list[0:4])
-        if obj.dps_services.single_cpe_site == "true":
-            site = obj.dps_services.single_cpe_sites
-            site_output = yang.Sdk.getData(url+"/single-cpe-site/single-cpe-site-services="+str(site), '', sdata.getTaskId())
-            conf = util.parseXmlString(site_output)
-            # if hasattr(conf.single_cpe_site_services.cpe, 'vrf_name'):
-            #     vrf = conf.single_cpe_site_services.cpe.vrf_name
-            if hasattr(conf.single_cpe_site_services.cpe_lan, 'end_points'):
-                for endpoint in util.convert_to_list(conf.single_cpe_site_services.cpe_lan.end_points):
-                    endpoint_ip = endpoint.device_ip
-                    if device_ip == endpoint_ip:
-                        if endpoint.dps == 'true':
-                            if hasattr(endpoint, 'vrf'):
-                                vrf = endpoint.vrf
-        elif obj.dps_services.dual_cpe_site == "true":
-            site = obj.dps_services.dual_cpe_sites
-            site_output = yang.Sdk.getData(url+"/dual-cpe-site/dual-cpe-site-services="+str(site), '', sdata.getTaskId())
-            conf = util.parseXmlString(site_output)
-            config = getLocalObject(sdata, 'cpe-name')
-            if config.cpe_name.cpe == 'cpe-primary':
-                # if hasattr(conf.dual_cpe_site_services.cpe_primary, 'vrf_name'):
-                #     vrf = conf.dual_cpe_site_services.cpe_primary.vrf_name
-                if hasattr(conf.dual_cpe_site_services.cpe_lan, 'end_points'):
-                    for endpoint in util.convert_to_list(conf.dual_cpe_site_services.cpe_lan.end_points):
+        if hasattr(obj.dps_services, 'single_cpe_site'):
+            if obj.dps_services.single_cpe_site == "true":
+                site = obj.dps_services.single_cpe_sites
+                site_output = yang.Sdk.getData(url+"/single-cpe-site/single-cpe-site-services="+str(site), '', sdata.getTaskId())
+                conf = util.parseXmlString(site_output)
+                # if hasattr(conf.single_cpe_site_services.cpe, 'vrf_name'):
+                #     vrf = conf.single_cpe_site_services.cpe.vrf_name
+                if hasattr(conf.single_cpe_site_services.cpe_lan, 'end_points'):
+                    for endpoint in util.convert_to_list(conf.single_cpe_site_services.cpe_lan.end_points):
                         endpoint_ip = endpoint.device_ip
                         if device_ip == endpoint_ip:
                             if endpoint.dps == 'true':
                                 if hasattr(endpoint, 'vrf'):
                                     vrf = endpoint.vrf
-            elif config.cpe_name.cpe == 'cpe-secondary':
-                # if hasattr(conf.dual_cpe_site_services.cpe_secondary, 'vrf_name'):
-                #     vrf = conf.dual_cpe_site_services.cpe_secondary.vrf_name
-                if hasattr(conf.dual_cpe_site_services.cpe_lan, 'end_points'):
-                    for endpoint in util.convert_to_list(conf.dual_cpe_site_services.cpe_lan.end_points):
+        elif hasattr(obj.dps_services, 'dual_cpe_site'):
+            if obj.dps_services.dual_cpe_site == "true":
+                site = obj.dps_services.dual_cpe_sites
+                site_output = yang.Sdk.getData(url+"/dual-cpe-site/dual-cpe-site-services="+str(site), '', sdata.getTaskId())
+                conf = util.parseXmlString(site_output)
+                config = getLocalObject(sdata, 'cpe-name')
+                if config.cpe_name.cpe == 'cpe-primary':
+                    # if hasattr(conf.dual_cpe_site_services.cpe_primary, 'vrf_name'):
+                    #     vrf = conf.dual_cpe_site_services.cpe_primary.vrf_name
+                    if hasattr(conf.dual_cpe_site_services.cpe_lan, 'end_points'):
+                        for endpoint in util.convert_to_list(conf.dual_cpe_site_services.cpe_lan.end_points):
+                            endpoint_ip = endpoint.device_ip
+                            if device_ip == endpoint_ip:
+                                if endpoint.dps == 'true':
+                                    if hasattr(endpoint, 'vrf'):
+                                        vrf = endpoint.vrf
+                elif config.cpe_name.cpe == 'cpe-secondary':
+                    # if hasattr(conf.dual_cpe_site_services.cpe_secondary, 'vrf_name'):
+                    #     vrf = conf.dual_cpe_site_services.cpe_secondary.vrf_name
+                    if hasattr(conf.dual_cpe_site_services.cpe_lan, 'end_points'):
+                        for endpoint in util.convert_to_list(conf.dual_cpe_site_services.cpe_lan.end_points):
+                            endpoint_ip = endpoint.device_ip
+                            if device_ip == endpoint_ip:
+                                if endpoint.dps == 'true':
+                                    if hasattr(endpoint, 'vrf'):
+                                        vrf = endpoint.vrf
+                elif config.cpe_name.cpe == 'cpe-secondary-only':
+                    # if hasattr(conf.dual_cpe_site_services.cpe_secondary, 'vrf_name'):
+                    #     vrf = conf.dual_cpe_site_services.cpe_secondary.vrf_name
+                    if hasattr(conf.dual_cpe_site_services.cpe_lan, 'end_points'):
+                        for endpoint in util.convert_to_list(conf.dual_cpe_site_services.cpe_lan.end_points):
+                            endpoint_ip = endpoint.device_ip
+                            if device_ip == endpoint_ip:
+                                if endpoint.dps == 'true':
+                                    if hasattr(endpoint, 'vrf'):
+                                        vrf = endpoint.vrf
+        elif hasattr(obj.dps_services, 'single_cpe_dual_wan_site'):
+            if obj.dps_services.single_cpe_dual_wan_site == "true":
+                site = obj.dps_services.single_cpe_dual_wan_sites
+                site_output = yang.Sdk.getData(url+"/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
+                conf = util.parseXmlString(site_output)
+                # if hasattr(conf.single_cpe_dual_wan_site_services.cpe, 'vrf_name'):
+                #     vrf = conf.single_cpe_dual_wan_site_services.cpe.vrf_name
+                if hasattr(conf.single_cpe_dual_wan_site_services.cpe_lan, 'end_points'):
+                    for endpoint in util.convert_to_list(conf.single_cpe_dual_wan_site_services.cpe_lan.end_points):
                         endpoint_ip = endpoint.device_ip
                         if device_ip == endpoint_ip:
                             if endpoint.dps == 'true':
                                 if hasattr(endpoint, 'vrf'):
                                     vrf = endpoint.vrf
-            elif config.cpe_name.cpe == 'cpe-secondary-only':
-                # if hasattr(conf.dual_cpe_site_services.cpe_secondary, 'vrf_name'):
-                #     vrf = conf.dual_cpe_site_services.cpe_secondary.vrf_name
-                if hasattr(conf.dual_cpe_site_services.cpe_lan, 'end_points'):
-                    for endpoint in util.convert_to_list(conf.dual_cpe_site_services.cpe_lan.end_points):
-                        endpoint_ip = endpoint.device_ip
-                        if device_ip == endpoint_ip:
-                            if endpoint.dps == 'true':
-                                if hasattr(endpoint, 'vrf'):
-                                    vrf = endpoint.vrf
-        elif obj.dps_services.single_cpe_dual_wan_site == "true":
-            site = obj.dps_services.single_cpe_dual_wan_sites
-            site_output = yang.Sdk.getData(url+"/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
-            conf = util.parseXmlString(site_output)
-            # if hasattr(conf.single_cpe_dual_wan_site_services.cpe, 'vrf_name'):
-            #     vrf = conf.single_cpe_dual_wan_site_services.cpe.vrf_name
-            if hasattr(conf.single_cpe_dual_wan_site_services.cpe_lan, 'end_points'):
-                for endpoint in util.convert_to_list(conf.single_cpe_dual_wan_site_services.cpe_lan.end_points):
-                    endpoint_ip = endpoint.device_ip
-                    if device_ip == endpoint_ip:
-                        if endpoint.dps == 'true':
-                            if hasattr(endpoint, 'vrf'):
-                                vrf = endpoint.vrf
-        elif obj.dps_services.dual_cpe_dual_wan_site == "true":
-            site = obj.dps_services.dual_cpe_dual_wan_sites
-            site_output = yang.Sdk.getData(url+"/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
-            conf = util.parseXmlString(site_output)
-            config = getLocalObject(sdata, 'cpe-name')
-            if config.cpe_name.cpe == 'cpe-primary':
-                # if hasattr(conf.dual_cpe_site_services.cpe_primary, 'vrf_name'):
-                #     vrf = conf.dual_cpe_site_services.cpe_primary.vrf_name
-                if hasattr(conf.dual_cpe_dual_wan_site_services.cpe_lan, 'end_points'):
-                    for endpoint in util.convert_to_list(conf.dual_cpe_dual_wan_site_services.cpe_lan.end_points):
-                        endpoint_ip = endpoint.device_ip
-                        if device_ip == endpoint_ip:
-                            if endpoint.dps == 'true':
-                                if hasattr(endpoint, 'vrf'):
-                                    vrf = endpoint.vrf
-            elif config.cpe_name.cpe == 'cpe-secondary':
-                # if hasattr(conf.dual_cpe_site_services.cpe_secondary, 'vrf_name'):
-                #     vrf = conf.dual_cpe_site_services.cpe_secondary.vrf_name
-                if hasattr(conf.dual_cpe_dual_wan_site_services.cpe_lan, 'end_points'):
-                    for endpoint in util.convert_to_list(conf.dual_cpe_dual_wan_site_services.cpe_lan.end_points):
-                        endpoint_ip = endpoint.device_ip
-                        if device_ip == endpoint_ip:
-                            if endpoint.dps == 'true':
-                                if hasattr(endpoint, 'vrf'):
-                                    vrf = endpoint.vrf
-            elif config.cpe_name.cpe == 'cpe-secondary-only':
-                # if hasattr(conf.dual_cpe_site_services.cpe_secondary, 'vrf_name'):
-                #     vrf = conf.dual_cpe_site_services.cpe_secondary.vrf_name
-                if hasattr(conf.dual_cpe_dual_wan_site_services.cpe_lan, 'end_points'):
-                    for endpoint in util.convert_to_list(conf.dual_cpe_dual_wan_site_services.cpe_lan.end_points):
-                        endpoint_ip = endpoint.device_ip
-                        if device_ip == endpoint_ip:
-                            if endpoint.dps == 'true':
-                                if hasattr(endpoint, 'vrf'):
-                                    vrf = endpoint.vrf
-        elif obj.dps_services.triple_cpe_site == "true":
-            site = obj.dps_services.triple_cpe_sites
-            site_output = yang.Sdk.getData(url+"/triple-cpe-site/triple-cpe-site-services="+str(site), '', sdata.getTaskId())
-            conf = util.parseXmlString(site_output)
-            config = getLocalObject(sdata, 'cpe-name')
-            if config.cpe_name.cpe == 'cpe-primary-only':
-                # if hasattr(conf.dual_cpe_site_services.cpe_primary, 'vrf_name'):
-                #     vrf = conf.dual_cpe_site_services.cpe_primary.vrf_name
-                if hasattr(conf.triple_cpe_site_services.cpe_lan, 'end_points'):
-                    for endpoint in util.convert_to_list(conf.triple_cpe_site_services.cpe_lan.end_points):
-                        endpoint_ip = endpoint.device_ip
-                        if device_ip == endpoint_ip:
-                            if endpoint.dps == 'true':
-                                if hasattr(endpoint, 'vrf'):
-                                    vrf = endpoint.vrf
+        elif hasattr(obj.dps_services, 'dual_cpe_dual_wan_site'):
+            if obj.dps_services.dual_cpe_dual_wan_site == "true":
+                site = obj.dps_services.dual_cpe_dual_wan_sites
+                site_output = yang.Sdk.getData(url+"/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
+                conf = util.parseXmlString(site_output)
+                config = getLocalObject(sdata, 'cpe-name')
+                if config.cpe_name.cpe == 'cpe-primary':
+                    # if hasattr(conf.dual_cpe_site_services.cpe_primary, 'vrf_name'):
+                    #     vrf = conf.dual_cpe_site_services.cpe_primary.vrf_name
+                    if hasattr(conf.dual_cpe_dual_wan_site_services.cpe_lan, 'end_points'):
+                        for endpoint in util.convert_to_list(conf.dual_cpe_dual_wan_site_services.cpe_lan.end_points):
+                            endpoint_ip = endpoint.device_ip
+                            if device_ip == endpoint_ip:
+                                if endpoint.dps == 'true':
+                                    if hasattr(endpoint, 'vrf'):
+                                        vrf = endpoint.vrf
+                elif config.cpe_name.cpe == 'cpe-secondary':
+                    # if hasattr(conf.dual_cpe_site_services.cpe_secondary, 'vrf_name'):
+                    #     vrf = conf.dual_cpe_site_services.cpe_secondary.vrf_name
+                    if hasattr(conf.dual_cpe_dual_wan_site_services.cpe_lan, 'end_points'):
+                        for endpoint in util.convert_to_list(conf.dual_cpe_dual_wan_site_services.cpe_lan.end_points):
+                            endpoint_ip = endpoint.device_ip
+                            if device_ip == endpoint_ip:
+                                if endpoint.dps == 'true':
+                                    if hasattr(endpoint, 'vrf'):
+                                        vrf = endpoint.vrf
+                elif config.cpe_name.cpe == 'cpe-secondary-only':
+                    # if hasattr(conf.dual_cpe_site_services.cpe_secondary, 'vrf_name'):
+                    #     vrf = conf.dual_cpe_site_services.cpe_secondary.vrf_name
+                    if hasattr(conf.dual_cpe_dual_wan_site_services.cpe_lan, 'end_points'):
+                        for endpoint in util.convert_to_list(conf.dual_cpe_dual_wan_site_services.cpe_lan.end_points):
+                            endpoint_ip = endpoint.device_ip
+                            if device_ip == endpoint_ip:
+                                if endpoint.dps == 'true':
+                                    if hasattr(endpoint, 'vrf'):
+                                        vrf = endpoint.vrf
+        elif hasattr(obj.dps_services, 'triple_cpe_site'):
+            if obj.dps_services.triple_cpe_site == "true":
+                site = obj.dps_services.triple_cpe_sites
+                site_output = yang.Sdk.getData(url+"/triple-cpe-site/triple-cpe-site-services="+str(site), '', sdata.getTaskId())
+                conf = util.parseXmlString(site_output)
+                config = getLocalObject(sdata, 'cpe-name')
+                if config.cpe_name.cpe == 'cpe-primary-only':
+                    # if hasattr(conf.dual_cpe_site_services.cpe_primary, 'vrf_name'):
+                    #     vrf = conf.dual_cpe_site_services.cpe_primary.vrf_name
+                    if hasattr(conf.triple_cpe_site_services.cpe_lan, 'end_points'):
+                        for endpoint in util.convert_to_list(conf.triple_cpe_site_services.cpe_lan.end_points):
+                            endpoint_ip = endpoint.device_ip
+                            if device_ip == endpoint_ip:
+                                if endpoint.dps == 'true':
+                                    if hasattr(endpoint, 'vrf'):
+                                        vrf = endpoint.vrf
 
     if vrf is None or util.isEmpty(vrf):
         vrf = 'GLOBAL'

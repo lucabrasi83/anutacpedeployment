@@ -44,7 +44,7 @@ Names of Leafs for this Yang Entity
 from servicemodel import util
 from servicemodel import yang
 from servicemodel import devicemgr
-from servicemodel.controller import devices
+
 
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject
@@ -76,6 +76,7 @@ class ServiceDataCustomization:
               route_maps(kwargs['inputdict']['route_map_name'], device, sdata, int_name, entity)
       else:
           route_maps(kwargs['inputdict']['route_map_name'], dev, sdata, int_name, entity)
+
 
     @staticmethod
     def process_service_device_bindings(smodelctx, sdata, dev, **kwargs):

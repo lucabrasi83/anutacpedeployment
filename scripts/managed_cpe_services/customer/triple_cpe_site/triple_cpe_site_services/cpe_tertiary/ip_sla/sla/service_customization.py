@@ -66,7 +66,7 @@ source-interface-name
 from servicemodel import util
 from servicemodel import yang
 from servicemodel import devicemgr
-from servicemodel.controller import devices
+
 
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject
@@ -137,6 +137,8 @@ class DeletePreProcessor(yang.SessionPreProcessor):
         operations = session.getOperations()
         """Add any move operations for Deletion"""
         log('operations: %s' % (operations))
+        yang.moveOperations(operations, ['DeleteSLA'], ['DeleteTrack', 'DeleteSLASchedule'], True)
+
 
 class CreatePreProcessor(yang.SessionPreProcessor):
     def processBeforeReserve(self, session):

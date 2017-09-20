@@ -13,7 +13,7 @@ from servicemodel import yang
 from servicemodel import util
 from servicemodel import ipam
 from servicemodel import devicemgr
-from servicemodel.controller import devices
+from servicemodel.controller.devices.device import vrfs
 
 from cpedeployment_lib import getLocalObject
 
@@ -87,12 +87,12 @@ def bgp_peer(entity, smodelctx, sdata, device, **kwargs):
     # if util.isEmpty(peer):
     #     raise Exception("Peer is empty")
     #if peer == 'peer-ip':
-    bgp_neighbor_obj = devices.device.vrfs.vrf.router_bgp.neighbor.neighbor()
+    bgp_neighbor_obj = vrfs.vrf.router_bgp.neighbor.neighbor()
     bgp_neighbor_obj.ip_address = peer_ip
     # elif peer == 'peer-group':
     #     if util.isEmpty(peer_group):
     #         raise Exception("Peer group is empty")
-    #     bgp_neighbor_obj = devices.device.vrfs.vrf.router_bgp.peer_group.peer_group()
+    #     bgp_neighbor_obj = vrfs.vrf.router_bgp.peer_group.peer_group()
     #     bgp_neighbor_obj.name = peer_group
     #     bgp_neighbor_obj.cidr = listen_cidr
     bgp_neighbor_obj.peer_group = peer_group
@@ -208,21 +208,20 @@ def bgp_peer(entity, smodelctx, sdata, device, **kwargs):
 
 def update_bgp_peer(entity, smodelctx, sdata, device, **kwargs):
     config = util.parseXmlString(sdata.getPayload()).bgp_peers
+
     previousconfig = util.parseXmlString(sdata.getPreviousPayload()).bgp_peers
     peer_ip = previousconfig.get_field_value('peer_ip')
 
     in_route_map = config.get_field_value('import_route_map')
     out_route_map = config.get_field_value('export_route_map')
 
-    bgp_neighbor_obj = devices.device.vrfs.vrf.router_bgp.neighbor.neighbor()
+    bgp_neighbor_obj = vrfs.vrf.router_bgp.neighbor.neighbor()
     bgp_neighbor_obj.ip_address = peer_ip
 
     if in_route_map is None:
         in_route_map = ''
     if out_route_map is None:
         out_route_map = ''
-
-    print 'Outbound route-map is: ' + str(out_route_map)
 
     rcpath = util.get_parent_rcpath(sdata.getRcPath())
     print 'setting rcpath= %s' % (rcpath)

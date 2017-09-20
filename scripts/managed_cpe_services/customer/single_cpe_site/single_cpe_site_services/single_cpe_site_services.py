@@ -42,7 +42,7 @@ from cpedeployment.cpedeployment_lib import ServiceModelContext
 from cpedeployment.cpedeployment_lib import getParentObject
 from cpedeployment.cpedeployment_lib import log
 
-from servicemodel.controller import devices
+
 import service_customization
 
 class SingleCpeSiteServices(yang.AbstractYangServiceHandler):
@@ -77,7 +77,7 @@ class SingleCpeSiteServices(yang.AbstractYangServiceHandler):
 
         inputkeydict = {}
         # START OF FETCHING THE PARENT KEY LEAF PARAMETERS
-        #inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-3].split('=')[1]
+        inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-3].split('=')[1]
         # END OF FETCHING THE PARENT KEY LEAF PARAMETERS
 
         #Use the custom methods to process the data

@@ -50,7 +50,7 @@ from cpedeployment.cpedeployment_lib import ServiceModelContext
 from cpedeployment.cpedeployment_lib import getParentObject
 from cpedeployment.cpedeployment_lib import log
 
-from servicemodel.controller import devices
+
 import service_customization
 
 class PacketHandling(yang.AbstractYangServiceHandler):
@@ -82,9 +82,9 @@ class PacketHandling(yang.AbstractYangServiceHandler):
 
         inputkeydict = {}
         # START OF FETCHING THE PARENT KEY LEAF PARAMETERS
-        #inputkeydict['managed_cpe_services_customer_qos_service_policies_policy_classes_class_name_name'] = sdata.getRcPath().split('/')[-2].split('=')[1]
-        #inputkeydict['managed_cpe_services_customer_qos_service_policies_policy_name'] = sdata.getRcPath().split('/')[-4].split('=')[1]
-        #inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-7].split('=')[1]
+        inputkeydict['managed_cpe_services_customer_qos_service_policies_policy_classes_class_name_name'] = sdata.getRcPath().split('/')[-2].split('=')[1]
+        inputkeydict['managed_cpe_services_customer_qos_service_policies_policy_name'] = sdata.getRcPath().split('/')[-4].split('=')[1]
+        inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-7].split('=')[1]
         # END OF FETCHING THE PARENT KEY LEAF PARAMETERS
 
         #Use the custom methods to process the data

@@ -50,7 +50,7 @@ from cpedeployment.cpedeployment_lib import ServiceModelContext
 from cpedeployment.cpedeployment_lib import getParentObject
 from cpedeployment.cpedeployment_lib import log
 
-from servicemodel.controller import devices
+
 import service_customization
 
 
@@ -92,6 +92,7 @@ class Options(yang.AbstractYangServiceHandler):
         inputdict['track'] = config.get_field_value('track')
         inputdict['description'] = config.get_field_value('description')
         inputdict['seq_num'] = config.get_field_value('seq_num')
+        inputdict['permanent'] = config.get_field_value('permanent')
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'cpe-secondary')
@@ -101,8 +102,8 @@ class Options(yang.AbstractYangServiceHandler):
         dev = getDeviceObject(device_mgmt_ip_address, sdata)
 
         # START OF FETCHING THE PARENT KEY LEAF PARAMETERS
-        #inputkeydict['managed_cpe_services_customer_dual_cpe_site_dual_cpe_site_services_site_name'] = sdata.getRcPath().split('/')[-5].split('=')[1]
-        #inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-7].split('=')[1]
+        inputkeydict['managed_cpe_services_customer_dual_cpe_site_dual_cpe_site_services_site_name'] = sdata.getRcPath().split('/')[-5].split('=')[1]
+        inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-7].split('=')[1]
         # END OF FETCHING THE PARENT KEY LEAF PARAMETERS
 
         #Use the custom methods to process the data
@@ -141,6 +142,7 @@ class Options(yang.AbstractYangServiceHandler):
         inputdict['track'] = config.get_field_value('track')
         inputdict['description'] = config.get_field_value('description')
         inputdict['seq_num'] = config.get_field_value('seq_num')
+        inputdict['permanent'] = config.get_field_value('permanent')
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'cpe-secondary')
@@ -182,6 +184,7 @@ class Options(yang.AbstractYangServiceHandler):
         inputdict['track'] = config.get_field_value('track')
         inputdict['description'] = config.get_field_value('description')
         inputdict['seq_num'] = config.get_field_value('seq_num')
+        inputdict['permanent'] = config.get_field_value('permanent')
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'cpe-secondary')

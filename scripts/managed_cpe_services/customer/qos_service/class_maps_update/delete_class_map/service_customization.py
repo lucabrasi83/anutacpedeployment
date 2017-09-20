@@ -54,7 +54,7 @@ single-cpe-dual-wan-sites
 from servicemodel import util
 from servicemodel import yang
 from servicemodel import devicemgr
-from servicemodel.controller import devices
+from servicemodel.controller.devices.device import class_maps
 
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject
@@ -270,7 +270,7 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
         device_class_map = yang.Sdk.getData(url_device_class_map, '', sdata.getTaskId())
         conf_class = util.parseXmlString(device_class_map)
 
-        cls_map_obj = devices.device.class_maps.class_map.class_map()
+        cls_map_obj = class_maps.class_map.class_map()
         cls_map_obj.name = cls_name
         device_dscp = []
         if hasattr(conf_class.class_map, 'class_match_condition'):
@@ -282,13 +282,13 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
             if isinstance(inputdict['dscp'], list) is True:
                 for ds in inputdict['dscp']:
                     if ds in device_dscp:
-                        match_obj = devices.device.class_maps.class_map.class_match_condition.class_match_condition()
+                        match_obj = class_maps.class_map.class_match_condition.class_match_condition()
                         match_obj.condition_type = "ip-dscp"
                         match_obj.match_value = ds
                         yang.Sdk.deleteData(device.url+"/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(cls_name, 'ip-dscp', ds), match_obj.getxml(filter=True), sdata.getTaskId(), sdata.getSession())
             else:
                 if inputdict['dscp'] in device_dscp:
-                    match_obj = devices.device.class_maps.class_map.class_match_condition.class_match_condition()
+                    match_obj = class_maps.class_map.class_match_condition.class_match_condition()
                     match_obj.condition_type = "ip-dscp"
                     match_obj.match_value = inputdict['dscp']
                     yang.Sdk.deleteData(device.url+"/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(cls_name, 'ip-dscp', inputdict['dscp']), match_obj.getxml(filter=True), sdata.getTaskId(), sdata.getSession())
@@ -307,11 +307,11 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
                         output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+cls_protocol_url+'</rc-path></input>')
                         ref = util.parseXmlString(output)
                         if hasattr(ref.output, 'references'):
-                           if hasattr(ref.output.references, 'reference'):
-                               if hasattr(ref.output.references.reference, 'src_node'):
-                                  for each_ref in util.convert_to_list(ref.output.references.reference.src_node):
-                                     yang.Sdk.removeReference(each_ref, cls_protocol_url)
-                        match_obj = devices.device.class_maps.class_map.class_match_condition.class_match_condition()
+                            if hasattr(ref.output.references, 'reference'):
+                                if hasattr(ref.output.references.reference, 'src_node'):
+                                    for each_ref in util.convert_to_list(ref.output.references.reference.src_node):
+                                        yang.Sdk.removeReference(each_ref, cls_protocol_url)
+                        match_obj = class_maps.class_map.class_match_condition.class_match_condition()
                         match_obj.condition_type = "protocol"
                         match_obj.match_value = pr
                         yang.Sdk.deleteData(device.url+"/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(cls_name, 'protocol', pr), match_obj.getxml(filter=True), sdata.getTaskId(), sdata.getSession())
@@ -321,7 +321,7 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
                             #     conf_class.class_map.class_match_condition.http_url = util.convert_to_list(conf_class.class_map.class_match_condition.http_url)
                             #     for dev_http_url in conf_class.class_map.class_match_condition.http_url:
                             #         device_http_url.append(dev_http_url.url)
-                            match_object = devices.device.class_maps.class_map.class_match_condition.http_url.http_url()
+                            match_object = class_maps.class_map.class_match_condition.http_url.http_url()
                             http_url = inputdict['http_url']
                             print "http_url is:",http_url
 
@@ -344,9 +344,10 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
                                 if hasattr(ref.output, 'references'):
                                     if hasattr(ref.output.references, 'reference'):
                                         if hasattr(ref.output.references.reference, 'src_node'):
-                                           for each_ref in util.convert_to_list(ref.output.references.reference.src_node):
+                                            for each_ref in util.convert_to_list(ref.output.references.reference.src_node):
                                                 yang.Sdk.removeReference(each_ref, cls_protocol_url)
-                                match_obj = devices.device.class_maps.class_map.class_match_condition.class_match_condition()
+
+                                match_obj = class_maps.class_map.class_match_condition.class_match_condition()
                                 match_obj.condition_type = "protocol"
                                 match_obj.match_value = pr
                                 match_obj.only_http = 'true'
@@ -361,7 +362,8 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
                             if hasattr(ref.output.references.reference, 'src_node'):
                                 for each_ref in util.convert_to_list(ref.output.references.reference.src_node):
                                     yang.Sdk.removeReference(each_ref, cls_protocol_url)
-                    match_obj = devices.device.class_maps.class_map.class_match_condition.class_match_condition()
+
+                    match_obj = class_maps.class_map.class_match_condition.class_match_condition()
                     match_obj.condition_type = "protocol"
                     match_obj.match_value = inputdict['protocol']
                     yang.Sdk.deleteData(device.url+"/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(cls_name, 'protocol', inputdict['protocol']), match_obj.getxml(filter=True), sdata.getTaskId(), sdata.getSession())
@@ -371,7 +373,7 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
                         #     conf_class.class_map.class_match_condition.http_url = util.convert_to_list(conf_class.class_map.class_match_condition.http_url)
                         #     for dev_http_url in conf_class.class_map.class_match_condition.http_url:
                         #         device_http_url.append(dev_http_url.url)
-                        match_object = devices.device.class_maps.class_map.class_match_condition.http_url.http_url()
+                        match_object = class_maps.class_map.class_match_condition.http_url.http_url()
                         http_url = inputdict['http_url']
                         print "http_url is:",http_url
 
@@ -388,7 +390,7 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
                                             match_object.url = url_http
                                             yang.Sdk.deleteData(device.url+"/qos:class-maps/class-map=%s/class-match-condition=%s,%s/http-url=%s" %(cls_name,'protocol','http',dev_http_url.url), match_object.getxml(filter=True), sdata.getSession())
                         else:
-                            match_obj = devices.device.class_maps.class_map.class_match_condition.class_match_condition()
+                            match_obj = class_maps.class_map.class_match_condition.class_match_condition()
                             match_obj.condition_type = "protocol"
                             match_obj.match_value = inputdict['protocol']
                             match_obj.only_http = 'true'
@@ -402,7 +404,7 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
                     device_access_group.append(access_dyn.match_value)
         if util.isNotEmpty(access_group):
             if access_group in device_access_group:
-                #Test to remove existing references
+
                 cls_acl_url = "/controller:devices/device=%s/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(device.device.id, cls_name, 'access-group', access_group)
                 output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+cls_acl_url+'</rc-path></input>')
                 ref = util.parseXmlString(output)
@@ -411,7 +413,7 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
                         if hasattr(ref.output.references.reference, 'src_node'):
                             for each_ref in util.convert_to_list(ref.output.references.reference.src_node):
                                 yang.Sdk.removeReference(each_ref, cls_acl_url)
-                match_obj = devices.device.class_maps.class_map.class_match_condition.class_match_condition()
+                match_obj = class_maps.class_map.class_match_condition.class_match_condition()
                 match_obj.condition_type = "access-group"
                 match_obj.match_value = access_group
                 yang.Sdk.deleteData(cls_acl_url, match_obj.getxml(filter=True), sdata.getTaskId(), sdata.getSession())
@@ -424,7 +426,7 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
                     device_qos_group.append(qos_dyn.match_value)
         if util.isNotEmpty(qos_group):
             if qos_group in device_qos_group:
-                    match_obj = devices.device.class_maps.class_map.class_match_condition.class_match_condition()
+                    match_obj = class_maps.class_map.class_match_condition.class_match_condition()
                     match_obj.condition_type = "qos-group"
                     match_obj.match_value = qos_group
                     yang.Sdk.deleteData(device.url+"/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(cls_name, 'qos-group', qos_group), match_obj.getxml(filter=True), sdata.getTaskId(), sdata.getSession())

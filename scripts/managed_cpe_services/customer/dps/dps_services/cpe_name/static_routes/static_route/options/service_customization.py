@@ -53,7 +53,8 @@ Names of Leafs for this Yang Entity
 from servicemodel import util
 from servicemodel import yang
 from servicemodel import devicemgr
-from servicemodel.controller import devices
+from servicemodel.controller.devices.device import vrfs
+from servicemodel.controller.devices.device import routes
 
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject
@@ -86,42 +87,47 @@ class ServiceDataCustomization:
         uri = sdata.getRcPath()
         uri_list = uri.split('/',5)
         url = '/'.join(uri_list[0:4])
-        if obj.dps_services.single_cpe_site == "true":
-            site = obj.dps_services.single_cpe_sites
-            site_output = yang.Sdk.getData(url+"/single-cpe-site/single-cpe-site-services="+str(site), '', sdata.getTaskId())
-            conf = util.parseXmlString(site_output)
-            entity = 'cpe'
-        elif obj.dps_services.dual_cpe_site == "true":
-            site = obj.dps_services.dual_cpe_sites
-            site_output = yang.Sdk.getData(url+"/dual-cpe-site/dual-cpe-site-services="+str(site), '', sdata.getTaskId())
-            conf = util.parseXmlString(site_output)
-            if obj_cpe.cpe_name.cpe == 'cpe-primary':
-                entity = 'cpe_primary'
-            elif obj_cpe.cpe_name.cpe == 'cpe-secondary':
-                entity = 'cpe_secondary'
-            elif obj_cpe.cpe_name.cpe == 'cpe-secondary-only':
-                entity = 'cpe_secondary_only'
-        elif obj.dps_services.single_cpe_dual_wan_site == "true":
-            site = obj.dps_services.single_cpe_dual_wan_sites
-            site_output = yang.Sdk.getData(url+"/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
-            conf = util.parseXmlString(site_output)
-            entity = 'cpe_dual'
-        elif obj.dps_services.dual_cpe_dual_wan_site == "true":
-            site = obj.dps_services.dual_cpe_dual_wan_sites
-            site_output = yang.Sdk.getData(url+"/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
-            conf = util.parseXmlString(site_output)
-            if obj_cpe.cpe_name.cpe == 'cpe-primary':
-                entity = 'cpe_primary_dual'
-            elif obj_cpe.cpe_name.cpe == 'cpe-secondary':
-                entity = 'cpe_secondary_dual'
-            elif obj_cpe.cpe_name.cpe == 'cpe-secondary-only':
-                entity = 'cpe_secondary_only_dual'
-        elif obj.dps_services.triple_cpe_site == "true":
-            site = obj.dps_services.triple_cpe_sites
-            site_output = yang.Sdk.getData(url+"/triple-cpe-site/triple-cpe-site-services="+str(site), '', sdata.getTaskId())
-            conf = util.parseXmlString(site_output)
-            if obj_cpe.cpe_name.cpe == 'cpe-primary-only':
-                entity = 'cpe_primary_triple'
+        if hasattr(obj.dps_services, 'single_cpe_site'):
+            if obj.dps_services.single_cpe_site == "true":
+                site = obj.dps_services.single_cpe_sites
+                site_output = yang.Sdk.getData(url+"/single-cpe-site/single-cpe-site-services="+str(site), '', sdata.getTaskId())
+                conf = util.parseXmlString(site_output)
+                entity = 'cpe'
+        elif hasattr(obj.dps_services, 'dual_cpe_site'):
+            if obj.dps_services.dual_cpe_site == "true":
+                site = obj.dps_services.dual_cpe_sites
+                site_output = yang.Sdk.getData(url+"/dual-cpe-site/dual-cpe-site-services="+str(site), '', sdata.getTaskId())
+                conf = util.parseXmlString(site_output)
+                if obj_cpe.cpe_name.cpe == 'cpe-primary':
+                    entity = 'cpe_primary'
+                elif obj_cpe.cpe_name.cpe == 'cpe-secondary':
+                    entity = 'cpe_secondary'
+                elif obj_cpe.cpe_name.cpe == 'cpe-secondary-only':
+                    entity = 'cpe_secondary_only'
+        elif hasattr(obj.dps_services, 'single_cpe_dual_wan_site'):
+            if obj.dps_services.single_cpe_dual_wan_site == "true":
+                site = obj.dps_services.single_cpe_dual_wan_sites
+                site_output = yang.Sdk.getData(url+"/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
+                conf = util.parseXmlString(site_output)
+                entity = 'cpe_dual'
+        elif hasattr(obj.dps_services, 'dual_cpe_dual_wan_site'):
+            if obj.dps_services.dual_cpe_dual_wan_site == "true":
+                site = obj.dps_services.dual_cpe_dual_wan_sites
+                site_output = yang.Sdk.getData(url+"/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
+                conf = util.parseXmlString(site_output)
+                if obj_cpe.cpe_name.cpe == 'cpe-primary':
+                    entity = 'cpe_primary_dual'
+                elif obj_cpe.cpe_name.cpe == 'cpe-secondary':
+                    entity = 'cpe_secondary_dual'
+                elif obj_cpe.cpe_name.cpe == 'cpe-secondary-only':
+                    entity = 'cpe_secondary_only_dual'
+        elif hasattr(obj.dps_services, 'triple_cpe_site'):
+            if obj.dps_services.triple_cpe_site == "true":
+                site = obj.dps_services.triple_cpe_sites
+                site_output = yang.Sdk.getData(url+"/triple-cpe-site/triple-cpe-site-services="+str(site), '', sdata.getTaskId())
+                conf = util.parseXmlString(site_output)
+                if obj_cpe.cpe_name.cpe == 'cpe-primary-only':
+                    entity = 'cpe_primary_triple'
         if entity == 'cpe':
             device_ip = conf.single_cpe_site_services.cpe.device_ip
         elif entity == 'cpe_primary':
@@ -195,10 +201,10 @@ def staticroute(smodelctx, sdata, device_ip, **kwarg):
         if vrf_name not in list_vrf:
             raise Exception('VRF is not configured or not part of service')
         static_routes_url = dev.url + '/vrfs/vrf=%s' % (vrf_name)
-        static_obj1 = devices.device.vrfs.vrf.routes.route.route()
+        static_obj1 = vrfs.vrf.routes.route.route()
     else:
         static_routes_url = dev.url
-        static_obj1 = devices.device.routes.route.route()
+        static_obj1 = routes.route.route()
 
     yang.Sdk.createData(static_routes_url, '<routes/>', sdata.getSession(), False)
     obj_local = getLocalObject(sdata, 'static-route=')
@@ -208,11 +214,11 @@ def staticroute(smodelctx, sdata, device_ip, **kwarg):
     static_obj1.dest_mask = obj_local.static_route.dest_mask
     if vrf_name is not None:
         static_route_url = dev.url + '/vrfs/vrf=%s/routes' % (vrf_name)
-        static_obj = devices.device.vrfs.vrf.routes.route.options.options()
+        static_obj = vrfs.vrf.routes.route.options.options()
         get_static_route_url = dev.url + '/vrfs/vrf=%s/routes/route=%s,%s' % (vrf_name,obj_local.static_route.dest_ip_address,obj_local.static_route.dest_mask)
     else:
         static_route_url = dev.url + '/routes'
-        static_obj = devices.device.routes.route.options.options()
+        static_obj = routes.route.options.options()
         get_static_route_url = dev.url + '/routes/route=%s,%s' % (obj_local.static_route.dest_ip_address,obj_local.static_route.dest_mask)
     try:
         xml_output = yang.Sdk.getData(get_static_route_url, '', sdata.getTaskId())
@@ -241,8 +247,10 @@ def staticroute(smodelctx, sdata, device_ip, **kwarg):
 
     if vrf_name is not None:
         global_address = kwarg['inputdict']['global_address']
-        if global_address is not None:
+        if global_address is not None and global_address == 'true':
             id += ' ' + 'global'
+            static_obj.global_address = global_address
+        elif global_address is not None and global_address == 'false':
             static_obj.global_address = global_address
 
     metric = kwarg['inputdict']['metric']
@@ -254,6 +262,13 @@ def staticroute(smodelctx, sdata, device_ip, **kwarg):
     if tag is not None:
         id += ' tag ' + tag
         static_obj.tag = tag
+
+    permanent = kwarg['inputdict']['permanent']
+    if permanent is not None and permanent == 'true':
+        id += ' permanent'
+        static_obj.permanent = permanent
+    elif permanent is not None and permanent == 'false':
+        static_obj.permanent = permanent
 
     name = kwarg['inputdict']['name']
     if name is not None:

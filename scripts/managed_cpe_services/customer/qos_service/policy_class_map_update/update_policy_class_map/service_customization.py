@@ -52,7 +52,7 @@ single-cpe-dual-wan-sites
 from servicemodel import util
 from servicemodel import yang
 from servicemodel import devicemgr
-from servicemodel.controller import devices
+from servicemodel.controller.devices.device import policy_maps
 
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject
@@ -169,7 +169,7 @@ def update_percentage(site, sdata, **kwargs):
     packets = inputdict['packets']
     qos_group = inputdict['qos_group']
 
-    map_obj = devices.device.policy_maps.policy_map.policy_map()
+    map_obj = policy_maps.policy_map.policy_map()
     map_obj.name = policy_name
     policy_name_exist = None
     if hasattr(conf.single_cpe_site_services.cpe_wan, 'child_qos_policy'):
@@ -179,7 +179,7 @@ def update_percentage(site, sdata, **kwargs):
         print "policy_name_exist is:",policy_name_exist
     if policy_name_exist == policy_name:
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
-        cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+        cls_obj = policy_maps.policy_map.class_entry.class_entry()
         cls_obj.class_name = class_name
         print "packet_handling: ",packet_handling
         if packet_handling is not None:
@@ -190,7 +190,7 @@ def update_percentage(site, sdata, **kwargs):
             yang.Sdk.createData(device.url+"/policy-maps/policy-map=%s"%(policy_name), cls_obj.getxml(filter=True), sdata.getSession(), False)
 
         if queue_limit is not None:
-            queue_limit_obj = devices.device.policy_maps.policy_map.class_entry.queue_limit.queue_limit()
+            queue_limit_obj = policy_maps.policy_map.class_entry.queue_limit.queue_limit()
             if util.isNotEmpty(queue_limit):
                 queue_limit_obj.queue_limit = queue_limit
                 queue_limit_obj.packet = packets
@@ -225,7 +225,7 @@ def update_percentage_dual(site, sdata, **kwargs):
     packets = inputdict['packets']
     qos_group = inputdict['qos_group']
 
-    map_obj = devices.device.policy_maps.policy_map.policy_map()
+    map_obj = policy_maps.policy_map.policy_map()
     map_obj.name = policy_name
     policy_name_exist = None
     if hasattr(conf.dual_cpe_site_services.cpe_primary_wan, 'child_qos_policy'):
@@ -235,7 +235,7 @@ def update_percentage_dual(site, sdata, **kwargs):
     if policy_name_exist == policy_name:
         device = devicemgr.getDeviceById(conf.dual_cpe_site_services.cpe_primary.device_ip)
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
-        cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+        cls_obj = policy_maps.policy_map.class_entry.class_entry()
         cls_obj.class_name = class_name
         print "packet_handling: ",packet_handling
         if packet_handling is not None:
@@ -245,7 +245,7 @@ def update_percentage_dual(site, sdata, **kwargs):
                 cls_obj.priority_percentage = percentage
             yang.Sdk.createData(device.url+"/policy-maps/policy-map=%s"%(policy_name), cls_obj.getxml(filter=True), sdata.getSession(), False)
         if queue_limit is not None:
-            queue_limit_obj = devices.device.policy_maps.policy_map.class_entry.queue_limit.queue_limit()
+            queue_limit_obj = policy_maps.policy_map.class_entry.queue_limit.queue_limit()
             if util.isNotEmpty(queue_limit):
                 queue_limit_obj.queue_limit = queue_limit
                 queue_limit_obj.packet = packets
@@ -267,7 +267,7 @@ def update_percentage_dual(site, sdata, **kwargs):
     if policy_name_exist == policy_name:
         device = devicemgr.getDeviceById(conf.dual_cpe_site_services.cpe_secondary.device_ip)
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
-        cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+        cls_obj = policy_maps.policy_map.class_entry.class_entry()
         cls_obj.class_name = class_name
         print "packet_handling: ",packet_handling
         if packet_handling is not None:
@@ -277,7 +277,7 @@ def update_percentage_dual(site, sdata, **kwargs):
                 cls_obj.priority_percentage = percentage
             yang.Sdk.createData(device.url+"/policy-maps/policy-map=%s"%(policy_name), cls_obj.getxml(filter=True), sdata.getSession(), False)
         if queue_limit is not None:
-            queue_limit_obj = devices.device.policy_maps.policy_map.class_entry.queue_limit.queue_limit()
+            queue_limit_obj = policy_maps.policy_map.class_entry.queue_limit.queue_limit()
             if util.isNotEmpty(queue_limit):
                 queue_limit_obj.queue_limit = queue_limit
                 queue_limit_obj.packet = packets
@@ -305,7 +305,7 @@ def update_percentage_single_dual(site, sdata, **kwargs):
     # print "obj: ",obj
     # print "xml of policy map obj: ",obj.toXml()
     # policy_name = obj.policy.name
-    # map_obj = devices.device.policy_maps.policy_map.policy_map()
+    # map_obj = policy_maps.policy_map.policy_map()
     # map_obj.name = policy_name
     inputdict = kwargs['inputdict']
     policy_name = inputdict['policy_name']
@@ -315,7 +315,7 @@ def update_percentage_single_dual(site, sdata, **kwargs):
     queue_limit = inputdict['queue_limit']
     packets = inputdict['packets']
     qos_group = inputdict['qos_group']
-    map_obj = devices.device.policy_maps.policy_map.policy_map()
+    map_obj = policy_maps.policy_map.policy_map()
     map_obj.name = policy_name
     policy_name_exist = None
     if hasattr(conf.single_cpe_dual_wan_site_services.cpe_primary_wan, 'child_qos_policy'):
@@ -325,7 +325,7 @@ def update_percentage_single_dual(site, sdata, **kwargs):
     if policy_name_exist == policy_name:
         device = devicemgr.getDeviceById(conf.single_cpe_dual_wan_site_services.cpe.device_ip)
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
-        cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+        cls_obj = policy_maps.policy_map.class_entry.class_entry()
         cls_obj.class_name = class_name
         print "packet_handling: ",packet_handling
         if packet_handling is not None:
@@ -335,7 +335,7 @@ def update_percentage_single_dual(site, sdata, **kwargs):
                 cls_obj.priority_percentage = percentage
             yang.Sdk.createData(device.url+"/policy-maps/policy-map=%s"%(policy_name), cls_obj.getxml(filter=True), sdata.getSession(), False)
         if queue_limit is not None:
-            queue_limit_obj = devices.device.policy_maps.policy_map.class_entry.queue_limit.queue_limit()
+            queue_limit_obj = policy_maps.policy_map.class_entry.queue_limit.queue_limit()
             if util.isNotEmpty(queue_limit):
                 queue_limit_obj.queue_limit = queue_limit
                 queue_limit_obj.packet = packets
@@ -358,7 +358,7 @@ def update_percentage_single_dual(site, sdata, **kwargs):
     if policy_name_exist == policy_name:
         device = devicemgr.getDeviceById(conf.single_cpe_dual_wan_site_services.cpe.device_ip)
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
-        cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+        cls_obj = policy_maps.policy_map.class_entry.class_entry()
         cls_obj.class_name = class_name
         print "packet_handling: ",packet_handling
         if packet_handling is not None:
@@ -368,7 +368,7 @@ def update_percentage_single_dual(site, sdata, **kwargs):
                 cls_obj.priority_percentage = percentage
             yang.Sdk.createData(device.url+"/policy-maps/policy-map=%s"%(policy_name), cls_obj.getxml(filter=True), sdata.getSession(), False)
         if queue_limit is not None:
-            queue_limit_obj = devices.device.policy_maps.policy_map.class_entry.queue_limit.queue_limit()
+            queue_limit_obj = policy_maps.policy_map.class_entry.queue_limit.queue_limit()
             if util.isNotEmpty(queue_limit):
                 queue_limit_obj.queue_limit = queue_limit
                 queue_limit_obj.packet = packets
@@ -399,7 +399,7 @@ def update_percentage_dual_dual(site, sdata, **kwargs):
     queue_limit = inputdict['queue_limit']
     packets = inputdict['packets']
     qos_group = inputdict['qos_group']
-    map_obj = devices.device.policy_maps.policy_map.policy_map()
+    map_obj = policy_maps.policy_map.policy_map()
     map_obj.name = policy_name
     policy_name_exist = None
     if hasattr(conf.dual_cpe_dual_wan_site_services.cpe_primary_inet_wan, 'child_qos_policy'):
@@ -409,7 +409,7 @@ def update_percentage_dual_dual(site, sdata, **kwargs):
     if policy_name_exist == policy_name:
         device = devicemgr.getDeviceById(conf.dual_cpe_dual_wan_site_services.cpe_primary.device_ip)
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
-        cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+        cls_obj = policy_maps.policy_map.class_entry.class_entry()
         cls_obj.class_name = class_name
         print "packet_handling: ",packet_handling
         if packet_handling is not None:
@@ -419,7 +419,7 @@ def update_percentage_dual_dual(site, sdata, **kwargs):
                 cls_obj.priority_percentage = percentage
             yang.Sdk.createData(device.url+"/policy-maps/policy-map=%s"%(policy_name), cls_obj.getxml(filter=True), sdata.getSession(), False)
         if queue_limit is not None:
-            queue_limit_obj = devices.device.policy_maps.policy_map.class_entry.queue_limit.queue_limit()
+            queue_limit_obj = policy_maps.policy_map.class_entry.queue_limit.queue_limit()
             if util.isNotEmpty(queue_limit):
                 queue_limit_obj.queue_limit = queue_limit
                 queue_limit_obj.packet = packets
@@ -442,7 +442,7 @@ def update_percentage_dual_dual(site, sdata, **kwargs):
     if policy_name_exist == policy_name:
         device = devicemgr.getDeviceById(conf.dual_cpe_dual_wan_site_services.cpe_primary.device_ip)
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
-        cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+        cls_obj = policy_maps.policy_map.class_entry.class_entry()
         cls_obj.class_name = class_name
         print "packet_handling: ",packet_handling
         if packet_handling is not None:
@@ -452,7 +452,7 @@ def update_percentage_dual_dual(site, sdata, **kwargs):
                 cls_obj.priority_percentage = percentage
             yang.Sdk.createData(device.url+"/policy-maps/policy-map=%s"%(policy_name), cls_obj.getxml(filter=True), sdata.getSession(), False)
         if queue_limit is not None:
-            queue_limit_obj = devices.device.policy_maps.policy_map.class_entry.queue_limit.queue_limit()
+            queue_limit_obj = policy_maps.policy_map.class_entry.queue_limit.queue_limit()
             if util.isNotEmpty(queue_limit):
                 queue_limit_obj.queue_limit = queue_limit
                 queue_limit_obj.packet = packets
@@ -475,7 +475,7 @@ def update_percentage_dual_dual(site, sdata, **kwargs):
     if policy_name_exist == policy_name:
         device = devicemgr.getDeviceById(conf.dual_cpe_dual_wan_site_services.cpe_secondary.device_ip)
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
-        cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+        cls_obj = policy_maps.policy_map.class_entry.class_entry()
         cls_obj.class_name = class_name
         print "packet_handling: ",packet_handling
         if packet_handling is not None:
@@ -485,7 +485,7 @@ def update_percentage_dual_dual(site, sdata, **kwargs):
                 cls_obj.priority_percentage = percentage
             yang.Sdk.createData(device.url+"/policy-maps/policy-map=%s"%(policy_name), cls_obj.getxml(filter=True), sdata.getSession(), False)
         if queue_limit is not None:
-            queue_limit_obj = devices.device.policy_maps.policy_map.class_entry.queue_limit.queue_limit()
+            queue_limit_obj = policy_maps.policy_map.class_entry.queue_limit.queue_limit()
             if util.isNotEmpty(queue_limit):
                 queue_limit_obj.queue_limit = queue_limit
                 queue_limit_obj.packet = packets
@@ -508,7 +508,7 @@ def update_percentage_dual_dual(site, sdata, **kwargs):
     if policy_name_exist == policy_name:
         device = devicemgr.getDeviceById(conf.dual_cpe_dual_wan_site_services.cpe_secondary.device_ip)
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
-        cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+        cls_obj = policy_maps.policy_map.class_entry.class_entry()
         cls_obj.class_name = class_name
         print "packet_handling: ",packet_handling
         if packet_handling is not None:
@@ -518,7 +518,7 @@ def update_percentage_dual_dual(site, sdata, **kwargs):
                 cls_obj.priority_percentage = percentage
             yang.Sdk.createData(device.url+"/policy-maps/policy-map=%s"%(policy_name), cls_obj.getxml(filter=True), sdata.getSession(), False)
         if queue_limit is not None:
-            queue_limit_obj = devices.device.policy_maps.policy_map.class_entry.queue_limit.queue_limit()
+            queue_limit_obj = policy_maps.policy_map.class_entry.queue_limit.queue_limit()
             if util.isNotEmpty(queue_limit):
                 queue_limit_obj.queue_limit = queue_limit
                 queue_limit_obj.packet = packets
@@ -549,7 +549,7 @@ def update_percentage_triple(site, sdata, **kwargs):
     queue_limit = inputdict['queue_limit']
     packets = inputdict['packets']
     qos_group = inputdict['qos_group']
-    map_obj = devices.device.policy_maps.policy_map.policy_map()
+    map_obj = policy_maps.policy_map.policy_map()
     map_obj.name = policy_name
     policy_name_exist = None
     if hasattr(conf.triple_cpe_site_services.cpe_primary_inet_wan, 'child_qos_policy'):
@@ -559,7 +559,7 @@ def update_percentage_triple(site, sdata, **kwargs):
     if policy_name_exist == policy_name:
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_primary.device_ip)
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
-        cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+        cls_obj = policy_maps.policy_map.class_entry.class_entry()
         cls_obj.class_name = class_name
         print "packet_handling: ",packet_handling
         if packet_handling is not None:
@@ -569,7 +569,7 @@ def update_percentage_triple(site, sdata, **kwargs):
                 cls_obj.priority_percentage = percentage
             yang.Sdk.createData(device.url+"/policy-maps/policy-map=%s"%(policy_name), cls_obj.getxml(filter=True), sdata.getSession(), False)
         if queue_limit is not None:
-            queue_limit_obj = devices.device.policy_maps.policy_map.class_entry.queue_limit.queue_limit()
+            queue_limit_obj = policy_maps.policy_map.class_entry.queue_limit.queue_limit()
             if util.isNotEmpty(queue_limit):
                 queue_limit_obj.queue_limit = queue_limit
                 queue_limit_obj.packet = packets
@@ -592,7 +592,7 @@ def update_percentage_triple(site, sdata, **kwargs):
     if policy_name_exist == policy_name:
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_primary.device_ip)
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
-        cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+        cls_obj = policy_maps.policy_map.class_entry.class_entry()
         cls_obj.class_name = class_name
         print "packet_handling: ",packet_handling
         if packet_handling is not None:
@@ -602,7 +602,7 @@ def update_percentage_triple(site, sdata, **kwargs):
                 cls_obj.priority_percentage = percentage
             yang.Sdk.createData(device.url+"/policy-maps/policy-map=%s"%(policy_name), cls_obj.getxml(filter=True), sdata.getSession(), False)
         if queue_limit is not None:
-            queue_limit_obj = devices.device.policy_maps.policy_map.class_entry.queue_limit.queue_limit()
+            queue_limit_obj = policy_maps.policy_map.class_entry.queue_limit.queue_limit()
             if util.isNotEmpty(queue_limit):
                 queue_limit_obj.queue_limit = queue_limit
                 queue_limit_obj.packet = packets
@@ -625,7 +625,7 @@ def update_percentage_triple(site, sdata, **kwargs):
     if policy_name_exist == policy_name:
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_secondary.device_ip)
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
-        cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+        cls_obj = policy_maps.policy_map.class_entry.class_entry()
         cls_obj.class_name = class_name
         print "packet_handling: ",packet_handling
         if packet_handling is not None:
@@ -635,7 +635,7 @@ def update_percentage_triple(site, sdata, **kwargs):
                 cls_obj.priority_percentage = percentage
             yang.Sdk.createData(device.url+"/policy-maps/policy-map=%s"%(policy_name), cls_obj.getxml(filter=True), sdata.getSession(), False)
         if queue_limit is not None:
-            queue_limit_obj = devices.device.policy_maps.policy_map.class_entry.queue_limit.queue_limit()
+            queue_limit_obj = policy_maps.policy_map.class_entry.queue_limit.queue_limit()
             if util.isNotEmpty(queue_limit):
                 queue_limit_obj.queue_limit = queue_limit
                 queue_limit_obj.packet = packets
@@ -658,7 +658,7 @@ def update_percentage_triple(site, sdata, **kwargs):
     if policy_name_exist == policy_name:
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_secondary.device_ip)
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
-        cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+        cls_obj = policy_maps.policy_map.class_entry.class_entry()
         cls_obj.class_name = class_name
         print "packet_handling: ",packet_handling
         if packet_handling is not None:
@@ -668,7 +668,7 @@ def update_percentage_triple(site, sdata, **kwargs):
                 cls_obj.priority_percentage = percentage
             yang.Sdk.createData(device.url+"/policy-maps/policy-map=%s"%(policy_name), cls_obj.getxml(filter=True), sdata.getSession(), False)
         if queue_limit is not None:
-            queue_limit_obj = devices.device.policy_maps.policy_map.class_entry.queue_limit.queue_limit()
+            queue_limit_obj = policy_maps.policy_map.class_entry.queue_limit.queue_limit()
             if util.isNotEmpty(queue_limit):
                 queue_limit_obj.queue_limit = queue_limit
                 queue_limit_obj.packet = packets
@@ -691,7 +691,7 @@ def update_percentage_triple(site, sdata, **kwargs):
     if policy_name_exist == policy_name:
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_tertiary.device_ip)
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
-        cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+        cls_obj = policy_maps.policy_map.class_entry.class_entry()
         cls_obj.class_name = class_name
         print "packet_handling: ",packet_handling
         if packet_handling is not None:
@@ -701,7 +701,7 @@ def update_percentage_triple(site, sdata, **kwargs):
                 cls_obj.priority_percentage = percentage
             yang.Sdk.createData(device.url+"/policy-maps/policy-map=%s"%(policy_name), cls_obj.getxml(filter=True), sdata.getSession(), False)
         if queue_limit is not None:
-            queue_limit_obj = devices.device.policy_maps.policy_map.class_entry.queue_limit.queue_limit()
+            queue_limit_obj = policy_maps.policy_map.class_entry.queue_limit.queue_limit()
             if util.isNotEmpty(queue_limit):
                 queue_limit_obj.queue_limit = queue_limit
                 queue_limit_obj.packet = packets
@@ -724,7 +724,7 @@ def update_percentage_triple(site, sdata, **kwargs):
     if policy_name_exist == policy_name:
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_tertiary.device_ip)
         yang.Sdk.createData(device.url+"/policy-maps", map_obj.getxml(filter=True), sdata.getSession(), False)
-        cls_obj = devices.device.policy_maps.policy_map.class_entry.class_entry()
+        cls_obj = policy_maps.policy_map.class_entry.class_entry()
         cls_obj.class_name = class_name
         print "packet_handling: ",packet_handling
         if packet_handling is not None:
@@ -734,7 +734,7 @@ def update_percentage_triple(site, sdata, **kwargs):
                 cls_obj.priority_percentage = percentage
             yang.Sdk.createData(device.url+"/policy-maps/policy-map=%s"%(policy_name), cls_obj.getxml(filter=True), sdata.getSession(), False)
         if queue_limit is not None:
-            queue_limit_obj = devices.device.policy_maps.policy_map.class_entry.queue_limit.queue_limit()
+            queue_limit_obj = policy_maps.policy_map.class_entry.queue_limit.queue_limit()
             if util.isNotEmpty(queue_limit):
                 queue_limit_obj.queue_limit = queue_limit
                 queue_limit_obj.packet = packets

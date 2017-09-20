@@ -47,7 +47,7 @@ interface-description
 from servicemodel import util
 from servicemodel import yang
 from servicemodel import devicemgr
-from servicemodel.controller import devices
+
 
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject
@@ -91,13 +91,12 @@ class ServiceDataCustomization:
             back_endpoint('cpe_lan', smodelctx, sdata, device, **kwargs)
 
     @staticmethod
-    def process_service_update_data(smodelctx, sdata, dev, **kwargs):
+    def process_service_update_data(smodelctx, sdata, **kwargs):
       """callback called for update operation"""
       modify = True
       if modify and kwargs is not None:
         for key, value in kwargs.iteritems():
           log("%s == %s" %(key,value))
-
 
     @staticmethod
     def process_service_delete_data(smodelctx, sdata, **kwargs):
