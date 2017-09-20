@@ -1,0 +1,7 @@
+<service-features>
+  <feature>
+    <name>cpe</name>
+    <icon>/cpe/vendor/cpe.png</icon>
+    <schema-grouping-name>cpe:cpe-def</schema-grouping-name>
+  </feature>
+</service-features>

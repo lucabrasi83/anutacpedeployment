@@ -1,0 +1,7 @@
+<service-features>
+  <feature>
+    <name>virtualnetwork</name>
+    <icon>/virtualnetworkfeature/vendor/virtualnetwork.png</icon>
+    <schema-grouping-name>vnf:virtual-network-def</schema-grouping-name>
+  </feature>
+</service-features>

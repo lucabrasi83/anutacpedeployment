@@ -1,0 +1,7 @@
+<service-features>
+  <feature>
+    <name>externalnetwork</name>
+    <icon>/externalnetworkfeature/vendor/externalnetwork.png</icon>
+    <schema-grouping-name>enf:external-network-def</schema-grouping-name>
+  </feature>
+</service-features>

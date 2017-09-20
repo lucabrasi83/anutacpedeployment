@@ -1,0 +1,44 @@
+module cpe {
+  yang-version 1;
+  namespace "http://anutanetworks.com/cpe";
+  prefix cpe;
+
+  import ncx-extensions {
+    prefix n-ext;
+  }
+  import controller {
+    prefix ac;
+  }
+  import resourcepool {
+    prefix rp;
+  }
+
+  organization
+    "Anuta Networks";
+
+  revision 2016-09-29 {
+    description
+      "Updated for NCX 5.5";
+  }
+
+  grouping cpe-def {
+    n-ext:ncx-feature "cpe";
+    leaf name {
+      type string;
+      description
+        "string";
+      mandatory true;
+    }
+    leaf internal-id {
+      type string;
+      description
+        "Internal Id to identify the Resource";
+    }
+    leaf sequence-number {
+      type uint16;
+      description
+        "User-specified sequence number to specify the order in which feature would be executed";
+      default "1";
+    }
+  }
+}
