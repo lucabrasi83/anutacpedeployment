@@ -68,9 +68,9 @@ class ServiceDataCustomization:
 
       if isinstance(dev, list) is True:
           for device in dev:
-              prefix_list_gen(smodelctx, sdata, device,**kwargs)
+              prefix_list_gen(smodelctx, sdata, device,'cpe_dual', **kwargs)
       else:
-          prefix_list_gen(smodelctx, sdata, dev,**kwargs)
+          prefix_list_gen(smodelctx, sdata, dev,'cpe_dual', **kwargs)
 
     @staticmethod
     def process_service_device_bindings(smodelctx, sdata, dev, **kwargs):

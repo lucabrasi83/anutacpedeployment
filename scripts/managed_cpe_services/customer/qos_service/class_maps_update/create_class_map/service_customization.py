@@ -297,7 +297,7 @@ def create_match_condition(entity, conf, sdata, **kwargs):
                             yang.Sdk.createData(device.url+"/class-maps/class-map=%s/class-match-condition=%s,%s" %(cls_name,'protocol','http'), match_object.getxml(filter=True), sdata.getSession(), False)
                     else:
                         match_obj.only_http = 'true'
-                        yang.Sdk.createData(device.url+"/class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession())
+                        yang.Sdk.createData(device.url+"/class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession(), False)
         else:
             match_obj = devices.device.class_maps.class_map.class_match_condition.class_match_condition()
             match_obj.condition_type = "protocol"
@@ -313,7 +313,7 @@ def create_match_condition(entity, conf, sdata, **kwargs):
                         yang.Sdk.createData(device.url+"/class-maps/class-map=%s/class-match-condition=%s,%s" %(cls_name,'protocol','http'), match_object.getxml(filter=True), sdata.getSession(), False)
                 else:
                     match_obj.only_http = 'true'
-                    yang.Sdk.createData(device.url+"/class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession())
+                    yang.Sdk.createData(device.url+"/class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession(), False)
 
     url_device_acl = '/controller:devices/device=%s' %(device.device.id)
     device_acl = yang.Sdk.getData(url_device_acl, '', sdata.getTaskId())

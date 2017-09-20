@@ -91,12 +91,13 @@ class ServiceDataCustomization:
             back_endpoint('cpe_lan', smodelctx, sdata, device, **kwargs)
 
     @staticmethod
-    def process_service_update_data(smodelctx, sdata, **kwargs):
+    def process_service_update_data(smodelctx, sdata, dev, **kwargs):
       """callback called for update operation"""
       modify = True
       if modify and kwargs is not None:
         for key, value in kwargs.iteritems():
           log("%s == %s" %(key,value))
+
 
     @staticmethod
     def process_service_delete_data(smodelctx, sdata, **kwargs):

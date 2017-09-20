@@ -208,8 +208,8 @@ def bgp_peer(entity, smodelctx, sdata, device, **kwargs):
 
 def update_bgp_peer(entity, smodelctx, sdata, device, **kwargs):
     config = util.parseXmlString(sdata.getPayload()).bgp_peers
-
-    peer_ip = config.get_field_value('peer_ip')
+    previousconfig = util.parseXmlString(sdata.getPreviousPayload()).bgp_peers
+    peer_ip = previousconfig.get_field_value('peer_ip')
 
     in_route_map = config.get_field_value('import_route_map')
     out_route_map = config.get_field_value('export_route_map')
@@ -222,10 +222,12 @@ def update_bgp_peer(entity, smodelctx, sdata, device, **kwargs):
     if out_route_map is None:
         out_route_map = ''
 
+    print 'Outbound route-map is: ' + str(out_route_map)
+
     rcpath = util.get_parent_rcpath(sdata.getRcPath())
     print 'setting rcpath= %s' % (rcpath)
 
-    xml_output = yang.Sdk.getData(rcpath, '', smodelctx.task_id)
+    xml_output = yang.Sdk.getData(rcpath, '', sdata.getTaskId())
     obj = util.parseXmlString(xml_output)
 
     vrf = None
@@ -238,14 +240,19 @@ def update_bgp_peer(entity, smodelctx, sdata, device, **kwargs):
     if vrf is None:
         vrf = "GLOBAL"
 
-    router_bgp_neighbor_url = device.url + '/vrfs/vrf=%s/router-bgp' % (vrf)
+    router_bgp_neighbor_url = device.url + '/vrfs/vrf=%s/router-bgp/neighbor=%s' % (vrf, peer_ip)
 
     payload = bgp_neighbor_obj.getxml(filter=True)
-    raw_payload = '<%s>%s</%s>' % ('in-route-map', in_route_map, 'in-route-map')
 
-    payload = payload.replace('</neighbor>', '%s</neighbor>' % raw_payload)
+    if in_route_map is not None:
+        raw_payload = '<%s>%s</%s>' % ('in-route-map', in_route_map, 'in-route-map')
 
-    raw_payload = '<%s>%s</%s>' % ('out-route-map', out_route_map, 'out-route-map')
-    payload = payload.replace('</neighbor>', '%s</neighbor>' % raw_payload)
+        payload = payload.replace('</neighbor>', '%s</neighbor>' % raw_payload)
 
-    yang.Sdk.createData(router_bgp_neighbor_url, payload, sdata.getSession(), False)
+        yang.Sdk.createData(router_bgp_neighbor_url, raw_payload, sdata.getSession(), False)
+
+    if out_route_map is not None:
+        raw_payload = '<%s>%s</%s>' % ('out-route-map', out_route_map, 'out-route-map')
+        payload = payload.replace('</neighbor>', '%s</neighbor>' % raw_payload)
+
+        yang.Sdk.createData(router_bgp_neighbor_url, raw_payload, sdata.getSession(), False)

@@ -55,7 +55,8 @@ class Customer(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'customer')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        #smodelctx = None
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -81,7 +82,7 @@ class Customer(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'customer')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -96,7 +97,7 @@ class Customer(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'customer')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
         rcpath = sdata.getRcPath() + '/'
         print 'rcpath = %s' % (rcpath)
         pattern = '/controller:services'
@@ -118,7 +119,7 @@ class Customer(yang.AbstractYangServiceHandler):
 
         print 'setting rcpath= %s' % (rcpath)
 
-        xml_output = yang.Sdk.getData(rcpath, '', smodelctx.task_id)
+        xml_output = yang.Sdk.getData(rcpath, '', sdata.getTaskId())
         obj = util.parseXmlString(xml_output)
 
         if hasattr(obj.customer,'single_cpe_site'):

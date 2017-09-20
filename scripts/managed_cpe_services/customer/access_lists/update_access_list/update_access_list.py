@@ -61,7 +61,7 @@ class UpdateAccessList(yang.AbstractYangServiceHandler):
         config = getCurrentObjectConfig(id, sdata, 'update_access_list')
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -78,6 +78,7 @@ class UpdateAccessList(yang.AbstractYangServiceHandler):
         inputdict['access_list_entry'] = config.get_field_value('access_list_entry')
         inputdict['operation'] = config.get_field_value('operation')
         inputdict['acl_name'] = config.get_field_value('acl_name')
+        inputdict['acl_sequence_num'] = config.get_field_value('acl_sequence_num')
         inputdict['action'] = config.get_field_value('action')
         inputdict['protocol'] = config.get_field_value('protocol')
         inputdict['service_obj_name'] = config.get_field_value('service_obj_name')
@@ -115,7 +116,7 @@ class UpdateAccessList(yang.AbstractYangServiceHandler):
         # END OF FETCHING THE LEAF PARAMETERS
 
         # START OF FETCHING THE PARENT KEY LEAF PARAMETERS
-        inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-3].split('=')[1]
+        #inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-3].split('=')[1]
         # END OF FETCHING THE PARENT KEY LEAF PARAMETERS
 
         #Use the custom methods to process the data
@@ -132,7 +133,7 @@ class UpdateAccessList(yang.AbstractYangServiceHandler):
         opaque_args = self.opaque_args
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)
@@ -196,7 +197,7 @@ class UpdateAccessList(yang.AbstractYangServiceHandler):
         opaque_args = self.opaque_args
 
         #Fetch Service Model Context Object
-        smodelctx = ServiceModelContext(id, sdata)
+        smodelctx = None
 
         #Fetch Parent Object
         parentobj = getParentObject(sdata)

@@ -83,7 +83,7 @@ class ServiceDataCustomization:
     @staticmethod
     def process_service_update_data(smodelctx, sdata, **kwargs):
       """callback called for update operation"""
-      raise Exception('Update forbidden for node dual-cpe-site-services at path managed-cpe-services/customer/dual-cpe-site/dual-cpe-site-services')
+      #raise Exception('Update forbidden for node dual-cpe-site-services at path managed-cpe-services/customer/dual-cpe-site/dual-cpe-site-services')
       modify = False
       if modify and kwargs is not None:
         for key, value in kwargs.iteritems():
@@ -182,3 +182,9 @@ class CreatePreProcessor(yang.SessionPreProcessor):
         print 'pass13: operations: %s' % (operations)
         yang.moveOperations(operations, ['CreateInterface'], ['CreateQPolicyMap', 'CreateVrf'], True)
         print 'pass14: operations: %s' % (operations)
+        yang.moveOperations(operations, ['CreateAclRule'], ['CreateAccessList'], True)
+        print 'pass15: operations: %s' % (operations)
+        yang.moveOperations(operations, ['CreateAclRule'], ['UpdateInterface'], False)
+        print 'pass16: operations: %s' % (operations)
+        yang.moveOperations(operations, ['CreateObjectGroup', 'CreateNetworkGroup'], ['CreateAccessList'], False)
+        print 'pass17: operations: %s' % (operations)

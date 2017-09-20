@@ -100,6 +100,7 @@ module cpedeployment {
   typedef access-list-entry-type {
     type enumeration {
       enum "extended";
+      enum "standard";
     }
   }
 
@@ -438,13 +439,17 @@ module cpedeployment {
   typedef protocol-def {
     type enumeration {
       enum "ftp";
+      enum "ftp-data";
+      enum "ftp-agent";
       enum "http";
       enum "https";
       enum "ntp";
       enum "bgp";
       enum "ospf";
+      enum "eigrp";
       enum "netflow";
       enum "snmp";
+      enum "snmp-trap";
       enum "ssh";
       enum "syslog";
       enum "tacacs";
@@ -458,8 +463,11 @@ module cpedeployment {
       enum "sip";
       enum "h323";
       enum "ms-lync";
+      enum "ms-lync-control";
+      enum "ms-lync-media";
       enum "ms-lync-audio";
       enum "ms-lync-video";
+      enum "ms-office-webapps";
       enum "rtp";
       enum "rtp video";
       enum "rtp audio";
@@ -474,7 +482,56 @@ module cpedeployment {
       enum "citrix-static";
       enum "teamviewer";
       enum "lwapp";
+      enum "amazon-web-services";
+      enum "apple-app-store";
+      enum "apple-ios-updates";
       enum "telnet";
+      enum "gmail";
+      enum "ms-wbt";
+      enum "youtube";
+      enum "windows-azure";
+      enum "windows-store";
+      enum "web-rtc";
+      enum "whatsapp";
+      enum "twitter";
+      enum "sqlserver";
+      enum "outlook-web-service";
+      enum "ora-srv";
+      enum "oracle-bi";
+      enum "oracle-ebsuite-unsecured";
+      enum "oracle-sqlnet";
+      enum "netflix";
+      enum "msexch-routing";
+      enum "mcafee-update";
+      enum "mcafee-antivirus";
+      enum "jabber";
+      enum "google-docs";
+      enum "google-earth";
+      enum "google-play";
+      enum "google-plus";
+      enum "google-services";
+      enum "google-services-audio";
+      enum "google-services-video";
+      enum "google-services-media";
+      enum "facebook";
+      enum "facebook-audio";
+      enum "facebook-media";
+      enum "facebook-video";
+      enum "facetime";
+      enum "cisco-collab-audio";
+      enum "cisco-collab-control";
+      enum "cisco-collab-video";
+      enum "cisco-collaboration";
+      enum "cisco-jabber-audio";
+      enum "cisco-jabber-control";
+      enum "cisco-jabber-video";
+      enum "cisco-media-audio";
+      enum "cisco-media-video";
+      enum "cisco-spark";
+      enum "cisco-spark-audio";
+      enum "cisco-spark-media";
+      enum "cisco-spark-video";
+      enum "skinny";
     }
   }
 
@@ -2547,7 +2604,8 @@ module cpedeployment {
         /*n-ext:maps-to "/controller:devices/device/l3features:ip-prefixlist-list/ip-prefixlist/ip-prefixlist-entries/ip-prefixlist-entry/rule-num";*/
       }
       leaf ipv4-prefix {
-        type inet:ipv4-prefix;
+        //type inet:ipv4-prefix;
+        type string;
         description
           "Valid IPv4 Prefix (A.B.C.D/Z for e.x: 172.16.1.0/24)";
         /*n-ext:maps-to "/controller:devices/device/l3features:ip-prefixlist-list/ip-prefixlist/ip-prefixlist-entries/ip-prefixlist-entry/subnet";*/
@@ -3439,6 +3497,11 @@ module cpedeployment {
       description
         "Name of Vrf";
       //mandatory true;
+    }
+    leaf description {
+      type string;
+      description
+        "Loopback Interface Description";
     }
   }
 
@@ -4450,6 +4513,13 @@ module cpedeployment {
         "string";
       when "../outbound-acl = 'true'";
     }
+    leaf pbr-policy {
+      type leafref {
+        path "../../../../../route-maps/route-map/route-map-name";
+      }
+      description
+        "pbr-policy";
+    }
     leaf nat-inside {
       type boolean;
       description
@@ -5383,6 +5453,12 @@ module cpedeployment {
           units "Mbps";
           when "../interface-type = 'Tunnel'";
         }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
+          when "../interface-type = 'Tunnel'";
+        }
         list bgp-peers {
           leaf sequence-number {
             type string;
@@ -5561,6 +5637,12 @@ module cpedeployment {
           description
             "0..65535";
           units "Mbps";
+          when "../interface-type = 'Tunnel'";
+        }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
           when "../interface-type = 'Tunnel'";
         }
         list bgp-peers {
@@ -6903,6 +6985,12 @@ module cpedeployment {
           units "Mbps";
           when "../interface-type = 'Tunnel'";
         }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
+          when "../interface-type = 'Tunnel'";
+        }
         list bgp-peers {
           leaf sequence-number {
             type string;
@@ -7081,6 +7169,12 @@ module cpedeployment {
           description
             "0..65535";
           units "Mbps";
+          when "../interface-type = 'Tunnel'";
+        }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
           when "../interface-type = 'Tunnel'";
         }
         list bgp-peers {
@@ -7263,6 +7357,12 @@ module cpedeployment {
           units "Mbps";
           when "../interface-type = 'Tunnel'";
         }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
+          when "../interface-type = 'Tunnel'";
+        }
         list bgp-peers {
           leaf sequence-number {
             type string;
@@ -7441,6 +7541,12 @@ module cpedeployment {
           description
             "0..65535";
           units "Mbps";
+          when "../interface-type = 'Tunnel'";
+        }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
           when "../interface-type = 'Tunnel'";
         }
         list bgp-peers {
@@ -7623,6 +7729,12 @@ module cpedeployment {
           units "Mbps";
           when "../interface-type = 'Tunnel'";
         }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
+          when "../interface-type = 'Tunnel'";
+        }
         list bgp-peers {
           leaf sequence-number {
             type string;
@@ -7801,6 +7913,12 @@ module cpedeployment {
           description
             "0..65535";
           units "Mbps";
+          when "../interface-type = 'Tunnel'";
+        }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
           when "../interface-type = 'Tunnel'";
         }
         list bgp-peers {
@@ -8745,6 +8863,12 @@ module cpedeployment {
           units "Mbps";
           when "../interface-type = 'Tunnel'";
         }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
+          when "../interface-type = 'Tunnel'";
+        }
         list bgp-peers {
           leaf sequence-number {
             type string;
@@ -8923,6 +9047,12 @@ module cpedeployment {
           description
             "0..65535";
           units "Mbps";
+          when "../interface-type = 'Tunnel'";
+        }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
           when "../interface-type = 'Tunnel'";
         }
         list bgp-peers {
@@ -9105,6 +9235,12 @@ module cpedeployment {
           units "Mbps";
           when "../interface-type = 'Tunnel'";
         }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
+          when "../interface-type = 'Tunnel'";
+        }
         list bgp-peers {
           leaf sequence-number {
             type string;
@@ -9283,6 +9419,12 @@ module cpedeployment {
           description
             "0..65535";
           units "Mbps";
+          when "../interface-type = 'Tunnel'";
+        }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
           when "../interface-type = 'Tunnel'";
         }
         list bgp-peers {
@@ -9922,6 +10064,12 @@ module cpedeployment {
           units "Mbps";
           when "../interface-type = 'Tunnel'";
         }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
+          when "../interface-type = 'Tunnel'";
+        }
         list bgp-peers {
           leaf sequence-number {
             type string;
@@ -10322,6 +10470,12 @@ module cpedeployment {
           units "Mbps";
           when "../interface-type = 'Tunnel'";
         }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
+          when "../interface-type = 'Tunnel'";
+        }
         list bgp-peers {
           leaf sequence-number {
             type string;
@@ -10500,6 +10654,12 @@ module cpedeployment {
           description
             "0..65535";
           units "Mbps";
+          when "../interface-type = 'Tunnel'";
+        }
+        leaf tunnel-mss {
+          type uint16;
+          description
+            "0..65535";
           when "../interface-type = 'Tunnel'";
         }
         list bgp-peers {
@@ -11686,6 +11846,13 @@ module cpedeployment {
         description
           "string";
       }
+      leaf acl-sequence-num {
+        type uint32 {
+          range "1..2147483647";
+        }
+        description
+          "1..2147483647";
+      }
       leaf action {
         type enumeration {
           enum "permit";
@@ -11872,6 +12039,13 @@ module cpedeployment {
       //  path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../name]/access-lists/access-list[name=current()/../access-list-name]/access-list-rules/name";
       //}
       mandatory true;
+    }
+    leaf acl-sequence-num {
+      type uint32 {
+        range "1..2147483647";
+      }
+      description
+        "1..2147483647";
     }
     leaf action {
       type enumeration {
@@ -12173,6 +12347,13 @@ module cpedeployment {
            udp
           ";
       }
+      leaf acl-sequence-num {
+        type uint32 {
+          range "1..2147483647";
+        }
+        description
+          "1..2147483647";
+      }
       leaf service-obj-name {
         type leafref {
           path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../../../name]/object-groups/object-group/name";
@@ -12373,8 +12554,6 @@ module cpedeployment {
           enum "cpe-secondary";
           enum "cpe-secondary-only";
           enum "cpe-primary-only";
-          enum "cpe-primary-dual";
-          enum "cpe-secondary-dual";
           enum "cpe-primary-triple";
           enum "cpe-secondary-only-dual";
         }
@@ -12392,34 +12571,34 @@ module cpedeployment {
         }
         description
           "string";
-        when " ../cpe = 'cpe' or ../cpe = 'cpe-secondary' or ../cpe = 'cpe-secondary-only' or ../cpe = 'cpe-primary-only' or ../cpe = 'cpe-secondary-only-dual' or ../cpe = 'cpe-primary-triple'";
+        when " ../cpe = 'cpe' or ../cpe = 'cpe-secondary' or ../cpe = 'cpe-secondary-only' or ../cpe = 'cpe-primary-only' or ../cpe = 'cpe-primary-triple'";
       }
       leaf rd {
         type string;
         description
           "string";
-        when " ../cpe = 'cpe' or ../cpe = 'cpe-secondary' or ../cpe = 'cpe-secondary-only' or ../cpe = 'cpe-primary-only' or ../cpe = 'cpe-secondary-only-dual' or ../cpe = 'cpe-primary-triple'";
+        when " ../cpe = 'cpe' or ../cpe = 'cpe-secondary' or ../cpe = 'cpe-secondary-only' or ../cpe = 'cpe-primary-only' or ../cpe = 'cpe-primary-triple'";
         config false;
       }
       leaf rt-import {
         type string;
         description
           "string";
-        when " ../cpe = 'cpe' or ../cpe = 'cpe-secondary' or ../cpe = 'cpe-secondary-only' or ../cpe = 'cpe-primary-only' or ../cpe = 'cpe-secondary-only-dual' or ../cpe = 'cpe-primary-triple'";
+        when " ../cpe = 'cpe' or ../cpe = 'cpe-secondary' or ../cpe = 'cpe-secondary-only' or ../cpe = 'cpe-primary-only' or ../cpe = 'cpe-primary-triple'";
         config false;
       }
       leaf rt-export {
         type string;
         description
           "string";
-        when " ../cpe = 'cpe' or ../cpe = 'cpe-secondary' or ../cpe = 'cpe-secondary-only' or ../cpe = 'cpe-primary-only' or ../cpe = 'cpe-secondary-only-dual' or ../cpe = 'cpe-primary-triple'";
+        when " ../cpe = 'cpe' or ../cpe = 'cpe-secondary' or ../cpe = 'cpe-secondary-only' or ../cpe = 'cpe-primary-only' or ../cpe = 'cpe-primary-triple'";
         config false;
       }
       leaf lan-interface {
         type boolean;
         description
           "lan-interface: True/False";
-        when " ../cpe = 'cpe' or ../cpe = 'cpe-primary' or ../cpe = 'cpe-secondary-only' or ../cpe = 'cpe-primary-only' or ../cpe = 'cpe-secondary-only-dual' or ../cpe = 'cpe-primary-triple'";
+        when " ../cpe = 'cpe' or ../cpe = 'cpe-primary' or ../cpe = 'cpe-secondary-only' or ../cpe = 'cpe-primary-only' or ../cpe = 'cpe-primary-triple'";
       }
       leaf hierarchical-inbound-policy {
         type boolean;
@@ -12449,7 +12628,7 @@ module cpedeployment {
         }
         description
           "pbr-policy";
-        when " ../lan-interface = 'true' and ../cpe != 'cpe-secondary' ";
+        when " ../lan-interface = 'true' and ../cpe != 'cpe-secondary'";
       }
       leaf next-hop-ip {
         type inet:ipv4-address;
@@ -12479,7 +12658,7 @@ module cpedeployment {
         type boolean;
         description
           "b2b-interface: True/False";
-        when " ../cpe = 'cpe-secondary' or ../cpe = 'cpe-primary' ";
+        when " ../cpe = 'cpe-secondary' or ../cpe = 'cpe-primary'";
       }
       leaf vlan-id {
         type uint32 {
@@ -12513,7 +12692,7 @@ module cpedeployment {
         type boolean;
         description
           "loopback: True/False";
-        when " ../cpe = 'cpe' or ../cpe = 'cpe-secondary' or ../cpe = 'cpe-secondary-only' or ../cpe = 'cpe-primary-only'";
+        when " ../cpe = 'cpe' or ../cpe = 'cpe-secondary' or ../cpe = 'cpe-primary-only'";
       }
       leaf loopback-interface-id {
         type uint8;
@@ -12684,7 +12863,7 @@ module cpedeployment {
         type boolean;
         description
           "vrf-lite: True/False";
-        when " ../ospf = 'true' and ../cpe = 'cpe'";
+        when " ../ospf = 'true'";
       }
       container ospf-networks {
         list ospf-network {
@@ -12741,7 +12920,7 @@ module cpedeployment {
         type boolean;
         description
           "tunnel: True/False";
-        when " ../cpe = 'cpe' or ../cpe = 'cpe-secondary' or ../cpe = 'cpe-secondary-only' or ../cpe = 'cpe-primary-only'";
+        when " ../cpe = 'cpe' or ../cpe = 'cpe-secondary' or ../cpe = 'cpe-secondary-only'";
       }
       leaf hub {
         type boolean;
@@ -12771,6 +12950,14 @@ module cpedeployment {
       }
       leaf tunnel-interface-description {
         type string;
+        description
+          "string";
+        when " ../tunnel = 'true' and ../cpe != 'cpe-primary'";
+      }
+      leaf tunnel-fvrf {
+        type leafref {
+          path "../../../../vrfs/vrf/vrf-name";
+        }
         description
           "string";
         when " ../tunnel = 'true' and ../cpe != 'cpe-primary'";
@@ -13031,7 +13218,8 @@ module cpedeployment {
         "string";
     }
     leaf prefix {
-      type inet:ipv4-prefix;
+      //type inet:ipv4-prefix;
+      type string;
       description
         "Valid IPv4 Prefix (A.B.C.D/Z for e.x: 172.16.1.0/24)";
     }
@@ -13087,6 +13275,12 @@ module cpedeployment {
             "vrf-definition-mode: True/False";
           default "false";
         }
+        //leaf vrf-wan {
+        //type boolean;
+        //description
+        //"WAN VRF won't be deleted if Checked during service deletion";
+        //default "true";
+        //}
         list rt-import {
           key "rt-import";
           leaf rt-import {

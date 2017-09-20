@@ -689,6 +689,8 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
             if util.isNotEmpty(fvrf) and fvrf != 'GLOBAL':
                 dmvpn_obj.front_vrf_name = fvrf
         else:
+            tcp_mss = inputdict['tunnel_mss']
+            ivrf = inputdict['ivrf']
             tunnel_mask = inputdict['tunnel_interface_mask']
             tunnel_id = inputdict['tunnel_interface_id']
             tunnel_destination = inputdict['tunnel_interface_destination']
@@ -699,9 +701,23 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
             dmvpn_obj = devices.device.dmvpntunnels.dmvpntunnel.dmvpntunnel()
             if util.isNotEmpty(fvrf) and fvrf != 'GLOBAL':
                 dmvpn_obj.front_vrf_name = fvrf
+            if util.isNotEmpty(ivrf) and ivrf != 'GLOBAL':
+                print 'ivrf is: ' + str(ivrf)
+                dmvpn_obj.vrf_name = ivrf
+                uri = sdata.getRcPath()
+                uri_list = uri.split('/', 5)
+                url = '/'.join(uri_list[0:4])
+                xml_output = yang.Sdk.getData(url+"/vrfs/vrf="+str(ivrf), '', sdata.getTaskId())
+                obj_local = util.parseXmlString(xml_output)
+                dmvpn_obj.vrf_definition_mode = obj_local.vrf.vrf_definition_mode
+            
             dmvpn_obj.name = tunnel_id
             dmvpn_obj.description = interface_description
-            dmvpn_obj.tcp_adjust_mss = "1300"
+            print 'tcp mss is: ' + str(tcp_mss)
+            if tcp_mss is not None:
+                dmvpn_obj.tcp_adjust_mss = tcp_mss
+            else:
+                dmvpn_obj.tcp_adjust_mss = '1300'
             dmvpn_obj.ipaddress = tunnel_ip_address
             dmvpn_obj.netmask = tunnel_mask
             dmvpn_obj.tunnel_destination = tunnel_destination
@@ -1281,7 +1297,17 @@ def object_group_def(source_object_group, dev, sdata):
                 if hasattr(objectgroup, 'prefix'):
                     if util.isNotEmpty(objectgroup.prefix):
                         network_obj2 = devices.device.object_groups_acl.object_group.networks.network.network()
-                        prefix = util.IPPrefix(objectgroup.prefix)
+                        #Haulotte Specific Dual CPE Sites. Keyword 'GUEST_LAN_PROFILE' to be replaced by GUEST LAN Profile CIDR
+                        if objectgroup.prefix == 'HAULOTTE-GUESTS':
+                            obj_haulotte_guests = getLocalObject(sdata, 'dual-cpe-site-services')
+                            log("haulotte guest obj is: %s" % (obj_haulotte_guests))
+                            obj_haulotte_guests.dual_cpe_site_services.cpe_lan.lan_profile = util.convert_to_list(obj_haulotte_guests.dual_cpe_site_services.cpe_lan.lan_profile)
+                            for lanprof in obj_haulotte_guests.dual_cpe_site_services.cpe_lan.lan_profile:
+                                if lanprof.profile_name == 'GUEST_LAN_PROFILE':
+                                    haulotte_guests_prefix = lanprof.get_field_value('cidr')
+                                    prefix = util.IPPrefix(haulotte_guests_prefix)
+                        else:
+                            prefix = util.IPPrefix(objectgroup.prefix)
                         ip_address = prefix.address
                         netmask = prefix.netmask
                         network_obj2.ip_address = ip_address
@@ -1302,6 +1328,11 @@ def access_group_def(url, access_group, dev, sdata):
         access_obj.acl_type = access_list_entry
         if name is not None:
             access_obj.name = name
+    elif access_list_entry == 'standard':
+        access_obj.acl_type = access_list_entry
+        if name is not None:
+            access_obj.name = name
+
     #yang.Sdk.createData(dev.url, '<access-lists/>', sdata.getSession(), False)
 
     access_obj_url = dev.url + '/access-lists'
@@ -1313,6 +1344,10 @@ def access_group_def(url, access_group, dev, sdata):
             service_obj_name = rule.service_obj_name
         else:
             service_obj_name = None
+        if hasattr(rule, 'acl_sequence_num') and util.isNotEmpty(rule.acl_sequence_num):
+            acl_sequence_num = rule.acl_sequence_num
+        else:
+            acl_sequence_num = None
         source_condition = rule.source_condition
         if hasattr(rule, 'source_object') and util.isNotEmpty(rule.source_object):
             source_object = rule.source_object
@@ -1367,7 +1402,12 @@ def access_group_def(url, access_group, dev, sdata):
 
         access_rule_obj.action = action
         access_rule_obj.layer4protocol = protocol
-        name_rule = action + ' ' + protocol
+        if util.isNotEmpty(acl_sequence_num):
+            access_rule_obj.linenumber = acl_sequence_num
+            #name_rule = acl_sequence_num + ' ' + action + ' ' + protocol
+            name_rule = action + ' ' + protocol
+        else:
+            name_rule = action + ' ' + protocol
         if util.isNotEmpty(service_obj_name):
             object_group_def(service_obj_name, dev, sdata)
             access_rule_obj.service_obj_name = service_obj_name
@@ -1923,7 +1963,7 @@ def delete_physical_interface(entity, smodelctx, sdata, device, **kwarg):
             intf_obj.acl_inbound_name._empty_tag = True
             intf_obj.acl_outbound_name._empty_tag = True
             #if ((vrf is not None and vrf != 'GLOBAL') or (ivrf is not None and ivrf != 'GLOBAL')) and inet_mpls == 'MPLS':
-            intf_obj.vrf._empty_tag = True
+            #intf_obj.vrf._empty_tag = False
             uri = device.url + '/interface:interfaces/interface=%s' % (str(interface_name1).replace('/', '%2F'))
             payload = intf_obj.getxml(filter=True)
             if device.isInterfaceInDeviceExists(interface_name1):
@@ -1932,7 +1972,7 @@ def delete_physical_interface(entity, smodelctx, sdata, device, **kwarg):
             intf_obj_phy.name = interface_name
             intf_obj_phy.long_name = interface_name
             intf_obj_phy.mode = "l3-interface"
-            #intf_obj_phy.vrf._empty_tag = True
+            #intf_obj_phy.vrf._empty_tag = False
             intf_obj_phy.link_negotiation._empty_tag = True
             intf_obj_phy.outbound_qos._empty_tag = True
             intf_obj_phy.inbound_qos._empty_tag = True
@@ -1978,7 +2018,7 @@ def delete_physical_interface(entity, smodelctx, sdata, device, **kwarg):
             intf_obj.acl_inbound_name._empty_tag = True
             intf_obj.acl_outbound_name._empty_tag = True
             #if ((vrf is not None and vrf != 'GLOBAL') or (ivrf is not None and ivrf != 'GLOBAL')) and inet_mpls == 'MPLS':
-            intf_obj.vrf._empty_tag = True
+            #intf_obj.vrf._empty_tag = False
             #if load_interval_delay is not None:
             intf_obj.load_interval_delay._empty_tag = True
             #if in_queue_length is not None:
@@ -1993,6 +2033,7 @@ def delete_physical_interface(entity, smodelctx, sdata, device, **kwarg):
                 yang.Sdk.patchData(uri, payload, sdata, add_reference=False)
                 intf_obj_phy1 = devices.device.interfaces.interface.interface()
                 intf_obj_phy1.name = interface_name
+                #intf_obj_phy1.vrf._empty_tag = False
                 intf_obj_phy1.long_name = interface_name
                 intf_obj_phy1.mode._empty_tag = True
                 payload1 = intf_obj_phy1.getxml(filter=True)
@@ -2023,9 +2064,9 @@ def back_endpoint(entity, smodelctx, sdata, device, **kwargs):
     site_outbound_acl = inputdict['site_outbound_acl']
     nat_inside = None
     nat_outside = None
-    if entity != "cpe_primary_cpe_secondary_ic":
-        nat_inside = inputdict['nat_inside']
-        nat_outside = inputdict['nat_outside']
+    #if entity != "cpe_primary_cpe_secondary_ic":
+    nat_inside = inputdict['nat_inside']
+    nat_outside = inputdict['nat_outside']
     #vlan_id = None
     vlan_id = inputdict['vlan_id']
     if util.isNotEmpty(interface_name):
@@ -2325,6 +2366,10 @@ def back_endpoint(entity, smodelctx, sdata, device, **kwargs):
             intf_obj.vrf_definition_mode = obj_local.vrf.vrf_definition_mode
             intf_obj.vrf = vrf
         if entity != "cpe_primary_cpe_secondary_ic":
+            if util.isNotEmpty(inputdict['pbr_policy']):
+                route_maps(inputdict['pbr_policy'], device, sdata)
+                intf_obj.pbr_policy = inputdict['pbr_policy']
+        else:
             if util.isNotEmpty(inputdict['pbr_policy']):
                 route_maps(inputdict['pbr_policy'], device, sdata)
                 intf_obj.pbr_policy = inputdict['pbr_policy']
@@ -2908,6 +2953,10 @@ def new_back_endpoint(entity, smodelctx, sdata, device, **kwargs):
             if util.isNotEmpty(inputdict['pbr_policy']):
                 route_maps(inputdict['pbr_policy'], device, sdata)
                 intf_obj.pbr_policy = inputdict['pbr_policy']
+        else:
+             if util.isNotEmpty(inputdict['pbr_policy']):
+                route_maps(inputdict['pbr_policy'], device, sdata)
+                intf_obj.pbr_policy = inputdict['pbr_policy']
         if hierarchical_inbound_policy == 'false':
             if util.isNotEmpty(inbound_policy):
                 intf_obj.inbound_qos = inbound_policy
@@ -3132,7 +3181,8 @@ def update_hsrp_priority(entity, smodelctx, sdata, device, **kwarg):
 
 
 def modifiedGetLocalObject(sdata, elem):
-    smodelctx = ServiceModelContext(id, sdata)
+    #smodelctx = None
+    smodelctx = None
     rcpath = sdata.getRcPath() + '/'
     print 'rcpath = %s' % (rcpath)
     pattern = '/controller:services'
@@ -3153,7 +3203,8 @@ def modifiedGetLocalObject(sdata, elem):
     rcpath = rcpath[:idx]
     print 'setting rcpath= %s' % (rcpath)
 
-    xml_output = yang.Sdk.getData(rcpath, '', smodelctx.task_id)
+    #xml_output = yang.Sdk.getData(rcpath, '', sdata.getTaskId())
+    xml_output = yang.Sdk.getData(rcpath, '', sdata.getTaskId())
     obj = util.parseXmlString(xml_output)
     return obj
 
@@ -3181,6 +3232,7 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
+            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
     elif entity == 'cpe_primary':
         config = config.cpe_primary_wan
@@ -3189,6 +3241,7 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
+            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
     elif entity == 'cpe_secondary':
         config = config.cpe_secondary_wan
@@ -3197,6 +3250,7 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
+            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
     elif entity == 'cpe_primary_dual':
         config = config.cpe_primary_wan
@@ -3205,6 +3259,7 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
+            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
     elif entity == 'cpe_secondary_dual':
         config = config.cpe_secondary_wan
@@ -3213,6 +3268,7 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
+            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
     elif entity == 'cpe_primary_inet_dual':
         config = config.cpe_primary_inet_wan
@@ -3221,6 +3277,7 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
+            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
     elif entity == 'cpe_primary_mpls_dual':
         config = config.cpe_primary_mpls_wan
@@ -3229,6 +3286,7 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
+            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
     elif entity == 'cpe_secondary_inet_dual':
         config = config.cpe_secondary_inet_wan
@@ -3237,6 +3295,7 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
+            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
     elif entity == 'cpe_secondary_mpls_dual':
         config = config.cpe_secondary_mpls_wan
@@ -3245,6 +3304,7 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
+            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
     elif entity == 'cpe_primary_inet_triple':
         config = config.cpe_primary_inet_wan
@@ -3253,6 +3313,7 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
+            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
     elif entity == 'cpe_primary_mpls_triple':
         config = config.cpe_primary_mpls_wan
@@ -3261,6 +3322,7 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
+            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
     elif entity == 'cpe_secondary_inet_triple':
         config = config.cpe_secondary_inet_wan
@@ -3269,6 +3331,7 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
+            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
     elif entity == 'cpe_secondary_mpls_triple':
         config = config.cpe_secondary_mpls_wan
@@ -3277,6 +3340,7 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
+            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
     elif entity == 'cpe_tertiary_inet_triple':
         config = config.cpe_tertiary_inet_wan
@@ -3285,6 +3349,7 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
+            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
     elif entity == 'cpe_tertiary_mpls_triple':
         config = config.cpe_tertiary_mpls_wan
@@ -3293,11 +3358,17 @@ def update_shape_avg(sdata, entity):
         dev = None
         for endpoint in obj:
             dev = endpoint.device_ip
+            wan_intf = endpoint.interface_name
         device = get_device_by_id(sdata, dev)
-    shape_average = config.get_field_value('shape_average')
-    # child_qos_policy = config.get_field_value('child_qos_policy')
 
+    shape_average = config.get_field_value('shape_average')
+    child_qos_policy = config.get_field_value('child_qos_policy')
+    prev_child_qos_policy = prevconfig.get_field_value('child_qos_policy')
     prev_policy_name = prevconfig.get_field_value('policy_name')
+
+    if prev_policy_name is None:
+        prev_policy_name = config.get_field_value('policy_name')
+
     prev_shape_average = prevconfig.get_field_value('shape_average')
     print "prevpolicyname is:", prev_policy_name
     print "prevshapeavg is:", prev_shape_average
@@ -3311,8 +3382,25 @@ def update_shape_avg(sdata, entity):
     if util.isNotEmpty(shape_average):
         if shape_average != prev_shape_average:
             cls_obj.shape_average = shape_average
+
+    if util.isNotEmpty(child_qos_policy):
+        if child_qos_policy != prev_child_qos_policy:
+            cls_obj.service_policy = child_qos_policy
+            qos_child(entity, child_qos_policy, device, sdata)
+
     yang.Sdk.createData(device.url+"/policy-maps/policy-map=%s" %(prev_policy_name), cls_obj.getxml(filter=True), sdata.getSession())
 
+    #Seb's added. Apply HQOS again to WAN interface
+    intf_obj = devices.device.interfaces.interface.interface()
+    intf_obj.name = wan_intf
+    intf_obj.long_name = wan_intf
+    intf_obj.outbound_qos = prev_policy_name
+
+    uri = device.url + '/interface:interfaces/interface=%s' % (str(wan_intf).replace('/', '%2F'))
+
+    int_payload = intf_obj.getxml(filter=True)
+
+    yang.Sdk.patchData(uri, int_payload, sdata, add_reference=False)
 
 def loopback(smodelctx, sdata, dev, **kwargs):
     inputdict = kwargs["inputdict"]
@@ -3321,6 +3409,7 @@ def loopback(smodelctx, sdata, dev, **kwargs):
     loopback_int_id = 'Loopback' + str(int_id)
     cidr = inputdict['cidr']
     vrf = inputdict['vrf']
+    description = inputdict['description']
     ip_addr = IpamPoolID(sdata.getTaskId(), sdata, cidr)
     ip_addr_obj = ip_addr.ipam_pool_obj
     prefix = util.IPPrefix(ip_addr_obj.cidr)
@@ -3373,6 +3462,8 @@ def loopback(smodelctx, sdata, dev, **kwargs):
     if util.isNotEmpty(loopback_ip):
         intf_obj.ip_address = loopback_ip
         intf_obj.netmask = netmask
+    if util.isNotEmpty(description):
+        intf_obj.description = description
     uri = sdata.getRcPath()
     uri_list = uri.split('/',5)
     url = '/'.join(uri_list[0:4])
