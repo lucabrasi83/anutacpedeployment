@@ -73,24 +73,27 @@ class ServiceDataCustomization:
                 log("%s == %s" %(key,value))
 
         if modify:
+            uri = sdata.getRcPath()
+            uri_list = uri.split('/',5)
+            url = '/'.join(uri_list[0:4])
             config = kwargs['config']
             inputdict = kwargs['inputdict']
             if inputdict['single_cpe_site'] == "true":
                 if len(inputdict['single_cpe_sites']) > 0:
                     if isinstance(inputdict['single_cpe_sites'], list) is True:
                         for site in inputdict['single_cpe_sites']:
-                            uri = sdata.getRcPath()
-                            uri_list = uri.split('/',5)
-                            url = '/'.join(uri_list[0:4])
+                            #uri = sdata.getRcPath()
+                            #uri_list = uri.split('/',5)
+                            #url = '/'.join(uri_list[0:4])
                             site_output = yang.Sdk.getData(url+"/single-cpe-site/single-cpe-site-services="+str(site), '', sdata.getTaskId())
                             conf = util.parseXmlString(site_output)
                             entity = 'cpe'
                             delete_route_map(entity, conf, sdata, **kwargs)
                     else:
                         site = inputdict['single_cpe_sites']
-                        uri = sdata.getRcPath()
-                        uri_list = uri.split('/',5)
-                        url = '/'.join(uri_list[0:4])
+                        #uri = sdata.getRcPath()
+                        #uri_list = uri.split('/',5)
+                        #url = '/'.join(uri_list[0:4])
                         site_output = yang.Sdk.getData(url+"/single-cpe-site/single-cpe-site-services="+str(site), '',sdata.getTaskId())
                         conf = util.parseXmlString(site_output)
                         entity = 'cpe'
@@ -100,9 +103,9 @@ class ServiceDataCustomization:
                 if len(inputdict['dual_cpe_sites']) > 0:
                     if isinstance(inputdict['dual_cpe_sites'], list) is True:
                         for site in inputdict['dual_cpe_sites']:
-                            uri = sdata.getRcPath()
-                            uri_list = uri.split('/',5)
-                            url = '/'.join(uri_list[0:4])
+                            #uri = sdata.getRcPath()
+                            #uri_list = uri.split('/',5)
+                            #url = '/'.join(uri_list[0:4])
                             site_output = yang.Sdk.getData(url+"/dual-cpe-site/dual-cpe-site-services="+str(site), '', sdata.getTaskId())
                             conf = util.parseXmlString(site_output)
                             entity = 'cpe_primary'
@@ -111,9 +114,9 @@ class ServiceDataCustomization:
                             delete_route_map(entity, conf, sdata, **kwargs)
                     else:
                         site = inputdict['dual_cpe_sites']
-                        uri = sdata.getRcPath()
-                        uri_list = uri.split('/',5)
-                        url = '/'.join(uri_list[0:4])
+                        #uri = sdata.getRcPath()
+                        #uri_list = uri.split('/',5)
+                        #url = '/'.join(uri_list[0:4])
                         site_output = yang.Sdk.getData(url+"/dual-cpe-site/dual-cpe-site-services="+str(site), '', sdata.getTaskId())
                         conf = util.parseXmlString(site_output)
                         entity = 'cpe_primary'
@@ -125,18 +128,18 @@ class ServiceDataCustomization:
                 if len(inputdict['single_cpe_dual_wan_sites']) > 0:
                     if isinstance(inputdict['single_cpe_dual_wan_sites'], list) is True:
                         for site in inputdict['single_cpe_dual_wan_sites']:
-                            uri = sdata.getRcPath()
-                            uri_list = uri.split('/',5)
-                            url = '/'.join(uri_list[0:4])
+                            #uri = sdata.getRcPath()
+                            #uri_list = uri.split('/',5)
+                            #url = '/'.join(uri_list[0:4])
                             site_output = yang.Sdk.getData(url+"/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
                             conf = util.parseXmlString(site_output)
                             entity = 'cpe_dual'
                             delete_route_map(entity, conf, sdata, **kwargs)
                     else:
                         site = inputdict['single_cpe_dual_wan_sites']
-                        uri = sdata.getRcPath()
-                        uri_list = uri.split('/',5)
-                        url = '/'.join(uri_list[0:4])
+                        #uri = sdata.getRcPath()
+                        #uri_list = uri.split('/',5)
+                        #url = '/'.join(uri_list[0:4])
                         site_output = yang.Sdk.getData(url+"/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
                         conf = util.parseXmlString(site_output)
                         entity = 'cpe_dual'
@@ -146,9 +149,9 @@ class ServiceDataCustomization:
                 if len(inputdict['triple_cpe_sites']) > 0:
                     if isinstance(inputdict['triple_cpe_sites'], list) is True:
                         for site in inputdict['triple_cpe_sites']:
-                            uri = sdata.getRcPath()
-                            uri_list = uri.split('/',5)
-                            url = '/'.join(uri_list[0:4])
+                            #uri = sdata.getRcPath()
+                            #uri_list = uri.split('/',5)
+                            #url = '/'.join(uri_list[0:4])
                             site_output = yang.Sdk.getData(url+"/triple-cpe-site/triple-cpe-site-services="+str(site), '', sdata.getTaskId())
                             conf = util.parseXmlString(site_output)
                             entity = 'cpe_primary_triple'
@@ -159,9 +162,9 @@ class ServiceDataCustomization:
                             delete_route_map(entity, conf, sdata, **kwargs)
                     else:
                         site = inputdict['triple_cpe_sites']
-                        uri = sdata.getRcPath()
-                        uri_list = uri.split('/',5)
-                        url = '/'.join(uri_list[0:4])
+                        #uri = sdata.getRcPath()
+                        #uri_list = uri.split('/',5)
+                        #url = '/'.join(uri_list[0:4])
                         site_output = yang.Sdk.getData(url+"/triple-cpe-site/triple-cpe-site-services="+str(site), '',sdata.getTaskId())
                         conf = util.parseXmlString(site_output)
                         entity = 'cpe_primary_triple'
@@ -175,9 +178,9 @@ class ServiceDataCustomization:
                 if len(inputdict['dual_cpe_dual_wan_sites']) > 0:
                     if isinstance(inputdict['dual_cpe_dual_wan_sites'], list) is True:
                         for site in inputdict['dual_cpe_dual_wan_sites']:
-                            uri = sdata.getRcPath()
-                            uri_list = uri.split('/',5)
-                            url = '/'.join(uri_list[0:4])
+                            #uri = sdata.getRcPath()
+                            #uri_list = uri.split('/',5)
+                            #url = '/'.join(uri_list[0:4])
                             site_output = yang.Sdk.getData(url+"/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
                             conf = util.parseXmlString(site_output)
                             entity = 'cpe_primary_dual'
@@ -186,9 +189,9 @@ class ServiceDataCustomization:
                             delete_route_map(entity, conf, sdata, **kwargs)
                     else:
                         site = inputdict['dual_cpe_dual_wan_sites']
-                        uri = sdata.getRcPath()
-                        uri_list = uri.split('/',5)
-                        url = '/'.join(uri_list[0:4])
+                        #uri = sdata.getRcPath()
+                        #uri_list = uri.split('/',5)
+                        #url = '/'.join(uri_list[0:4])
                         site_output = yang.Sdk.getData(url+"/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
                         conf = util.parseXmlString(site_output)
                         entity = 'cpe_primary_dual'
@@ -213,7 +216,7 @@ class ServiceDataCustomization:
     @staticmethod
     def process_service_update_data(smodelctx, sdata, **kwargs):
       """callback called for update operation"""
-      raise Exception('Update forbidden for node delete-route-maps at path managed-cpe-services/customer/route-maps/delete-route-maps')
+      #raise Exception('Update forbidden for node delete-route-maps at path managed-cpe-services/customer/route-maps/delete-route-maps')
       modify = True
       if modify and kwargs is not None:
         for key, value in kwargs.iteritems():
@@ -257,26 +260,32 @@ def delete_route_map(entity, conf, sdata, **kwargs):
     conf_route = util.parseXmlString(device_route_map)
 
     device_route = []
+    device_route_entries = []
     device_route_match = []
     device_route_set = []
     if hasattr(conf_route.route_maps, 'route_map'):
         conf_route.route_maps.route_map = util.convert_to_list(conf_route.route_maps.route_map)
-        for routemap in conf_route.route_maps.route_map:
-            device_route.append(routemap.name)
-            if hasattr(routemap, 'route_map_entries'):
-                routemap.route_map_entries = util.convert_to_list(routemap.route_map_entries)
-                for entry in routemap.route_map_entries:
-                    if hasattr(entry, 'match_condition'):
-                        entry.match_condition = util.convert_to_list(entry.match_condition)
-                        for match in entry.match_condition:
-                            name = match.condition_type + ',' + match.value
-                            device_route_match.append(name)
+        device_route = [routemap.name for routemap in conf_route.route_maps.route_map]
+        #for routemap in conf_route.route_maps.route_map:
+            #device_route.append(routemap.name)
+        if hasattr(routemap, 'route_map_entries'):
+            routemap.route_map_entries = util.convert_to_list(routemap.route_map_entries)
+            device_route_entries = [entry.seq for entry in routemap.route_map_entries]
+            #for entry in routemap.route_map_entries:
+                #device_route_entries.append(entry.seq)
+            if hasattr(entry, 'match_condition'):
+                entry.match_condition = util.convert_to_list(entry.match_condition)
+                device_route_match = [match.condition_type + ',' + match.value for match in entry.match_condition]
+                        #for match in entry.match_condition:
+                            #name = match.condition_type + ',' + match.value
+                            #device_route_match.append(name)
 
-                    if hasattr(entry, 'set_action'):
-                        entry.set_action = util.convert_to_list(entry.set_action)
-                        for set1 in entry.set_action:
-                            set_name = set1.set_type + ',' + set1.value
-                            device_route_set.append(set_name)
+            if hasattr(entry, 'set_action'):
+                entry.set_action = util.convert_to_list(entry.set_action)
+                device_route_set = [set1.set_type + ',' + set1.value for set1 in entry.set_action]
+                        #for set1 in entry.set_action:
+                            #set_name = set1.set_type + ',' + set1.value
+                            #device_route_set.append(set_name)
 
     action = inputdict['action']
     entry = inputdict['entry']
@@ -294,24 +303,26 @@ def delete_route_map(entity, conf, sdata, **kwargs):
                 matchcondition_obj.value = condition_value
             # if condition_type == 'as-path' and condition_value is not None:
             #     as_path_acl(condition_value, device, sdata)
-            input_name = condition_type + ',' + condition_value
-            condition_type = condition_type.replace(' ', '%20')
-            condition_value = condition_value.replace(' ', '%20')
-            match_condition_url = '/controller:devices/device=%s/l3features:route-maps/route-map=%s/route-map-entries=%s/match-condition=%s,%s' % (device.device.id, route_map_name, sequence_number,condition_type,condition_value)
-            if input_name in device_route_match:
-                output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+match_condition_url+'</rc-path></input>')
-                ref = util.parseXmlString(output)
-                log("xml_op:%s" %(ref))
-                if hasattr(ref.output, 'references'):
-                    if hasattr(ref.output.references, 'reference'):
-                        if hasattr(ref.output.references.reference, 'src_node'):
-                            for each_ref in util.convert_to_list(ref.output.references.reference.src_node):
-                                yang.Sdk.removeReference(each_ref, match_condition_url)
+            if condition_type is not None and condition_value is not None:
+                input_name = condition_type + ',' + condition_value
+                condition_type = condition_type.replace(' ', '%20')
+                condition_value = condition_value.replace(' ', '%20')
+                match_condition_url = '/controller:devices/device=%s/l3features:route-maps/route-map=%s/route-map-entries=%s/match-condition=%s,%s' % (device.device.id, route_map_name, sequence_number,condition_type,condition_value)
+                if input_name in device_route_match:
+                    output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+match_condition_url+'</rc-path></input>')
+                    ref = util.parseXmlString(output)
+                    log("xml_op:%s" %(ref))
+                    if hasattr(ref.output, 'references'):
+                        if hasattr(ref.output.references, 'reference'):
+                            if hasattr(ref.output.references.reference, 'src_node'):
+                                for each_ref in util.convert_to_list(ref.output.references.reference.src_node):
+                                    yang.Sdk.removeReference(each_ref, match_condition_url)
 
-                yang.Sdk.deleteData(match_condition_url, matchcondition_obj.getxml(filter=True), sdata.getTaskId(), sdata.getSession())
-            else:
-                print "Match condition is not in device: ", device
+                    yang.Sdk.deleteData(match_condition_url, matchcondition_obj.getxml(filter=True), sdata.getTaskId(), sdata.getSession())
+                else:
+                    print "Match condition is not in device: ", device
 
+            
         if entry == 'set-action':
             set_obj1 = route_maps.route_map.route_map_entries.set_action.set_action()
             if set_type is not None:
@@ -323,27 +334,43 @@ def delete_route_map(entity, conf, sdata, **kwargs):
                         set_obj1.ip = set_ip
             if set_value is not None:
                 set_obj1.value = set_value
-            input_set_name = set_type + ',' + set_value
-            set_type = set_type.replace(' ', '%20')
-            set_value = set_value.replace(' ', '%20')
-            set_action_url = '/controller:devices/device=%s/l3features:route-maps/route-map=%s/route-map-entries=%s/set-action=%s,%s' % (device.device.id, route_map_name,sequence_number,set_type,set_value)
-            if input_set_name in device_route_set:
-                output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+set_action_url+'</rc-path></input>')
-                ref = util.parseXmlString(output)
-                log("xml_op:%s" %(ref))
-                if hasattr(ref.output, 'references'):
-                    if hasattr(ref.output.references, 'reference'):
-                        if hasattr(ref.output.references.reference, 'src_node'):
-                            for each_ref in util.convert_to_list(ref.output.references.reference.src_node):
-                                yang.Sdk.removeReference(each_ref, set_action_url)
+            if set_type is not None and set_value is not None:
+                input_set_name = set_type + ',' + set_value
+                set_type = set_type.replace(' ', '%20')
+                set_value = set_value.replace(' ', '%20')
+                set_action_url = '/controller:devices/device=%s/l3features:route-maps/route-map=%s/route-map-entries=%s/set-action=%s,%s' % (device.device.id, route_map_name,sequence_number,set_type,set_value)
+                if input_set_name in device_route_set:
+                    output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+set_action_url+'</rc-path></input>')
+                    ref = util.parseXmlString(output)
+                    log("xml_op:%s" %(ref))
+                    if hasattr(ref.output, 'references'):
+                        if hasattr(ref.output.references, 'reference'):
+                            if hasattr(ref.output.references.reference, 'src_node'):
+                                for each_ref in util.convert_to_list(ref.output.references.reference.src_node):
+                                    yang.Sdk.removeReference(each_ref, set_action_url)
+                    yang.Sdk.deleteData(set_action_url, set_obj1.getxml(filter=True), sdata.getTaskId(), sdata.getSession())
+                else:
+                    print "Set action is not in device: ", device
 
-                yang.Sdk.deleteData(set_action_url, set_obj1.getxml(filter=True), sdata.getTaskId(), sdata.getSession())
-            else:
-                print "Set action is not in device: ", device
+        #Delete Entire Route-Map sequence entry
+        if entry == 'delete-sequence-entry':
+                route_map_entry_url = '/controller:devices/device=%s/l3features:route-maps/route-map=%s/route-map-entries=%s' % (device.device.id, route_map_name, sequence_number) 
+                if sequence_number in device_route_entries:
+                    output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+route_map_entry_url+'</rc-path></input>')
+                    ref = util.parseXmlString(output)
+                    log("xml_op:%s" %(ref))
+                    if hasattr(ref.output, 'references'):
+                        if hasattr(ref.output.references, 'reference'):
+                            for eachreference in util.convert_to_list(ref.output.references.reference):
+                                if hasattr(eachreference, 'src_node'):
+                                    for each_ref in util.convert_to_list(eachreference.src_node):
+                                        yang.Sdk.removeReference(each_ref, eachreference.dest_node)
+                    yang.Sdk.deleteData(route_map_entry_url, None, sdata.getTaskId(), sdata.getSession())
+                else:
+                    print "Set action is not in device: ", device
     else:
-        print "Route-map is not in device: ", device
-
-
+        print "Route-map is not in device: ", device       
+                
 class DeletePreProcessor(yang.SessionPreProcessor):
     def processBeforeReserve(self, session):
         operations = session.getOperations()

@@ -65,12 +65,13 @@ class ServiceDataCustomization:
       if modify:
         config = kwargs['config']
         inputdict = kwargs['inputdict']
-
+      entity = 'cpe_primary'
+      int_name = None
       if isinstance(dev, list) is True:
           for device in dev:
-              route_maps(kwargs['inputdict']['route_map_name'], device, sdata)
+              route_maps(kwargs['inputdict']['route_map_name'], device, sdata, int_name, entity)
       else:
-          route_maps(kwargs['inputdict']['route_map_name'], dev, sdata)
+          route_maps(kwargs['inputdict']['route_map_name'], dev, sdata, int_name, entity)
 
     @staticmethod
     def process_service_device_bindings(smodelctx, sdata, dev, **kwargs):
@@ -88,7 +89,7 @@ class ServiceDataCustomization:
     @staticmethod
     def process_service_update_data(smodelctx, sdata, **kwargs):
       """callback called for update operation"""
-      raise Exception('Update forbidden for node route-map at path managed-cpe-services/customer/dual-cpe-site/dual-cpe-site-services/cpe-primary/route-maps/route-map')
+      #raise Exception('Update forbidden for node route-map at path managed-cpe-services/customer/dual-cpe-site/dual-cpe-site-services/cpe-primary/route-maps/route-map')
       modify = False
       if modify and kwargs is not None:
         for key, value in kwargs.iteritems():

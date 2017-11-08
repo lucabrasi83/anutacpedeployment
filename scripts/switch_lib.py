@@ -31,20 +31,66 @@ def spanningtree(smodelctx, sdata, dev, **kwargs):
     extend_system_id = inputdict['extend_system_id']
     vlan_range = inputdict['vlan_range']
     priority = inputdict['priority']
+    util.log_debug("mode:"+str(options))
     if options == 'mode':
+        util.log_debug("in mode")
         spanningtreeobj = spanning_tree.mode.mode()
         spanningtreeobj.mode = mode
         if extend_system_id == 'true':
             spanningtreeobj.extend_system_id = extend_system_id
-        yang.Sdk.createData(dev.url, '<spanning-tree/>', sdata.getSession(), False)
+        spanningtree = dev.url.split("/data")[1]
+        if not yang.Sdk.dataExists(spanningtree+"/basicDeviceConfigs:spanning-tree"):
+            yang.Sdk.createData(dev.url, '<spanning-tree/>', sdata.getSession(), False)
         yang.Sdk.createData(dev.url + '/spanning-tree', spanningtreeobj.getxml(filter=True), sdata.getSession())
     elif options == 'vlan':
+        spanningtree = dev.url.split("/data")[1]
+        if not yang.Sdk.dataExists(spanningtree+"/basicDeviceConfigs:spanning-tree"):
+            yang.Sdk.createData(dev.url, '<spanning-tree/>', sdata.getSession(), False)
+        xml_output = yang.Sdk.getData(dev.url+"/basicDeviceConfigs:spanning-tree", '', sdata.getTaskId())
+        obj = util.parseXmlString(xml_output)
+        if hasattr(obj.spanning_tree,"vlan"):
+            vlan_list = []
+            for vlan in util.convert_to_list(obj.spanning_tree.vlan):
+                if priority == vlan.priority:
+                    yang.Sdk.deleteData(dev.url+"/basicDeviceConfigs:spanning-tree/vlan="+vlan.vlan.replace(',','%2C'), '', sdata.getTaskId(), sdata.getSession())
+                    vlan_list.append(vlan.vlan)
+                else:
+                    vlan = vlan_range
+            if vlan_list != []:
+                vlan = ",".join(vlan_list)
+                vlan = vlan+","+vlan_range
+                vlan = format_vlan(vlan)
+                util.log_debug("vlan:"+str(vlan))
+
+        else:
+            vlan = vlan_range
         spanningtreeobj = spanning_tree.vlan.vlan()
-        spanningtreeobj.vlan = vlan_range
+        spanningtreeobj.vlan = format_vlan(vlan)
         spanningtreeobj.priority = priority
-        yang.Sdk.createData(dev.url, '<spanning-tree/>', sdata.getSession(), False)
         yang.Sdk.createData(dev.url + '/spanning-tree', spanningtreeobj.getxml(filter=True), sdata.getSession())
 
+def format_vlan(vlan):
+    l = vlan.split(",")
+    list1 = []
+    for i in l:
+        if "-" in i:
+            list1.extend(range(int(i.split("-")[0]),int(i.split("-")[1])+1))
+        else:
+            list1.append(int(i))
+    list2 = list(set(list1))
+    list2.sort(key=lambda x: [int(y) for y in str(x).split('-')])
+    ret = []
+    a = b = list2[0]
+
+    for el in list2[1:]:
+        if el == b+1:
+            b = el
+        else:
+            ret.append(str(a) if a==b else str(a)+"-"+str(b)) # is a single or a range?
+            a = b = el                       # let's start again with a single
+    ret.append(str(a) if a==b else str(a)+"-"+str(b))
+    vlan = ','.join(ret)
+    return vlan
 
 def vlandef(smodelctx, sdata, dev, **kwargs):
     inputdict = kwargs['inputdict']
@@ -70,7 +116,8 @@ def interfacedef(smodelctx, sdata, dev, **kwargs):
     if interface_type == "Physical":
         interfacedefobj.mode = "l3-interface"
     elif interface_type == "SVI":
-        interfacedefobj.mode = "vlan"
+        #     interfacedefobj.mode = "vlan"
+        interfacedefobj.vlan = vlan_id
 
     next_ip_address = None
     if interface_type == 'Physical':
@@ -240,6 +287,8 @@ def switchport(smodelctx, sdata, dev, **kwargs):
                 switchportobj = interfaces.interface.allowed_vlans.allowed_vlans()
                 switchportobj.is_encap = 'true'
                 allowvlanurl = dev.url + '/interfaces/interface=%s'  % (str(interface_name).replace('/', '%2F'))
+                vlanurl = dev.url + '/interfaces/interface=%s' % (str(interface_name).replace('/', '%2F'))
+                yang.Sdk.createData(vlanurl, '<allowed-vlans/>', sdata.getSession(), False)
                 yang.Sdk.createData(allowvlanurl, switchportobj.getxml(filter=True), sdata.getSession())
         elif options == "port-security":
             switchportobj = interfaces.interface.port_security.port_security()

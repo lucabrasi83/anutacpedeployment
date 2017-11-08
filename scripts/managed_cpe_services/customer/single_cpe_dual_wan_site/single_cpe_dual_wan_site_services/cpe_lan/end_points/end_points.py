@@ -66,7 +66,7 @@ class EndPoints(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = None
         devbindobjs={}
@@ -103,6 +103,8 @@ class EndPoints(yang.AbstractYangServiceHandler):
         inputdict['nat_outside'] = config.get_field_value('nat_outside')
         inputdict['delay'] = config.get_field_value('delay')
         inputdict['mace_enable'] = config.get_field_value('mace_enable')
+        inputdict['tcp_mss'] = config.get_field_value('tcp_mss')
+        inputdict['bandwidth'] = config.get_field_value('bandwidth')
         # END OF FETCHING THE LEAF PARAMETERS
 
         #Fetch Device Object
@@ -128,12 +130,49 @@ class EndPoints(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         #Fetch Device Object
         prevconfig = util.parseXmlString(sdata.getPreviousPayload())
         prevconfig = prevconfig.end_points
         dev = getDeviceObject(prevconfig.get_field_value('device_ip'), sdata)
+
+        inputdict = {}
+
+        # START OF FETCHING THE LEAF PARAMETERS
+        inputdict['profile_name'] = config.get_field_value('profile_name')
+        inputdict['endpoint_name'] = config.get_field_value('endpoint_name')
+        inputdict['device_ip'] = config.get_field_value('device_ip')
+        inputdict['vrf'] = config.get_field_value('vrf')
+        inputdict['interface_type'] = config.get_field_value('interface_type')
+        inputdict['interface_name'] = config.get_field_value('interface_name')
+        inputdict['vlan_id'] = config.get_field_value('vlan_id')
+        inputdict['interface_ip'] = config.get_field_value('interface_ip')
+        inputdict['interface_description'] = config.get_field_value('interface_description')
+        inputdict['pbr_policy'] = config.get_field_value('pbr_policy')
+        inputdict['dps'] = config.get_field_value('dps')
+        inputdict['ospf'] = config.get_field_value('ospf')
+        inputdict['priority'] = config.get_field_value('priority')
+        inputdict['cost'] = config.get_field_value('cost')
+        inputdict['fast_hello'] = config.get_field_value('fast_hello')
+        inputdict['hello_multiplier'] = config.get_field_value('hello_multiplier')
+        inputdict['hello_interval'] = config.get_field_value('hello_interval')
+        inputdict['dead_interval'] = config.get_field_value('dead_interval')
+        inputdict['ospf_id'] = config.get_field_value('ospf_id')
+        inputdict['area'] = config.get_field_value('area')
+        inputdict['inbound_acl'] = config.get_field_value('inbound_acl')
+        inputdict['global_inbound_acl'] = config.get_field_value('global_inbound_acl')
+        inputdict['site_inbound_acl'] = config.get_field_value('site_inbound_acl')
+        inputdict['outbound_acl'] = config.get_field_value('outbound_acl')
+        inputdict['global_outbound_acl'] = config.get_field_value('global_outbound_acl')
+        inputdict['site_outbound_acl'] = config.get_field_value('site_outbound_acl')
+        inputdict['nat_inside'] = config.get_field_value('nat_inside')
+        inputdict['nat_outside'] = config.get_field_value('nat_outside')
+        inputdict['delay'] = config.get_field_value('delay')
+        inputdict['mace_enable'] = config.get_field_value('mace_enable')
+        inputdict['tcp_mss'] = config.get_field_value('tcp_mss')
+        inputdict['bandwidth'] = config.get_field_value('bandwidth')
+        # END OF FETCHING THE LEAF PARAMETERS
 
         #Use the custom method to process the data
         service_customization.ServiceDataCustomization.process_service_update_data(smodelctx, sdata, dev=dev, parentobj=parentobj, config=config)
@@ -148,10 +187,47 @@ class EndPoints(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         #Fetch Device Object
         dev = getDeviceObject(config.get_field_value('device_ip'), sdata)
+
+        inputdict = {}
+
+        # START OF FETCHING THE LEAF PARAMETERS
+        inputdict['profile_name'] = config.get_field_value('profile_name')
+        inputdict['endpoint_name'] = config.get_field_value('endpoint_name')
+        inputdict['device_ip'] = config.get_field_value('device_ip')
+        inputdict['vrf'] = config.get_field_value('vrf')
+        inputdict['interface_type'] = config.get_field_value('interface_type')
+        inputdict['interface_name'] = config.get_field_value('interface_name')
+        inputdict['vlan_id'] = config.get_field_value('vlan_id')
+        inputdict['interface_ip'] = config.get_field_value('interface_ip')
+        inputdict['interface_description'] = config.get_field_value('interface_description')
+        inputdict['pbr_policy'] = config.get_field_value('pbr_policy')
+        inputdict['dps'] = config.get_field_value('dps')
+        inputdict['ospf'] = config.get_field_value('ospf')
+        inputdict['priority'] = config.get_field_value('priority')
+        inputdict['cost'] = config.get_field_value('cost')
+        inputdict['fast_hello'] = config.get_field_value('fast_hello')
+        inputdict['hello_multiplier'] = config.get_field_value('hello_multiplier')
+        inputdict['hello_interval'] = config.get_field_value('hello_interval')
+        inputdict['dead_interval'] = config.get_field_value('dead_interval')
+        inputdict['ospf_id'] = config.get_field_value('ospf_id')
+        inputdict['area'] = config.get_field_value('area')
+        inputdict['inbound_acl'] = config.get_field_value('inbound_acl')
+        inputdict['global_inbound_acl'] = config.get_field_value('global_inbound_acl')
+        inputdict['site_inbound_acl'] = config.get_field_value('site_inbound_acl')
+        inputdict['outbound_acl'] = config.get_field_value('outbound_acl')
+        inputdict['global_outbound_acl'] = config.get_field_value('global_outbound_acl')
+        inputdict['site_outbound_acl'] = config.get_field_value('site_outbound_acl')
+        inputdict['nat_inside'] = config.get_field_value('nat_inside')
+        inputdict['nat_outside'] = config.get_field_value('nat_outside')
+        inputdict['delay'] = config.get_field_value('delay')
+        inputdict['mace_enable'] = config.get_field_value('mace_enable')
+        inputdict['tcp_mss'] = config.get_field_value('tcp_mss')
+        inputdict['bandwidth'] = config.get_field_value('bandwidth')
+        # END OF FETCHING THE LEAF PARAMETERS
 
         #Use the custom method to process the data
         service_customization.ServiceDataCustomization.process_service_delete_data(smodelctx, sdata, dev=dev, parentobj=parentobj, config=config)

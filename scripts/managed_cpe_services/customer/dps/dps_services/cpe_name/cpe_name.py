@@ -64,7 +64,7 @@ class CpeName(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         devbindobjs={}
@@ -127,8 +127,8 @@ class CpeName(yang.AbstractYangServiceHandler):
         inputdict['tunnel_interface_ip_address'] = config.get_field_value('tunnel_interface_ip_address')
         inputdict['tunnel_interface_description'] = config.get_field_value('tunnel_interface_description')
         inputdict['tunnel_bandwidth'] = config.get_field_value('tunnel_bandwidth')
-	inputdict['bgp_vrf'] = config.get_field_value('bgp_vrf')
-	inputdict['tunnel_fvrf'] = config.get_field_value('tunnel_fvrf')
+        inputdict['bgp_vrf'] = config.get_field_value('bgp_vrf')
+        inputdict['tunnel_fvrf'] = config.get_field_value('tunnel_fvrf')
         # END OF FETCHING THE LEAF PARAMETERS
 
         inputkeydict = {}
@@ -148,7 +148,7 @@ class CpeName(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
         dev = []
         #Use the custom method to process the data
         service_customization.ServiceDataCustomization.process_service_update_data(smodelctx, sdata, dev=dev, parentobj=parentobj, config=config)
@@ -163,7 +163,7 @@ class CpeName(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
         dev = []
 
         inputdict = {}
@@ -209,8 +209,8 @@ class CpeName(yang.AbstractYangServiceHandler):
         inputdict['tunnel_interface_ip_address'] = config.get_field_value('tunnel_interface_ip_address')
         inputdict['tunnel_interface_description'] = config.get_field_value('tunnel_interface_description')
         inputdict['tunnel_bandwidth'] = config.get_field_value('tunnel_bandwidth')
-	inputdict['bgp_vrf'] = config.get_field_value('bgp_vrf')
-	inputdict['tunnel_fvrf'] = config.get_field_value('tunnel_fvrf')
+        inputdict['bgp_vrf'] = config.get_field_value('bgp_vrf')
+        inputdict['tunnel_fvrf'] = config.get_field_value('tunnel_fvrf')
         # END OF FETCHING THE LEAF PARAMETERS
 
         inputkeydict = {}

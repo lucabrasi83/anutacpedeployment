@@ -42,6 +42,7 @@ from servicemodel import devicemgr
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject
 from cpedeployment.cpedeployment_lib import getCurrentObjectConfig
+from cpedeployment.cpedeployment_lib import getPreviousObjectConfig
 from cpedeployment.cpedeployment_lib import ServiceModelContext
 from cpedeployment.cpedeployment_lib import getParentObject
 from cpedeployment.cpedeployment_lib import log
@@ -68,7 +69,7 @@ class LanProfile(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -82,6 +83,10 @@ class LanProfile(yang.AbstractYangServiceHandler):
         inputdict['inbound_policy'] = config.get_field_value('inbound_policy')
         inputdict['hierarchical_inbound_policy'] = config.get_field_value('hierarchical_inbound_policy')
         inputdict['hierarchical_policy'] = config.get_field_value('hierarchical_policy')
+        inputdict['hierarchical_lan_outbound_policy'] = config.get_field_value('hierarchical_lan_outbound_policy')
+        inputdict['hierarchical_egress_policy'] = config.get_field_value('hierarchical_egress_policy')
+        inputdict['shape_average_rate'] = config.get_field_value('shape_average_rate')
+        inputdict['outbound_lan_policy'] = config.get_field_value('outbound_lan_policy')
         inputdict['auto_negotiation'] = config.get_field_value('auto_negotiation')
         if inputdict.get('auto_negotiation') is None:
           inputdict['auto_negotiation'] = 'False'
@@ -129,18 +134,20 @@ class LanProfile(yang.AbstractYangServiceHandler):
     def update(self, id, sdata):
         #Fetch Local Config Object
         config = getCurrentObjectConfig(id, sdata, 'lan_profile')
+        pconfig = getPreviousObjectConfig(id, sdata, 'lan_profile')
         opaque_args = self.opaque_args
 
         #Fetch Service Model Context Object
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
         devbindobjs={}
         inputdict = {}
+        pinputdict = {}
         opaque_args = self.opaque_args
 
         # START OF FETCHING THE LEAF PARAMETERS
@@ -149,6 +156,10 @@ class LanProfile(yang.AbstractYangServiceHandler):
         inputdict['inbound_policy'] = config.get_field_value('inbound_policy')
         inputdict['hierarchical_inbound_policy'] = config.get_field_value('hierarchical_inbound_policy')
         inputdict['hierarchical_policy'] = config.get_field_value('hierarchical_policy')
+        inputdict['hierarchical_lan_outbound_policy'] = config.get_field_value('hierarchical_lan_outbound_policy')
+        inputdict['hierarchical_egress_policy'] = config.get_field_value('hierarchical_egress_policy')
+        inputdict['shape_average_rate'] = config.get_field_value('shape_average_rate')
+        inputdict['outbound_lan_policy'] = config.get_field_value('outbound_lan_policy')
         inputdict['auto_negotiation'] = config.get_field_value('auto_negotiation')
         if inputdict.get('auto_negotiation') is None:
           inputdict['auto_negotiation'] = 'False'
@@ -179,9 +190,51 @@ class LanProfile(yang.AbstractYangServiceHandler):
           inputdict['hold_time_sec'] = '1'
         inputdict['hold_time_msec'] = config.get_field_value('hold_time_msec')
         # END OF FETCHING THE LEAF PARAMETERS
+
+        # START OF FETCHING THE PREVIOUS LEAF PARAMETERS
+        pinputdict['profile_name'] = pconfig.get_field_value('profile_name')
+        pinputdict['cidr'] = pconfig.get_field_value('cidr')
+        pinputdict['inbound_policy'] = pconfig.get_field_value('inbound_policy')
+        pinputdict['hierarchical_inbound_policy'] = pconfig.get_field_value('hierarchical_inbound_policy')
+        pinputdict['hierarchical_policy'] = pconfig.get_field_value('hierarchical_policy')
+        pinputdict['hierarchical_lan_outbound_policy'] = pconfig.get_field_value('hierarchical_lan_outbound_policy')
+        pinputdict['hierarchical_egress_policy'] = pconfig.get_field_value('hierarchical_egress_policy')
+        pinputdict['shape_average_rate'] = pconfig.get_field_value('shape_average_rate')
+        pinputdict['outbound_lan_policy'] = pconfig.get_field_value('outbound_lan_policy')
+        pinputdict['auto_negotiation'] = pconfig.get_field_value('auto_negotiation')
+        if pinputdict.get('auto_negotiation') is None:
+          pinputdict['auto_negotiation'] = 'False'
+        pinputdict['speed'] = pconfig.get_field_value('speed')
+        pinputdict['duplex'] = pconfig.get_field_value('duplex')
+        pinputdict['load_interval'] = pconfig.get_field_value('load_interval')
+        pinputdict['load_interval_delay'] = pconfig.get_field_value('load_interval_delay')
+        pinputdict['hold_queue_in'] = pconfig.get_field_value('hold_queue_in')
+        pinputdict['in_queue_length'] = pconfig.get_field_value('in_queue_length')
+        pinputdict['hold_queue_out'] = pconfig.get_field_value('hold_queue_out')
+        pinputdict['out_queue_length'] = pconfig.get_field_value('out_queue_length')
+        pinputdict['hsrp_version'] = pconfig.get_field_value('hsrp_version')
+        if pinputdict.get('hsrp_version') is None:
+          pinputdict['hsrp_version'] = '2'
+        pinputdict['hsrp_standby_ip'] = pconfig.get_field_value('hsrp_standby_ip')
+        pinputdict['hsrp_group'] = pconfig.get_field_value('hsrp_group')
+        pinputdict['hsrp_preempt'] = pconfig.get_field_value('hsrp_preempt')
+        pinputdict['hsrp_preempt_reload_delay'] = pconfig.get_field_value('hsrp_preempt_reload_delay')
+        pinputdict['auth_type'] = pconfig.get_field_value('auth_type')
+        pinputdict['auth_password'] = pconfig.get_field_value('auth_password')
+        pinputdict['hsrp_timers'] = pconfig.get_field_value('hsrp_timers')
+        pinputdict['hello_interval_sec'] = pconfig.get_field_value('hello_interval_sec')
+        pinputdict['hello_interval_msec'] = pconfig.get_field_value('hello_interval_msec')
+        if pinputdict.get('hello_interval_msec') is None:
+          pinputdict['hello_interval_msec'] = '250'
+        pinputdict['hold_time_sec'] = pconfig.get_field_value('hold_time_sec')
+        if pinputdict.get('hold_time_sec') is None:
+          pinputdict['hold_time_sec'] = '1'
+        pinputdict['hold_time_msec'] = pconfig.get_field_value('hold_time_msec')
+        # END OF FETCHING THE LEAF PARAMETERS
+
         dev = []
         #Use the custom method to process the data
-        service_customization.ServiceDataCustomization.process_service_update_data(smodelctx, sdata, id=id, dev=dev, parentobj=parentobj, config=config, hopaque=opaque_args, inputdict=inputdict)
+        service_customization.ServiceDataCustomization.process_service_update_data(smodelctx, sdata, id=id, dev=dev, parentobj=parentobj, config=config, hopaque=opaque_args, inputdict=inputdict, pinputdict=pinputdict, pconfig=pconfig)
 
     def delete(self, id, sdata):
         sdata.getSession().addYangSessionPreReserveProcessor(self.delete_pre_processor)
@@ -194,7 +247,7 @@ class LanProfile(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -208,6 +261,10 @@ class LanProfile(yang.AbstractYangServiceHandler):
         inputdict['inbound_policy'] = config.get_field_value('inbound_policy')
         inputdict['hierarchical_inbound_policy'] = config.get_field_value('hierarchical_inbound_policy')
         inputdict['hierarchical_policy'] = config.get_field_value('hierarchical_policy')
+        inputdict['hierarchical_lan_outbound_policy'] = config.get_field_value('hierarchical_lan_outbound_policy')
+        inputdict['hierarchical_egress_policy'] = config.get_field_value('hierarchical_egress_policy')
+        inputdict['shape_average_rate'] = config.get_field_value('shape_average_rate')
+        inputdict['outbound_lan_policy'] = config.get_field_value('outbound_lan_policy')
         inputdict['auto_negotiation'] = config.get_field_value('auto_negotiation')
         if inputdict.get('auto_negotiation') is None:
           inputdict['auto_negotiation'] = 'False'

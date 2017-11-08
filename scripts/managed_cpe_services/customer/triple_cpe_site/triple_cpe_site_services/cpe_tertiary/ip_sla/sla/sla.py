@@ -70,7 +70,7 @@ class Sla(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -111,8 +111,8 @@ class Sla(yang.AbstractYangServiceHandler):
         inputdict['history_interval'] = config.get_field_value('history_interval')
         inputdict['buckets_size'] = config.get_field_value('buckets_size')
         inputdict['num_packets'] = config.get_field_value('num_packets')
-        inputdict['delay_down_time'] = config.get_field_value('delay_down_time')
-        inputdict['delay_up_time'] = config.get_field_value('delay_up_time')
+        inputdict['track_delay_down_time'] = config.get_field_value('track_delay_down_time')
+        inputdict['track_delay_up_time'] = config.get_field_value('track_delay_up_time')
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'cpe-tertiary')
@@ -143,7 +143,7 @@ class Sla(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -184,8 +184,8 @@ class Sla(yang.AbstractYangServiceHandler):
         inputdict['history_interval'] = config.get_field_value('history_interval')
         inputdict['buckets_size'] = config.get_field_value('buckets_size')
         inputdict['num_packets'] = config.get_field_value('num_packets')
-        inputdict['delay_down_time'] = config.get_field_value('delay_down_time')
-        inputdict['delay_up_time'] = config.get_field_value('delay_up_time')
+        inputdict['track_delay_down_time'] = config.get_field_value('track_delay_down_time')
+        inputdict['track_delay_up_time'] = config.get_field_value('track_delay_up_time')
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'cpe-tertiary')
@@ -208,7 +208,7 @@ class Sla(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -249,8 +249,8 @@ class Sla(yang.AbstractYangServiceHandler):
         inputdict['history_interval'] = config.get_field_value('history_interval')
         inputdict['buckets_size'] = config.get_field_value('buckets_size')
         inputdict['num_packets'] = config.get_field_value('num_packets')
-        inputdict['delay_down_time'] = config.get_field_value('delay_down_time')
-        inputdict['delay_up_time'] = config.get_field_value('delay_up_time')
+        inputdict['track_delay_down_time'] = config.get_field_value('track_delay_down_time')
+        inputdict['track_delay_up_time'] = config.get_field_value('track_delay_up_time')
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'cpe-tertiary')

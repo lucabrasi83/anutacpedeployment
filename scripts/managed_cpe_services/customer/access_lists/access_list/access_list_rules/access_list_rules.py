@@ -64,7 +64,7 @@ class AccessListRules(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = None
         devbindobjs={}
@@ -80,16 +80,27 @@ class AccessListRules(yang.AbstractYangServiceHandler):
         inputdict['destination_condition'] = config.get_field_value('destination_condition')
         inputdict['destination_object'] = config.get_field_value('destination_object')
         inputdict['port_number'] = config.get_field_value('port_number')
+        inputdict['source_port'] = config.get_field_value('source_port')
         inputdict['match_packets'] = config.get_field_value('match_packets')
         inputdict['precedence'] = config.get_field_value('precedence')
         inputdict['source_object_group'] = config.get_field_value('source_object_group')
         inputdict['destination_object_group'] = config.get_field_value('destination_object_group')
+        inputdict['source_port_operator'] = config.get_field_value('source_port_operator')
+        inputdict['dest_port_operator'] = config.get_field_value('dest_port_operator')
+        '''
+        if util.isNotEmpty(inputdict['port_number']):
+            if util.isEmpty(inputdict['dest_port_operator']):
+                inputdict['dest_port_operator'] == 'eq'
+        if util.isNotEmpty(inputdict['source_port']):
+            if util.isEmpty(inputdict['source_port_operator']):
+                inputdict['source_port_operator'] == 'eq'
+        '''
         # END OF FETCHING THE LEAF PARAMETERS
 
         inputkeydict = {}
         # START OF FETCHING THE PARENT KEY LEAF PARAMETERS
-        inputkeydict['managed_cpe_services_customer_access_lists_access_list_name'] = sdata.getRcPath().split('/')[-2].split('=')[1]
-        inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-4].split('=')[1]
+        #inputkeydict['managed_cpe_services_customer_access_lists_access_list_name'] = sdata.getRcPath().split('/')[-2].split('=')[1]
+        #inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-4].split('=')[1]
         # END OF FETCHING THE PARENT KEY LEAF PARAMETERS
 
         #Use the custom methods to process the data
@@ -106,8 +117,32 @@ class AccessListRules(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
         dev = None
+        inputdict = {}
+
+        # START OF FETCHING THE LEAF PARAMETERS
+        inputdict['name'] = config.get_field_value('name')
+        inputdict['action'] = config.get_field_value('action')
+        inputdict['protocol'] = config.get_field_value('protocol')
+        inputdict['service_obj_name'] = config.get_field_value('service_obj_name')
+        inputdict['source_condition'] = config.get_field_value('source_condition')
+        inputdict['source_object'] = config.get_field_value('source_object')
+        inputdict['destination_condition'] = config.get_field_value('destination_condition')
+        inputdict['destination_object'] = config.get_field_value('destination_object')
+        inputdict['port_number'] = config.get_field_value('port_number')
+        inputdict['source_port'] = config.get_field_value('source_port')
+        inputdict['match_packets'] = config.get_field_value('match_packets')
+        inputdict['precedence'] = config.get_field_value('precedence')
+        inputdict['source_object_group'] = config.get_field_value('source_object_group')
+        inputdict['destination_object_group'] = config.get_field_value('destination_object_group')
+        inputdict['source_port_operator'] = config.get_field_value('source_port_operator')
+        inputdict['dest_port_operator'] = config.get_field_value('dest_port_operator')
+        if inputdict['port_number'] is not None and inputdict['dest_port_operator'] is None:
+            inputdict['dest_port_operator'] == 'eq'
+        if inputdict['source_port'] is not None and inputdict['source_port_operator'] is None:
+            inputdict['source_port_operator'] == 'eq'
+        # END OF FETCHING THE LEAF PARAMETERS
         #Use the custom method to process the data
         service_customization.ServiceDataCustomization.process_service_update_data(smodelctx, sdata, dev=dev, parentobj=parentobj, config=config)
 
@@ -121,8 +156,32 @@ class AccessListRules(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
         dev = None
+        inputdict = {}
+
+        # START OF FETCHING THE LEAF PARAMETERS
+        inputdict['name'] = config.get_field_value('name')
+        inputdict['action'] = config.get_field_value('action')
+        inputdict['protocol'] = config.get_field_value('protocol')
+        inputdict['service_obj_name'] = config.get_field_value('service_obj_name')
+        inputdict['source_condition'] = config.get_field_value('source_condition')
+        inputdict['source_object'] = config.get_field_value('source_object')
+        inputdict['destination_condition'] = config.get_field_value('destination_condition')
+        inputdict['destination_object'] = config.get_field_value('destination_object')
+        inputdict['port_number'] = config.get_field_value('port_number')
+        inputdict['source_port'] = config.get_field_value('source_port')
+        inputdict['match_packets'] = config.get_field_value('match_packets')
+        inputdict['precedence'] = config.get_field_value('precedence')
+        inputdict['source_object_group'] = config.get_field_value('source_object_group')
+        inputdict['destination_object_group'] = config.get_field_value('destination_object_group')
+        inputdict['source_port_operator'] = config.get_field_value('source_port_operator')
+        inputdict['dest_port_operator'] = config.get_field_value('dest_port_operator')
+        if inputdict['port_number'] is not None and inputdict['dest_port_operator'] is None:
+            inputdict['dest_port_operator'] == 'eq'
+        if inputdict['source_port'] is not None and inputdict['source_port_operator'] is None:
+            inputdict['source_port_operator'] == 'eq'
+        # END OF FETCHING THE LEAF PARAMETERS
         #Use the custom method to process the data
         service_customization.ServiceDataCustomization.process_service_delete_data(smodelctx, sdata, dev=dev, parentobj=parentobj, config=config)
 

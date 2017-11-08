@@ -42,6 +42,7 @@ from servicemodel import devicemgr
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject
 from cpedeployment.cpedeployment_lib import getCurrentObjectConfig
+from cpedeployment.cpedeployment_lib import getPreviousObjectConfig
 from cpedeployment.cpedeployment_lib import ServiceModelContext
 from cpedeployment.cpedeployment_lib import getParentObject
 from cpedeployment.cpedeployment_lib import log
@@ -68,7 +69,7 @@ class EndPoints(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -103,8 +104,10 @@ class EndPoints(yang.AbstractYangServiceHandler):
         inputdict['nat_outside'] = config.get_field_value('nat_outside')
         inputdict['nat_inside'] = config.get_field_value('nat_inside')
         inputdict['tunnel_mss'] = config.get_field_value('tunnel_mss')
+        inputdict['tunnel_mtu'] = config.get_field_value('tunnel_mtu')
         inputdict['delay'] = config.get_field_value('delay')
         inputdict['mace_enable'] = config.get_field_value('mace_enable')
+        inputdict['wan_interface_bandwidth'] = config.get_field_value('wan_interface_bandwidth')
         # END OF FETCHING THE LEAF PARAMETERS
 
         #Fetch Device Object
@@ -127,18 +130,20 @@ class EndPoints(yang.AbstractYangServiceHandler):
     def update(self, id, sdata):
         #Fetch Local Config Object
         config = getCurrentObjectConfig(id, sdata, 'end_points')
+        pconfig = getPreviousObjectConfig(id, sdata, 'end_points')
         opaque_args = self.opaque_args
 
         #Fetch Service Model Context Object
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
         devbindobjs={}
         inputdict = {}
+        pinputdict = {}
         opaque_args = self.opaque_args
 
         # START OF FETCHING THE LEAF PARAMETERS
@@ -168,16 +173,51 @@ class EndPoints(yang.AbstractYangServiceHandler):
         inputdict['nat_outside'] = config.get_field_value('nat_outside')
         inputdict['nat_inside'] = config.get_field_value('nat_inside')
         inputdict['tunnel_mss'] = config.get_field_value('tunnel_mss')
+        inputdict['tunnel_mtu'] = config.get_field_value('tunnel_mtu')
         inputdict['delay'] = config.get_field_value('delay')
         inputdict['mace_enable'] = config.get_field_value('mace_enable')
+        inputdict['wan_interface_bandwidth'] = config.get_field_value('wan_interface_bandwidth')
+        # END OF FETCHING THE LEAF PARAMETERS
+
+        # START OF FETCHING THE PREVIOUS LEAF PARAMETERS
+        pinputdict['endpoint_name'] = pconfig.get_field_value('endpoint_name')
+        pinputdict['device_ip'] = pconfig.get_field_value('device_ip')
+        pinputdict['fvrf'] = pconfig.get_field_value('fvrf')
+        pinputdict['ivrf'] = pconfig.get_field_value('ivrf')
+        pinputdict['vrf'] = pconfig.get_field_value('vrf')
+        pinputdict['interface_type'] = pconfig.get_field_value('interface_type')
+        pinputdict['interface_name'] = pconfig.get_field_value('interface_name')
+        pinputdict['vlan_id'] = pconfig.get_field_value('vlan_id')
+        pinputdict['interface_description'] = pconfig.get_field_value('interface_description')
+        pinputdict['inbound_acl'] = pconfig.get_field_value('inbound_acl')
+        pinputdict['global_inbound_acl'] = pconfig.get_field_value('global_inbound_acl')
+        pinputdict['site_inbound_acl'] = pconfig.get_field_value('site_inbound_acl')
+        pinputdict['outbound_acl'] = pconfig.get_field_value('outbound_acl')
+        pinputdict['global_outbound_acl'] = pconfig.get_field_value('global_outbound_acl')
+        pinputdict['site_outbound_acl'] = pconfig.get_field_value('site_outbound_acl')
+        pinputdict['dmvpn_profile'] = pconfig.get_field_value('dmvpn_profile')
+        pinputdict['p2p'] = pconfig.get_field_value('p2p')
+        pinputdict['tunnel_interface_ip_address'] = pconfig.get_field_value('tunnel_interface_ip_address')
+        pinputdict['tunnel_interface_mask'] = pconfig.get_field_value('tunnel_interface_mask')
+        pinputdict['tunnel_interface_id'] = pconfig.get_field_value('tunnel_interface_id')
+        pinputdict['tunnel_interface_destination'] = pconfig.get_field_value('tunnel_interface_destination')
+        pinputdict['tunnel_source'] = pconfig.get_field_value('tunnel_source')
+        pinputdict['tunnel_bandwidth'] = pconfig.get_field_value('tunnel_bandwidth')
+        pinputdict['nat_outside'] = pconfig.get_field_value('nat_outside')
+        pinputdict['nat_inside'] = pconfig.get_field_value('nat_inside')
+        pinputdict['tunnel_mss'] = pconfig.get_field_value('tunnel_mss')
+        pinputdict['tunnel_mtu'] = pconfig.get_field_value('tunnel_mtu')
+        pinputdict['delay'] = pconfig.get_field_value('delay')
+        pinputdict['mace_enable'] = pconfig.get_field_value('mace_enable')
+        pinputdict['wan_interface_bandwidth'] = pconfig.get_field_value('wan_interface_bandwidth')
         # END OF FETCHING THE LEAF PARAMETERS
 
         #Fetch Device Object
-        dev = getDeviceObject(config.get_field_value('device_ip'), sdata)
+        dev = getDeviceObject(pconfig.get_field_value('device_ip'), sdata)
         self.opaque_args['hireachy_device'] = dev
 
         #Use the custom method to process the data
-        service_customization.ServiceDataCustomization.process_service_update_data(smodelctx, sdata, id=id, dev=dev, parentobj=parentobj, config=config, hopaque=opaque_args, inputdict=inputdict)
+        service_customization.ServiceDataCustomization.process_service_update_data(smodelctx, sdata, id=id, dev=dev, parentobj=parentobj, config=config, pconfig=pconfig, hopaque=opaque_args, inputdict=inputdict, pinputdict=pinputdict)
 
     def delete(self, id, sdata):
         sdata.getSession().addYangSessionPreReserveProcessor(self.delete_pre_processor)
@@ -190,7 +230,7 @@ class EndPoints(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -225,8 +265,10 @@ class EndPoints(yang.AbstractYangServiceHandler):
         inputdict['nat_outside'] = config.get_field_value('nat_outside')
         inputdict['nat_inside'] = config.get_field_value('nat_inside')
         inputdict['tunnel_mss'] = config.get_field_value('tunnel_mss')
+        inputdict['tunnel_mtu'] = config.get_field_value('tunnel_mtu')
         inputdict['delay'] = config.get_field_value('delay')
         inputdict['mace_enable'] = config.get_field_value('mace_enable')
+        inputdict['wan_interface_bandwidth'] = config.get_field_value('wan_interface_bandwidth')
         # END OF FETCHING THE LEAF PARAMETERS
 
         #Fetch Device Object

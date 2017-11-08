@@ -72,6 +72,7 @@ from cpedeployment.cpedeployment_lib import log
 from cpedeployment.endpoint_lib import wan_endpoint,update_shape_avg
 from cpedeployment.endpoint_lib import deallocate_ipaddress_from_ipam
 from cpedeployment.endpoint_lib import delete_physical_interface
+from cpedeployment.endpoint_lib import update_wan_endpoint
 
 
 class ServiceDataCustomization:
@@ -108,7 +109,7 @@ class ServiceDataCustomization:
     @staticmethod
     def process_service_update_data(smodelctx, sdata, **kwargs):
       """callback called for update operation"""
-      raise Exception('Update forbidden for node end-points at path managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/cpe-primary-mpls-wan/end-points')
+      #raise Exception('Update forbidden for node end-points at path managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/cpe-primary-mpls-wan/end-points')
       modify = True
       if modify and kwargs is not None:
         for key, value in kwargs.iteritems():
@@ -117,6 +118,17 @@ class ServiceDataCustomization:
       if modify:
         config = kwargs['config']
         inputdict = kwargs['inputdict']
+        id = kwargs['id']
+        opaque_args = kwargs['hopaque']
+
+        #Previous config and previous inputdict
+        pconfig = kwargs['pconfig']
+        pinputdict = kwargs['pinputdict']
+
+        dev = kwargs['dev']
+
+        for device in util.convert_to_list(dev):
+            update_wan_endpoint(sdata, device, **kwargs)
 
     @staticmethod
     def process_service_delete_data(smodelctx, sdata, **kwargs):
@@ -139,6 +151,19 @@ class DeletePreProcessor(yang.SessionPreProcessor):
         operations = session.getOperations()
         """Add any move operations for Deletion"""
         log('operations: %s' % (operations))
+        yang.moveOperations(operations, ['DeleteIpsecProfileWithIKE'], ['DeleteDmvpnTunnel'], True)
+        print 'pass6: operations: %s' % (operations)
+        yang.moveOperations(operations, ['DeleteTransformSetWithIKE'], ['DeleteIpsecProfileWithIKE'], True)
+        print 'pass7: operations: %s' % (operations)
+        yang.moveOperations(operations, ['DeleteCryptoProfileMatchWithIKE'], ['DeleteTransformSetWithIKE'], True)
+        print 'pass8: operations: %s' % (operations)
+        yang.moveOperations(operations, ['DeleteCryptoProfileWithIKE'], ['DeleteCryptoProfileMatchWithIKE'], True)
+        print 'pass8_1: operations: %s' % (operations)
+        yang.moveOperations(operations, ['DeleteCryptoPolicyWithIKE'], ['DeleteCryptoProfileWithIKE'], True)
+        print 'pass9: operations: %s' % (operations)
+        yang.moveOperations(operations, ['DeleteCryptoPreSharedKeyWithIKE'], ['DeleteCryptoPolicyWithIKE'], True)
+        print 'pass10: operations: %s' % (operations)
+        yang.moveOperations(operations, ['DeleteCryptoWithIKE'], ['DeleteCryptoPreSharedKeyWithIKE'], True)
 
 class CreatePreProcessor(yang.SessionPreProcessor):
     def processBeforeReserve(self, session):

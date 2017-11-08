@@ -68,7 +68,7 @@ class EndPoints(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -110,6 +110,8 @@ class EndPoints(yang.AbstractYangServiceHandler):
         inputdict['decrement'] = config.get_field_value('decrement')
         inputdict['delay'] = config.get_field_value('delay')
         inputdict['mace_enable'] = config.get_field_value('mace_enable')
+        inputdict['tcp_mss'] = config.get_field_value('tcp_mss')
+        inputdict['bandwidth'] = config.get_field_value('bandwidth')
         # END OF FETCHING THE LEAF PARAMETERS
 
         #Fetch Device Object
@@ -138,7 +140,7 @@ class EndPoints(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -180,6 +182,8 @@ class EndPoints(yang.AbstractYangServiceHandler):
         inputdict['decrement'] = config.get_field_value('decrement')
         inputdict['delay'] = config.get_field_value('delay')
         inputdict['mace_enable'] = config.get_field_value('mace_enable')
+        inputdict['tcp_mss'] = config.get_field_value('tcp_mss')
+        inputdict['bandwidth'] = config.get_field_value('bandwidth')
         # END OF FETCHING THE LEAF PARAMETERS
 
         #Fetch Device Object
@@ -202,7 +206,7 @@ class EndPoints(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -244,6 +248,8 @@ class EndPoints(yang.AbstractYangServiceHandler):
         inputdict['decrement'] = config.get_field_value('decrement')
         inputdict['delay'] = config.get_field_value('delay')
         inputdict['mace_enable'] = config.get_field_value('mace_enable')
+        inputdict['tcp_mss'] = config.get_field_value('tcp_mss')
+        inputdict['bandwidth'] = config.get_field_value('bandwidth')
         # END OF FETCHING THE LEAF PARAMETERS
 
         #Fetch Device Object

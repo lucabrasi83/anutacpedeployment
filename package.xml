@@ -6,51 +6,51 @@
             <group>com.anuta.ncx.packages</group>
             <name>servicemodel</name>
             <order>0</order>
-            <version>6.0.0.0</version>
+            <version>6.0.1.1</version>
         </dependency>
         <dependency>
             <group>com.anuta.ncx.packages</group>
             <name>vrouterfeature</name>
             <order>1</order>
-            <version>6.0.0.0</version>
+            <version>6.0.1.1</version>
         </dependency>
         <dependency>
             <group>com.anuta.ncx.packages</group>
             <name>interconnect</name>
             <order>2</order>
-            <version>6.0.0.0</version>
+            <version>6.0.1.1</version>
         </dependency>
         <dependency>
             <group>com.anuta.ncx.packages</group>
             <name>virtualnetworkfeature</name>
             <order>3</order>
-            <version>6.0.0.0</version>
+            <version>6.0.1.1</version>
         </dependency>
         <dependency>
             <group>com.anuta.ncx.packages</group>
             <name>externalnetworkfeature</name>
             <order>4</order>
-            <version>6.0.0.0</version>
+            <version>6.0.1.1</version>
         </dependency>
         <dependency>
             <group>com.anuta.ncx.packages</group>
             <name>cpe</name>
             <order>5</order>
-            <version>6.0.0.0</version>
+            <version>6.0.1.1</version>
         </dependency>
         <dependency>
             <group>com.anuta.ncx.packages</group>
             <name>wanoptimizerfeature</name>
             <order>6</order>
-            <version>6.0.0.0</version>
+            <version>6.0.1.1</version>
         </dependency>
     </dependencies>
     <deploy-on-agent>false</deploy-on-agent>
-    <description>CPEDEPLOYMENT Service Package @servicePackageDescription@</description>
+    <description>CPEDEPLOYMENT Service Package</description>
     <module-name>cpedeployment</module-name>
     <name>CPEDEPLOYMENT Service</name>
-    <ncx-version>[6.0.0.0,)</ncx-version>
+    <ncx-version>[6.0.1,)</ncx-version>
     <order>-1</order>
     <type>SERVICE_MODEL</type>
-    <version>6.7.0.0</version>
+    <version>6.0.3.3</version>
 </package>

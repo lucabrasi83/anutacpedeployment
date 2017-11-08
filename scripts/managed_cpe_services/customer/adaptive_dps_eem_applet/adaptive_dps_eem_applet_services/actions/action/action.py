@@ -67,7 +67,7 @@ class Action(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -82,6 +82,7 @@ class Action(yang.AbstractYangServiceHandler):
         inputdict['cli_string'] = config.get_field_value('cli_string')
         inputdict['regex_pattern'] = config.get_field_value('regex_pattern')
         inputdict['input_string'] = config.get_field_value('input_string')
+        inputdict['syslog'] = config.get_field_value('syslog')
         inputdict['syslog_priority'] = config.get_field_value('syslog_priority')
         inputdict['syslog_msg'] = config.get_field_value('syslog_msg')
         inputdict['first_operand'] = config.get_field_value('first_operand')
@@ -113,7 +114,7 @@ class Action(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -128,6 +129,7 @@ class Action(yang.AbstractYangServiceHandler):
         inputdict['cli_string'] = config.get_field_value('cli_string')
         inputdict['regex_pattern'] = config.get_field_value('regex_pattern')
         inputdict['input_string'] = config.get_field_value('input_string')
+        inputdict['syslog'] = config.get_field_value('syslog')
         inputdict['syslog_priority'] = config.get_field_value('syslog_priority')
         inputdict['syslog_msg'] = config.get_field_value('syslog_msg')
         inputdict['first_operand'] = config.get_field_value('first_operand')
@@ -147,6 +149,7 @@ class Action(yang.AbstractYangServiceHandler):
         pinputdict['cli_string'] = pconfig.get_field_value('cli_string')
         pinputdict['regex_pattern'] = pconfig.get_field_value('regex_pattern')
         pinputdict['input_string'] = pconfig.get_field_value('input_string')
+        pinputdict['syslog'] = pconfig.get_field_value('syslog')
         pinputdict['syslog_priority'] = pconfig.get_field_value('syslog_priority')
         pinputdict['syslog_msg'] = pconfig.get_field_value('syslog_msg')
         pinputdict['first_operand'] = pconfig.get_field_value('first_operand')
@@ -170,7 +173,7 @@ class Action(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -185,6 +188,7 @@ class Action(yang.AbstractYangServiceHandler):
         inputdict['cli_string'] = config.get_field_value('cli_string')
         inputdict['regex_pattern'] = config.get_field_value('regex_pattern')
         inputdict['input_string'] = config.get_field_value('input_string')
+        inputdict['syslog'] = config.get_field_value('syslog')
         inputdict['syslog_priority'] = config.get_field_value('syslog_priority')
         inputdict['syslog_msg'] = config.get_field_value('syslog_msg')
         inputdict['first_operand'] = config.get_field_value('first_operand')

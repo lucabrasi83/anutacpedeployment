@@ -68,7 +68,7 @@ class Sla(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = None
         devbindobjs={}
@@ -107,8 +107,8 @@ class Sla(yang.AbstractYangServiceHandler):
         inputdict['http_url'] = config.get_field_value('http_url')
         inputdict['http_raw_request'] = config.get_field_value('http_raw_request')
         inputdict['num_packets'] = config.get_field_value('num_packets')
-        inputdict['delay_down_time'] = config.get_field_value('delay_down_time')
-        inputdict['delay_up_time'] = config.get_field_value('delay_up_time')
+        inputdict['track_delay_down_time'] = config.get_field_value('track_delay_down_time')
+        inputdict['track_delay_up_time'] = config.get_field_value('track_delay_up_time')
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'cpe')
@@ -137,7 +137,45 @@ class Sla(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
+
+        inputdict = {}
+        # START OF FETCHING THE LEAF PARAMETERS
+        inputdict['vrf_name'] = config.get_field_value('vrf_name')
+        inputdict['entry_number'] = config.get_field_value('entry_number')
+        inputdict['operation_type'] = config.get_field_value('operation_type')
+        inputdict['destination'] = config.get_field_value('destination')
+        inputdict['source'] = config.get_field_value('source')
+        inputdict['source_interface_name'] = config.get_field_value('source_interface_name')
+        inputdict['source_interface_ip'] = config.get_field_value('source_interface_ip')
+        inputdict['data_size'] = config.get_field_value('data_size')
+        # if inputdict['data_size'] is None:
+        #   inputdict['data_size'] = '500'
+        inputdict['frequency'] = config.get_field_value('frequency')
+        # if inputdict['frequency'] is None:
+        #   inputdict['frequency'] = '3'
+        inputdict['timeout'] = config.get_field_value('timeout')
+        # if inputdict['timeout'] is None:
+        #   inputdict['timeout'] = '2500'
+        inputdict['threshold'] = config.get_field_value('threshold')
+        # if inputdict['threshold'] is None:
+        #   inputdict['threshold'] = '2500'
+        inputdict['track_number'] = config.get_field_value('track_number')
+        inputdict['response_data_size'] = config.get_field_value('response_data_size')
+        inputdict['destination_port'] = config.get_field_value('destination_port')
+        inputdict['source_port'] = config.get_field_value('source_port')
+        inputdict['interval'] = config.get_field_value('interval')
+        inputdict['tos'] = config.get_field_value('tos')
+        inputdict['tag'] = config.get_field_value('tag')
+        inputdict['history_interval'] = config.get_field_value('history_interval')
+        inputdict['buckets_size'] = config.get_field_value('buckets_size')
+        inputdict['http_request_type'] = config.get_field_value('http_request_type')
+        inputdict['http_url'] = config.get_field_value('http_url')
+        inputdict['http_raw_request'] = config.get_field_value('http_raw_request')
+        inputdict['num_packets'] = config.get_field_value('num_packets')
+        inputdict['track_delay_down_time'] = config.get_field_value('track_delay_down_time')
+        inputdict['track_delay_up_time'] = config.get_field_value('track_delay_up_time')
+        # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'cpe')
         device_mgmt_ip_address = _Gen_obj.cpe.device_ip
@@ -158,7 +196,45 @@ class Sla(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
+
+        inputdict = {}
+        # START OF FETCHING THE LEAF PARAMETERS
+        inputdict['vrf_name'] = config.get_field_value('vrf_name')
+        inputdict['entry_number'] = config.get_field_value('entry_number')
+        inputdict['operation_type'] = config.get_field_value('operation_type')
+        inputdict['destination'] = config.get_field_value('destination')
+        inputdict['source'] = config.get_field_value('source')
+        inputdict['source_interface_name'] = config.get_field_value('source_interface_name')
+        inputdict['source_interface_ip'] = config.get_field_value('source_interface_ip')
+        inputdict['data_size'] = config.get_field_value('data_size')
+        # if inputdict['data_size'] is None:
+        #   inputdict['data_size'] = '500'
+        inputdict['frequency'] = config.get_field_value('frequency')
+        # if inputdict['frequency'] is None:
+        #   inputdict['frequency'] = '3'
+        inputdict['timeout'] = config.get_field_value('timeout')
+        # if inputdict['timeout'] is None:
+        #   inputdict['timeout'] = '2500'
+        inputdict['threshold'] = config.get_field_value('threshold')
+        # if inputdict['threshold'] is None:
+        #   inputdict['threshold'] = '2500'
+        inputdict['track_number'] = config.get_field_value('track_number')
+        inputdict['response_data_size'] = config.get_field_value('response_data_size')
+        inputdict['destination_port'] = config.get_field_value('destination_port')
+        inputdict['source_port'] = config.get_field_value('source_port')
+        inputdict['interval'] = config.get_field_value('interval')
+        inputdict['tos'] = config.get_field_value('tos')
+        inputdict['tag'] = config.get_field_value('tag')
+        inputdict['history_interval'] = config.get_field_value('history_interval')
+        inputdict['buckets_size'] = config.get_field_value('buckets_size')
+        inputdict['http_request_type'] = config.get_field_value('http_request_type')
+        inputdict['http_url'] = config.get_field_value('http_url')
+        inputdict['http_raw_request'] = config.get_field_value('http_raw_request')
+        inputdict['num_packets'] = config.get_field_value('num_packets')
+        inputdict['track_delay_down_time'] = config.get_field_value('track_delay_down_time')
+        inputdict['track_delay_up_time'] = config.get_field_value('track_delay_up_time')
+        # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'cpe')
         device_mgmt_ip_address = _Gen_obj.cpe.device_ip

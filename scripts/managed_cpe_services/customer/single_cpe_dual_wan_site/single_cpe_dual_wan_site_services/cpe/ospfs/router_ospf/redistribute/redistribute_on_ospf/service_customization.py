@@ -96,7 +96,7 @@ class ServiceDataCustomization:
     @staticmethod
     def process_service_update_data(smodelctx, sdata, **kwargs):
       """callback called for update operation"""
-      raise Exception('Update forbidden for node redistribute-on-ospf at path managed-cpe-services/customer/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services/cpe/ospfs/router-ospf/redistribute/redistribute-on-ospf')
+      #raise Exception('Update forbidden for node redistribute-on-ospf at path managed-cpe-services/customer/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services/cpe/ospfs/router-ospf/redistribute/redistribute-on-ospf')
       modify = True
       if modify and kwargs is not None:
         for key, value in kwargs.iteritems():

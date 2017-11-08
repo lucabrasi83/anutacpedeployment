@@ -69,13 +69,19 @@ def grouping_create_wanop_ic_local_props_type1_wanop_endpoint(smodelctx, sdata, 
                             </ipaddress-pool>'''
                 cidr_url = "/app/restconf/data/ipam:ipaddress-pools"
 
-                try:
-                    cidr_name_local = cidr_name
-                    cidr_name_local = cidr_name_local.replace('/', '%2F')
-                    get_ipaddress_pool_url = "/app/restconf/data/ipam:ipaddress-pools/ipaddress-pool=%s" %(cidr_name_local)
-                    pool = yang.Sdk.getData(get_ipaddress_pool_url, '', sdata.getTaskId())
-                    pool = util.parseXmlString(pool)
-                except DataNodeNotFoundException:
+                # try:
+                #     cidr_name_local = cidr_name
+                #     cidr_name_local = cidr_name_local.replace('/', '%2F')
+                #     get_ipaddress_pool_url = "/app/restconf/data/ipam:ipaddress-pools/ipaddress-pool=%s" %(cidr_name_local)
+                #     pool = yang.Sdk.getData(get_ipaddress_pool_url, '', sdata.getTaskId())
+                #     pool = util.parseXmlString(pool)
+                # except DataNodeNotFoundException:
+                #     yang.Sdk.createData(cidr_url, payload, sdata.getSession())
+
+                cidr_name_local = cidr_name
+                cidr_name_local = cidr_name_local.replace('/', '%2F')
+                get_ipaddress_pool_url = "/app/restconf/data/ipam:ipaddress-pools/ipaddress-pool=%s" %(cidr_name_local)
+                if not yang.Sdk.dataExists(get_ipaddress_pool_url):
                     yang.Sdk.createData(cidr_url, payload, sdata.getSession())
 
                 if util.isNotEmpty(inputdict["interface_ip"]):

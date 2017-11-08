@@ -82,7 +82,7 @@ class ServiceDataCustomization:
     @staticmethod
     def process_service_update_data(smodelctx, sdata, **kwargs):
       """callback called for update operation"""
-      raise Exception('Update forbidden for node tertiary-mpls-wan at path managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/tertiary-mpls-wan')
+      #raise Exception('Update forbidden for node tertiary-mpls-wan at path managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/tertiary-mpls-wan')
       modify = True
       if modify and kwargs is not None:
         for key, value in kwargs.iteritems():

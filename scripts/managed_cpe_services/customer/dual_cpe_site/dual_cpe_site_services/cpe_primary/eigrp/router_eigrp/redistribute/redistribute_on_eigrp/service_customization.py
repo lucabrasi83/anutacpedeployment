@@ -106,7 +106,7 @@ class ServiceDataCustomization:
     @staticmethod
     def process_service_update_data(smodelctx, sdata, **kwargs):
       """callback called for update operation"""
-      raise Exception('Update forbidden for node redistribute-on-eigrp at path managed-cpe-services/customer/dual-cpe-site/dual-cpe-site-services/cpe-primary/eigrp/router-eigrp/redistribute/redistribute-on-eigrp')
+      #raise Exception('Update forbidden for node redistribute-on-eigrp at path managed-cpe-services/customer/dual-cpe-site/dual-cpe-site-services/cpe-primary/eigrp/router-eigrp/redistribute/redistribute-on-eigrp')
       modify = True
       if modify and kwargs is not None:
         for key, value in kwargs.items():
