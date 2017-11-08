@@ -77,6 +77,9 @@ class ServiceDataCustomization:
                 log("%s == %s" %(key,value))
 
         if modify:
+            uri = sdata.getRcPath()
+            uri_list = uri.split('/',5)
+            url = '/'.join(uri_list[0:4])
             config = kwargs['config']
             inputdict = kwargs['inputdict']
             #match_type = inputdict['match_type']
@@ -84,9 +87,9 @@ class ServiceDataCustomization:
                 if len(inputdict['single_cpe_sites']) > 0:
                     if isinstance(inputdict['single_cpe_sites'], list) is True:
                         for site in inputdict['single_cpe_sites']:
-                            uri = sdata.getRcPath()
-                            uri_list = uri.split('/',5)
-                            url = '/'.join(uri_list[0:4])
+                            #uri = sdata.getRcPath()
+                            #uri_list = uri.split('/',5)
+                            #url = '/'.join(uri_list[0:4])
                             site_output = yang.Sdk.getData(url+"/single-cpe-site/single-cpe-site-services="+str(site), '', sdata.getTaskId())
                             conf = util.parseXmlString(site_output)
                             entity = 'cpe'
@@ -94,9 +97,9 @@ class ServiceDataCustomization:
                             create_match_condition(entity, conf, sdata, **kwargs)
                     else:
                         site = inputdict['single_cpe_sites']
-                        uri = sdata.getRcPath()
-                        uri_list = uri.split('/',5)
-                        url = '/'.join(uri_list[0:4])
+                        #uri = sdata.getRcPath()
+                        #uri_list = uri.split('/',5)
+                        #url = '/'.join(uri_list[0:4])
                         site_output = yang.Sdk.getData(url+"/single-cpe-site/single-cpe-site-services="+str(site), '',sdata.getTaskId())
                         conf = util.parseXmlString(site_output)
                         entity = 'cpe'
@@ -107,9 +110,9 @@ class ServiceDataCustomization:
                 if len(inputdict['dual_cpe_sites']) > 0:
                     if isinstance(inputdict['dual_cpe_sites'], list) is True:
                         for site in inputdict['dual_cpe_sites']:
-                            uri = sdata.getRcPath()
-                            uri_list = uri.split('/',5)
-                            url = '/'.join(uri_list[0:4])
+                            #uri = sdata.getRcPath()
+                            #uri_list = uri.split('/',5)
+                            #url = '/'.join(uri_list[0:4])
                             site_output = yang.Sdk.getData(url+"/dual-cpe-site/dual-cpe-site-services="+str(site), '', sdata.getTaskId())
                             conf = util.parseXmlString(site_output)
                             entity = 'cpe_primary'
@@ -120,9 +123,9 @@ class ServiceDataCustomization:
                             create_match_condition(entity, conf, sdata, **kwargs)
                     else:
                         site = inputdict['dual_cpe_sites']
-                        uri = sdata.getRcPath()
-                        uri_list = uri.split('/',5)
-                        url = '/'.join(uri_list[0:4])
+                        #uri = sdata.getRcPath()
+                        #uri_list = uri.split('/',5)
+                        #url = '/'.join(uri_list[0:4])
                         site_output = yang.Sdk.getData(url+"/dual-cpe-site/dual-cpe-site-services="+str(site), '', sdata.getTaskId())
                         conf = util.parseXmlString(site_output)
                         entity = 'cpe_primary'
@@ -136,9 +139,9 @@ class ServiceDataCustomization:
                 if len(inputdict['single_cpe_dual_wan_sites']) > 0:
                     if isinstance(inputdict['single_cpe_dual_wan_sites'], list) is True:
                         for site in inputdict['single_cpe_dual_wan_sites']:
-                            uri = sdata.getRcPath()
-                            uri_list = uri.split('/',5)
-                            url = '/'.join(uri_list[0:4])
+                            #uri = sdata.getRcPath()
+                            #uri_list = uri.split('/',5)
+                            #url = '/'.join(uri_list[0:4])
                             site_output = yang.Sdk.getData(url+"/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
                             conf = util.parseXmlString(site_output)
                             entity = 'cpe_dual'
@@ -146,9 +149,9 @@ class ServiceDataCustomization:
                             create_match_condition(entity, conf, sdata, **kwargs)
                     else:
                         site = inputdict['single_cpe_dual_wan_sites']
-                        uri = sdata.getRcPath()
-                        uri_list = uri.split('/',5)
-                        url = '/'.join(uri_list[0:4])
+                        #uri = sdata.getRcPath()
+                        #uri_list = uri.split('/',5)
+                        #url = '/'.join(uri_list[0:4])
                         site_output = yang.Sdk.getData(url+"/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
                         conf = util.parseXmlString(site_output)
                         entity = 'cpe_dual'
@@ -159,9 +162,9 @@ class ServiceDataCustomization:
                 if len(inputdict['triple_cpe_sites']) > 0:
                     if isinstance(inputdict['triple_cpe_sites'], list) is True:
                         for site in inputdict['triple_cpe_sites']:
-                            uri = sdata.getRcPath()
-                            uri_list = uri.split('/',5)
-                            url = '/'.join(uri_list[0:4])
+                            #uri = sdata.getRcPath()
+                            #uri_list = uri.split('/',5)
+                            #url = '/'.join(uri_list[0:4])
                             site_output = yang.Sdk.getData(url+"/triple-cpe-site/triple-cpe-site-services="+str(site), '', sdata.getTaskId())
                             conf = util.parseXmlString(site_output)
                             entity = 'cpe_primary_triple'
@@ -172,9 +175,9 @@ class ServiceDataCustomization:
                             create_match_condition(entity, conf, sdata, **kwargs)
                     else:
                         site = inputdict['triple_cpe_sites']
-                        uri = sdata.getRcPath()
-                        uri_list = uri.split('/',5)
-                        url = '/'.join(uri_list[0:4])
+                        #uri = sdata.getRcPath()
+                        #uri_list = uri.split('/',5)
+                        #url = '/'.join(uri_list[0:4])
                         site_output = yang.Sdk.getData(url+"/triple-cpe-site/triple-cpe-site-services="+str(site), '',sdata.getTaskId())
                         conf = util.parseXmlString(site_output)
                         entity = 'cpe_primary_triple'
@@ -188,9 +191,9 @@ class ServiceDataCustomization:
                 if len(inputdict['dual_cpe_dual_wan_sites']) > 0:
                     if isinstance(inputdict['dual_cpe_dual_wan_sites'], list) is True:
                         for site in inputdict['dual_cpe_dual_wan_sites']:
-                            uri = sdata.getRcPath()
-                            uri_list = uri.split('/',5)
-                            url = '/'.join(uri_list[0:4])
+                            #uri = sdata.getRcPath()
+                            #uri_list = uri.split('/',5)
+                            #url = '/'.join(uri_list[0:4])
                             site_output = yang.Sdk.getData(url+"/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
                             conf = util.parseXmlString(site_output)
                             entity = 'cpe_primary_dual'
@@ -199,9 +202,9 @@ class ServiceDataCustomization:
                             create_match_condition(entity, conf, sdata, **kwargs)
                     else:
                         site = inputdict['dual_cpe_dual_wan_sites']
-                        uri = sdata.getRcPath()
-                        uri_list = uri.split('/',5)
-                        url = '/'.join(uri_list[0:4])
+                        #uri = sdata.getRcPath()
+                        #uri_list = uri.split('/',5)
+                        #url = '/'.join(uri_list[0:4])
                         site_output = yang.Sdk.getData(url+"/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
                         conf = util.parseXmlString(site_output)
                         entity = 'cpe_primary_dual'
@@ -225,7 +228,7 @@ class ServiceDataCustomization:
     @staticmethod
     def process_service_update_data(smodelctx, sdata, **kwargs):
       """callback called for update operation"""
-      raise Exception('Update forbidden for node update-class-map at path managed-cpe-services/customer/qos-service/class-maps-update/update-class-map')
+      #raise Exception('Update forbidden for node update-class-map at path managed-cpe-services/customer/qos-service/class-maps-update/update-class-map')
       modify = True
       if modify and kwargs is not None:
         for key, value in kwargs.iteritems():
@@ -276,9 +279,10 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
     device_dscp = []
     if hasattr(conf_class.class_map, 'class_match_condition'):
         conf_class.class_map.class_match_condition = util.convert_to_list(conf_class.class_map.class_match_condition)
-        for dscp_dyn in conf_class.class_map.class_match_condition:
-            if dscp_dyn.condition_type == 'ip-dscp':
-                device_dscp.append(dscp_dyn.match_value)
+        #for dscp_dyn in conf_class.class_map.class_match_condition:
+            #if dscp_dyn.condition_type == 'ip-dscp':
+                #device_dscp.append(dscp_dyn.match_value)
+        device_dscp = [dscp_dyn.match_value for dscp_dyn in conf_class.class_map.class_match_condition if dscp_dyn.condition_type == 'ip-dscp']
     if len(inputdict['dscp']) > 0:
         for ds in device_dscp:
             if ds not in dscp:
@@ -290,9 +294,10 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
     device_protocol = []
     if hasattr(conf_class.class_map, 'class_match_condition'):
         conf_class.class_map.class_match_condition = util.convert_to_list(conf_class.class_map.class_match_condition)
-        for protocol_dyn in conf_class.class_map.class_match_condition:
-            if protocol_dyn.condition_type == 'protocol':
-                device_protocol.append(protocol_dyn.match_value)
+        #for protocol_dyn in conf_class.class_map.class_match_condition:
+            #if protocol_dyn.condition_type == 'protocol':
+                #device_protocol.append(protocol_dyn.match_value)
+        device_protocol = [protocol_dyn.match_value for protocol_dyn in conf_class.class_map.class_match_condition if protocol_dyn.condition_type == 'protocol']
     if len(inputdict['protocol']) > 0:
         for pr in device_protocol:
             if pr not in protocol:
@@ -304,9 +309,10 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
     device_access_group = []
     if hasattr(conf_class.class_map, 'class_match_condition'):
         conf_class.class_map.class_match_condition = util.convert_to_list(conf_class.class_map.class_match_condition)
-        for access_dyn in conf_class.class_map.class_match_condition:
-            if access_dyn.condition_type == 'access-group':
-                device_access_group.append(access_dyn.match_value)
+        #for access_dyn in conf_class.class_map.class_match_condition:
+            #if access_dyn.condition_type == 'access-group':
+                #device_access_group.append(access_dyn.match_value)
+        device_access_group = [access_dyn.match_value for access_dyn in conf_class.class_map.class_match_condition if access_dyn.condition_type == 'access-group']
     if util.isNotEmpty(access_group):
         for access in device_access_group:
             if access != access_group:
@@ -318,9 +324,10 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
     device_qos_group = []
     if hasattr(conf_class.class_map, 'class_match_condition'):
         conf_class.class_map.class_match_condition = util.convert_to_list(conf_class.class_map.class_match_condition)
-        for qos_dyn in conf_class.class_map.class_match_condition:
-            if qos_dyn.condition_type == 'qos-group':
-                device_qos_group.append(qos_dyn.match_value)
+        #for qos_dyn in conf_class.class_map.class_match_condition:
+            #if qos_dyn.condition_type == 'qos-group':
+                #device_qos_group.append(qos_dyn.match_value)
+        device_qos_group = [qos_dyn.match_value for qos_dyn in conf_class.class_map.class_match_condition if qos_dyn.condition_type == 'qos-group']
     if util.isNotEmpty(qos_group):
         for qos in device_qos_group:
             if qos != qos_group:
@@ -362,9 +369,9 @@ def create_match_condition(entity, conf, sdata, **kwargs):
     device_cls = []
     if hasattr(conf_cls.class_maps, 'class_map'):
         conf_cls.class_maps.class_map = util.convert_to_list(conf_cls.class_maps.class_map)
-        for cls in conf_cls.class_maps.class_map:
-            device_cls.append(cls.name)
-
+        #for cls in conf_cls.class_maps.class_map:
+            #device_cls.append(cls.name)
+        device_cls = [cls.name for cls in conf_cls.class_maps.class_map]
     if cls_name in device_cls:
         cls_map_obj = class_maps.class_map.class_map()
         cls_map_obj.name = cls_name
@@ -372,12 +379,12 @@ def create_match_condition(entity, conf, sdata, **kwargs):
             if isinstance(inputdict['dscp'], list) is True:
                 for ds in inputdict['dscp']:
                     match_obj = class_maps.class_map.class_match_condition.class_match_condition()
-                    match_obj.condition_type = "ip-dscp"
+                    match_obj.condition_type = "ip dscp"
                     match_obj.match_value = ds
                     yang.Sdk.createData(device.url+"/qos:class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession(), False)
             else:
                 match_obj = class_maps.class_map.class_match_condition.class_match_condition()
-                match_obj.condition_type = "ip-dscp"
+                match_obj.condition_type = "ip dscp"
                 match_obj.match_value = inputdict['dscp']
                 yang.Sdk.createData(device.url+"/qos:class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession(), False)
 
@@ -395,10 +402,10 @@ def create_match_condition(entity, conf, sdata, **kwargs):
                         if util.isNotEmpty(http_url):
                             for url_http in util.convert_to_list(http_url):
                                 match_object.url = url_http
-                                yang.Sdk.createData(device.url+"/class-maps/class-map=%s/class-match-condition=%s,%s" %(cls_name,'protocol','http'), match_object.getxml(filter=True), sdata.getSession(), False)
+                                yang.Sdk.createData(device.url+"/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(cls_name,'protocol','http'), match_object.getxml(filter=True), sdata.getSession(), False)
                         else:
                             match_obj.only_http = 'true'
-                            yang.Sdk.createData(device.url+"/class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession(), False)
+                            yang.Sdk.createData(device.url+"/qos:class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession(), False)
             else:
                 match_obj = class_maps.class_map.class_match_condition.class_match_condition()
                 match_obj.condition_type = "protocol"
@@ -411,10 +418,10 @@ def create_match_condition(entity, conf, sdata, **kwargs):
                     if util.isNotEmpty(http_url):
                         for url_http in util.convert_to_list(http_url):
                             match_object.url = url_http
-                            yang.Sdk.createData(device.url+"/class-maps/class-map=%s/class-match-condition=%s,%s" %(cls_name,'protocol','http'), match_object.getxml(filter=True), sdata.getSession(), False)
+                            yang.Sdk.createData(device.url+"/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(cls_name,'protocol','http'), match_object.getxml(filter=True), sdata.getSession(), False)
                     else:
                         match_obj.only_http = 'true'
-                        yang.Sdk.createData(device.url+"/class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession(), False)
+                        yang.Sdk.createData(device.url+"/qos:class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession(), False)
 
         url_device_acl = '/controller:devices/device=%s' %(device.device.id)
         device_acl = yang.Sdk.getData(url_device_acl, '', sdata.getTaskId())
@@ -426,23 +433,43 @@ def create_match_condition(entity, conf, sdata, **kwargs):
         if hasattr(conf_acl.device, 'access_lists'):
             if hasattr(conf_acl.device, 'access_list'):
                 conf_acl.device.access_lists.access_list = util.convert_to_list(conf_acl.device.access_lists.access_list)
-                for access_dyn in conf_acl.device.access_lists.access_list:
-                    device_access_group.append(access_dyn.name)
-
+                #for access_dyn in conf_acl.device.access_lists.access_list:
+                    #device_access_group.append(access_dyn.name)
+                device_access_group = [access_dyn.name for access_dyn in conf_acl.device.access_lists.access_list]
         if util.isNotEmpty(access_group):
-            if access_group not in device_access_group:
-                access_group_def(url, access_group, device, sdata)
 
-            match_obj = class_maps.class_map.class_match_condition.class_match_condition()
-            match_obj.condition_type = "access-group"
-            match_obj.match_value = access_group
-            yang.Sdk.createData(device.url+"/qos:class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession(), False)
+            if len(inputdict['access_group']) > 0:
+                if isinstance(inputdict['access_group'], list) is True:
+                    for eachacl in inputdict['access_group']:
+                        if eachacl not in device_access_group:
+                            access_group_def(url, eachacl, device, sdata)
+
+                        match_obj = class_maps.class_map.class_match_condition.class_match_condition()
+                        match_obj.condition_type = "access-group"
+                        match_obj.match_value = eachacl
+                        yang.Sdk.createData(device.url+"/qos:class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession(), False)
+                else:
+                    if access_group not in device_access_group:
+                            access_group_def(url, access_group, device, sdata)
+
+                    match_obj = class_maps.class_map.class_match_condition.class_match_condition()
+                    match_obj.condition_type = "access-group"
+                    match_obj.match_value = access_group
+                    yang.Sdk.createData(device.url+"/qos:class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession(), False)
 
         if util.isNotEmpty(qos_group):
-            match_obj = class_maps.class_map.class_match_condition.class_match_condition()
-            match_obj.condition_type = "qos-group"
-            match_obj.match_value = qos_group
-            yang.Sdk.createData(device.url+"/qos:class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession(), False)
+            if len(inputdict['qos_group']) > 0:
+                if isinstance(inputdict['qos_group'], list) is True:
+                    for eachqosg in inputdict['qos_group']:
+                        match_obj = class_maps.class_map.class_match_condition.class_match_condition()
+                        match_obj.condition_type = "qos-group"
+                        match_obj.match_value = eachqosg
+                        yang.Sdk.createData(device.url+"/qos:class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession(), False)
+                else:
+                    match_obj = class_maps.class_map.class_match_condition.class_match_condition()
+                    match_obj.condition_type = "qos-group"
+                    match_obj.match_value = qos_group
+                    yang.Sdk.createData(device.url+"/qos:class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession(), False)
     else:
         print "Class is not in device: ", device
 

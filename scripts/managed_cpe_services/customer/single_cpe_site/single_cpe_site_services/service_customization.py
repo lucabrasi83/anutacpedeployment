@@ -75,11 +75,21 @@ class ServiceDataCustomization:
         config = kwargs['config']
         inputdict = kwargs['inputdict']
         devbindobjs = kwargs['devbindobjs']
+        import time
+        now = time.strftime("%Y-%b-%d %I:%M %p %Z", time.localtime())
+        if sdata.isServiceDiscoveryEnabled() == True:
+            payload = '<brownfield-site>true</brownfield-site>'
+        else:
+            payload = '<greenfield-site>true</greenfield-site>'
+
+        payload_time = '<created-on>' + now + '</created-on>'
+        yang.Sdk.createData(sdata.getRcPath(), payload, sdata.getSession(), False)
+        yang.Sdk.createData(sdata.getRcPath(), payload_time, sdata.getSession(), False)
 
     @staticmethod
     def process_service_update_data(smodelctx, sdata, **kwargs):
       """callback called for update operation"""
-      raise Exception('Update forbidden for node single-cpe-site-services at path managed-cpe-services/customer/single-cpe-site/single-cpe-site-services')
+      #raise Exception('Update forbidden for node single-cpe-site-services at path managed-cpe-services/customer/single-cpe-site/single-cpe-site-services')
       modify = False
       if modify and kwargs is not None:
         for key, value in kwargs.iteritems():
@@ -145,6 +155,46 @@ class CreatePreProcessor(yang.SessionPreProcessor):
         """Add any move operations for creation"""
         log('operations: %s' % (operations))
         yang.moveOperations(operations, ['CreateInterface', 'UpdateInterface'], ['CreateQPolicyMap'], True)
+        yang.moveOperations(operations, ['CreateInterfaceOspf', 'CreateInterfaceHSRP'], ['CreateInterface', 'UpdateInterface'], True)
+        util.log_debug('pass00: operations: %s' % (operations))
+        '''
+        yang.moveOperations(operations, ['CreateQPolicyMap', 'CreateVrf'], ['CreateInterface'], False)
+        print 'pass01: operations: %s' % (operations)
+        yang.moveOperations(operations, ['CreateVrf'], ['CreateInterface', 'UpdateInterface'], False)
+        print 'pass02: operations: %s' % (operations)
+        yang.moveOperations(operations, ['CreateQPolicyMap'], ['CreateVrf'], True)
+        print 'pass03: operations: %s' % (operations)
+        yang.moveOperations(operations, ['CreateInterface', 'UpdateInterface'], ['UpdateVrf'], True)
+        print 'pass04: operations: %s' % (operations)
+        yang.moveOperations(operations, ['CreateAccessList'], ['CreateVrf'], True)
+        print 'pass05: operations: %s' % (operations)
+        yang.moveOperations(operations, ['CreateVrf'], ['CreateRouterBGP'], False)
+        print 'pass05: operations: %s' % (operations)
+        yang.moveOperations(operations, ['CreateInterface'], ['CreateRouteMap'], False)
+        print 'pass07: operations: %s' % (operations)
+        yang.moveOperations(operations, ['CreateInterface'], ['CreateRoute'], False)
+        print 'pass08: operations: %s' % (operations)
+        yang.moveOperations(operations, ['CreateDmvpnTunnel'], ['CreateVrfRouteEntry', 'CreateRoute'], False)
+        print 'pass09: operations: %s' % (operations)
+        yang.moveOperations(operations, ['CreateInterface'], ['CreateVrfRouteEntry', 'CreateRoute'], False)
+        print 'pass10: operations: %s' % (operations)
+        #yang.moveOperations(operations, ['CreateRoute'], ['CreateDmvpnTunnel','CreateInterface'], True)
+        #print 'pass10: operations: %s' % (operations)
+        #yang.moveOperations(operations, ['CreateRoute','CreateVrfRouteEntry'], ['createRouterEigrp','createRouterEigrpNetwork'], True)
+        #print 'pass11: operations: %s' % (operations)
+        yang.moveOperations(operations, ['CreateRouterBGPNeighbor'], ['CreateRouterBGP'], True)
+        print 'pass12: operations: %s' % (operations)
+        yang.moveOperations(operations, ['CreateRouterBGPRedistribute'], ['CreateRouterBGP'], True)
+        print 'pass13: operations: %s' % (operations)
+        yang.moveOperations(operations, ['CreateInterface', 'UpdateInterface'], ['CreateQPolicyMap', 'CreateVrf'], True)
+        print 'pass14: operations: %s' % (operations)
+        yang.moveOperations(operations, ['CreateAclRule'], ['CreateAccessList'], True)
+        print 'pass15: operations: %s' % (operations)
+        yang.moveOperations(operations, ['CreateAclRule'], ['UpdateInterface'], False)
+        print 'pass16: operations: %s' % (operations)
+        yang.moveOperations(operations, ['CreateObjectGroup', 'CreateNetworkGroup'], ['CreateAccessList'], False)
+        print 'pass17: operations: %s' % (operations)
+        '''
         # yang.moveOperations(operations, ['CreateInterface'], ['UpdateVrf'], True)
         # print 'pass01: operations: %s' % (operations)
         # yang.moveOperations(operations, ['CreateInterface'], ['CreateVrf'], True)

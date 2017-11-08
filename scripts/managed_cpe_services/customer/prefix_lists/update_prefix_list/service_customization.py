@@ -72,6 +72,9 @@ class ServiceDataCustomization:
                 log("%s == %s" %(key,value))
 
         if modify:
+            uri = sdata.getRcPath()
+            uri_list = uri.split('/',5)
+            url = '/'.join(uri_list[0:4])
             config = kwargs['config']
             inputdict = kwargs['inputdict']
             inputkeydict = kwargs['inputkeydict']
@@ -79,9 +82,9 @@ class ServiceDataCustomization:
                 if len(inputdict['single_cpe_sites']) > 0:
                     if isinstance(inputdict['single_cpe_sites'], list) is True:
                         for site in inputdict['single_cpe_sites']:
-                            uri = sdata.getRcPath()
-                            uri_list = uri.split('/',5)
-                            url = '/'.join(uri_list[0:4])
+                            #uri = sdata.getRcPath()
+                            #uri_list = uri.split('/',5)
+                            #url = '/'.join(uri_list[0:4])
                             site_output = yang.Sdk.getData(url+"/single-cpe-site/single-cpe-site-services="+str(site), '', sdata.getTaskId())
                             conf = util.parseXmlString(site_output)
                             entity = 'cpe'
@@ -91,9 +94,9 @@ class ServiceDataCustomization:
                                 create_prefix(entity, conf, sdata, **kwargs)
                     else:
                         site = inputdict['single_cpe_sites']
-                        uri = sdata.getRcPath()
-                        uri_list = uri.split('/',5)
-                        url = '/'.join(uri_list[0:4])
+                        #uri = sdata.getRcPath()
+                        #uri_list = uri.split('/',5)
+                        #url = '/'.join(uri_list[0:4])
                         site_output = yang.Sdk.getData(url+"/single-cpe-site/single-cpe-site-services="+str(site), '',sdata.getTaskId())
                         conf = util.parseXmlString(site_output)
                         entity = 'cpe'
@@ -106,9 +109,9 @@ class ServiceDataCustomization:
                 if len(inputdict['dual_cpe_sites']) > 0:
                     if isinstance(inputdict['dual_cpe_sites'], list) is True:
                         for site in inputdict['dual_cpe_sites']:
-                            uri = sdata.getRcPath()
-                            uri_list = uri.split('/',5)
-                            url = '/'.join(uri_list[0:4])
+                            #uri = sdata.getRcPath()
+                            #uri_list = uri.split('/',5)
+                            #url = '/'.join(uri_list[0:4])
                             site_output = yang.Sdk.getData(url+"/dual-cpe-site/dual-cpe-site-services="+str(site), '', sdata.getTaskId())
                             conf = util.parseXmlString(site_output)
                             entity = 'cpe_primary'
@@ -123,9 +126,9 @@ class ServiceDataCustomization:
                                 create_prefix(entity, conf, sdata, **kwargs)
                     else:
                         site = inputdict['dual_cpe_sites']
-                        uri = sdata.getRcPath()
-                        uri_list = uri.split('/',5)
-                        url = '/'.join(uri_list[0:4])
+                        #uri = sdata.getRcPath()
+                        #uri_list = uri.split('/',5)
+                        #url = '/'.join(uri_list[0:4])
                         site_output = yang.Sdk.getData(url+"/dual-cpe-site/dual-cpe-site-services="+str(site), '', sdata.getTaskId())
                         conf = util.parseXmlString(site_output)
                         entity = 'cpe_primary'
@@ -143,9 +146,9 @@ class ServiceDataCustomization:
                 if len(inputdict['single_cpe_dual_wan_sites']) > 0:
                     if isinstance(inputdict['single_cpe_dual_wan_sites'], list) is True:
                         for site in inputdict['single_cpe_dual_wan_sites']:
-                            uri = sdata.getRcPath()
-                            uri_list = uri.split('/',5)
-                            url = '/'.join(uri_list[0:4])
+                            #uri = sdata.getRcPath()
+                            #uri_list = uri.split('/',5)
+                            #url = '/'.join(uri_list[0:4])
                             site_output = yang.Sdk.getData(url+"/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
                             conf = util.parseXmlString(site_output)
                             entity = 'cpe_dual'
@@ -155,9 +158,9 @@ class ServiceDataCustomization:
                                 create_prefix(entity, conf, sdata, **kwargs)
                     else:
                         site = inputdict['single_cpe_dual_wan_sites']
-                        uri = sdata.getRcPath()
-                        uri_list = uri.split('/',5)
-                        url = '/'.join(uri_list[0:4])
+                        #uri = sdata.getRcPath()
+                        #uri_list = uri.split('/',5)
+                        #url = '/'.join(uri_list[0:4])
                         site_output = yang.Sdk.getData(url+"/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
                         conf = util.parseXmlString(site_output)
                         entity = 'cpe_dual'
@@ -170,9 +173,9 @@ class ServiceDataCustomization:
                 if len(inputdict['triple_cpe_sites']) > 0:
                     if isinstance(inputdict['triple_cpe_sites'], list) is True:
                         for site in inputdict['triple_cpe_sites']:
-                            uri = sdata.getRcPath()
-                            uri_list = uri.split('/',5)
-                            url = '/'.join(uri_list[0:4])
+                            #uri = sdata.getRcPath()
+                            #uri_list = uri.split('/',5)
+                            #url = '/'.join(uri_list[0:4])
                             site_output = yang.Sdk.getData(url+"/triple-cpe-site/triple-cpe-site-services="+str(site), '', sdata.getTaskId())
                             conf = util.parseXmlString(site_output)
                             entity = 'cpe_primary_triple'
@@ -192,9 +195,9 @@ class ServiceDataCustomization:
                                 create_prefix(entity, conf, sdata, **kwargs)
                     else:
                         site = inputdict['triple_cpe_sites']
-                        uri = sdata.getRcPath()
-                        uri_list = uri.split('/',5)
-                        url = '/'.join(uri_list[0:4])
+                        #uri = sdata.getRcPath()
+                        #uri_list = uri.split('/',5)
+                        #url = '/'.join(uri_list[0:4])
                         site_output = yang.Sdk.getData(url+"/triple-cpe-site/triple-cpe-site-services="+str(site), '',sdata.getTaskId())
                         conf = util.parseXmlString(site_output)
                         entity = 'cpe_primary_triple'
@@ -217,9 +220,9 @@ class ServiceDataCustomization:
                 if len(inputdict['dual_cpe_dual_wan_sites']) > 0:
                     if isinstance(inputdict['dual_cpe_dual_wan_sites'], list) is True:
                         for site in inputdict['dual_cpe_dual_wan_sites']:
-                            uri = sdata.getRcPath()
-                            uri_list = uri.split('/',5)
-                            url = '/'.join(uri_list[0:4])
+                            #uri = sdata.getRcPath()
+                            #uri_list = uri.split('/',5)
+                            #url = '/'.join(uri_list[0:4])
                             site_output = yang.Sdk.getData(url+"/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
                             conf = util.parseXmlString(site_output)
                             entity = 'cpe_primary_dual'
@@ -234,9 +237,9 @@ class ServiceDataCustomization:
                                 create_prefix(entity, conf, sdata, **kwargs)
                     else:
                         site = inputdict['dual_cpe_dual_wan_sites']
-                        uri = sdata.getRcPath()
-                        uri_list = uri.split('/',5)
-                        url = '/'.join(uri_list[0:4])
+                        #uri = sdata.getRcPath()
+                        #uri_list = uri.split('/',5)
+                        #url = '/'.join(uri_list[0:4])
                         site_output = yang.Sdk.getData(url+"/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
                         conf = util.parseXmlString(site_output)
                         entity = 'cpe_primary_dual'
@@ -320,9 +323,9 @@ def delete_prefix(entity, conf, sdata, **kwargs):
     device_pre = []
     if hasattr(conf_prefix.ip_prefixlist_list, 'ip_prefixlist'):
         conf_prefix.ip_prefixlist_list.ip_prefixlist = util.convert_to_list(conf_prefix.ip_prefixlist_list.ip_prefixlist)
-        for pre in conf_prefix.ip_prefixlist_list.ip_prefixlist:
-            device_pre.append(pre.name)
-
+        #for pre in conf_prefix.ip_prefixlist_list.ip_prefixlist:
+            #device_pre.append(pre.name)
+        device_pre = [pre.name for pre in conf_prefix.ip_prefixlist_list.ip_prefixlist]
     if prefix_list_name in device_pre:
         url_device_prefix_entry = '/controller:devices/device=%s/l3features:ip-prefixlist-list/ip-prefixlist=%s' %(device.device.id, prefix_list_name)
         device_prefix_entry = yang.Sdk.getData(url_device_prefix_entry, '', sdata.getTaskId())
@@ -331,8 +334,9 @@ def delete_prefix(entity, conf, sdata, **kwargs):
         if hasattr(conf_prefix_entry.ip_prefixlist, 'ip_prefixlist_entries'):
             if hasattr(conf_prefix_entry.ip_prefixlist.ip_prefixlist_entries, 'ip_prefixlist_entry'):
                 conf_prefix_entry.ip_prefixlist.ip_prefixlist_entries.ip_prefixlist_entry = util.convert_to_list(conf_prefix_entry.ip_prefixlist.ip_prefixlist_entries.ip_prefixlist_entry)
-                for entry in conf_prefix_entry.ip_prefixlist.ip_prefixlist_entries.ip_prefixlist_entry:
-                    device_pre_entry.append(entry.rule_num)
+                #for entry in conf_prefix_entry.ip_prefixlist.ip_prefixlist_entries.ip_prefixlist_entry:
+                    #device_pre_entry.append(entry.rule_num)
+                device_pre_entry = [entry.rule_num for entry in conf_prefix_entry.ip_prefixlist.ip_prefixlist_entries.ip_prefixlist_entry]
 
         if rule_num in device_pre_entry:
             prefix_obj = ip_prefixlist_list.ip_prefixlist.ip_prefixlist_entries.ip_prefixlist_entry.ip_prefixlist_entry()
@@ -391,8 +395,9 @@ def create_prefix(entity, conf, sdata, **kwargs):
     device_pre = []
     if hasattr(conf_prefix.ip_prefixlist_list, 'ip_prefixlist'):
         conf_prefix.ip_prefixlist_list.ip_prefixlist = util.convert_to_list(conf_prefix.ip_prefixlist_list.ip_prefixlist)
-        for pre in conf_prefix.ip_prefixlist_list.ip_prefixlist:
-            device_pre.append(pre.name)
+        #for pre in conf_prefix.ip_prefixlist_list.ip_prefixlist:
+            #device_pre.append(pre.name)
+        device_pre = [pre.name for pre in conf_prefix.ip_prefixlist_list.ip_prefixlist]
 
     if prefix_list_name in device_pre:
         prefix_obj = ip_prefixlist_list.ip_prefixlist.ip_prefixlist_entries.ip_prefixlist_entry.ip_prefixlist_entry()
@@ -414,7 +419,7 @@ def create_prefix(entity, conf, sdata, **kwargs):
             prefix_obj.compare = 'le'
         device.addIpPrefixListEntriesContainer(prefix_list_name, sdata.getSession())
 
-        prefix_list_url = device.url + '/ip-prefixlist-list/ip-prefixlist=%s/ip-prefixlist-entries' % (prefix_list_name)
+        prefix_list_url = device.url + '/l3features:ip-prefixlist-list/ip-prefixlist=%s/ip-prefixlist-entries' % (prefix_list_name)
         yang.Sdk.createData(prefix_list_url, prefix_obj.getxml(filter=True), sdata.getSession(), False)
     else:
         print "Prefix list is not in device: ", device

@@ -71,6 +71,7 @@ class ServiceDataCustomization:
       if modify:
         config = kwargs['config']
         inputdict = kwargs['inputdict']
+        inputkeydict = kwargs['inputkeydict']
 
     @staticmethod
     def process_service_device_bindings(smodelctx, sdata, dev, **kwargs):
@@ -83,24 +84,33 @@ class ServiceDataCustomization:
       if modify:
         config = kwargs['config']
         inputdict = kwargs['inputdict']
+        inputkeydict = kwargs['inputkeydict']
         devbindobjs = kwargs['devbindobjs']
 
     @staticmethod
     def process_service_update_data(smodelctx, sdata, **kwargs):
       """callback called for update operation"""
-      raise Exception('Update forbidden for node cpe-primary-cpe-secondary-ic at path managed-cpe-services/customer/dual-cpe-site/dual-cpe-site-services/cpe-primary-cpe-secondary-ic')
-      modify = False
+      #raise Exception('Update forbidden for node cpe-primary-cpe-secondary-ic at path managed-cpe-services/customer/dual-cpe-site/dual-cpe-site-services/cpe-primary-cpe-secondary-ic')
+      modify = True
       if modify and kwargs is not None:
         for key, value in kwargs.iteritems():
           log("%s == %s" %(key,value))
 
+      if modify:
+        config = kwargs['config']
+        inputdict = kwargs['inputdict']
+
     @staticmethod
     def process_service_delete_data(smodelctx, sdata, **kwargs):
       """callback called for delete operation"""
-      modify = False
+      modify = True
       if modify and kwargs is not None:
         for key, value in kwargs.iteritems():
           log("%s == %s" %(key,value))
+
+      if modify:
+        config = kwargs['config']
+        inputdict = kwargs['inputdict']
 
 class DeletePreProcessor(yang.SessionPreProcessor):
     def processBeforeReserve(self, session):

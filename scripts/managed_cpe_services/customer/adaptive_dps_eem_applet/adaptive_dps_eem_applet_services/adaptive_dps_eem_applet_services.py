@@ -64,7 +64,7 @@ class AdaptiveDps(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -74,6 +74,7 @@ class AdaptiveDps(yang.AbstractYangServiceHandler):
 
         # START OF FETCHING THE LEAF PARAMETERS
         inputdict['applet_name'] = config.get_field_value('applet_name')
+        inputdict['description'] = config.get_field_value('description')
 #        inputdict['device_ip'] = config.get_field_value('device_ip')
         # END OF FETCHING THE LEAF PARAMETERS
 
@@ -97,7 +98,7 @@ class AdaptiveDps(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -107,6 +108,7 @@ class AdaptiveDps(yang.AbstractYangServiceHandler):
 
         # START OF FETCHING THE LEAF PARAMETERS
         inputdict['applet_name'] = config.get_field_value('applet_name')
+        inputdict['description'] = config.get_field_value('description')
         # END OF FETCHING THE LEAF PARAMETERS
 
         pinputdict = {}
@@ -128,7 +130,7 @@ class AdaptiveDps(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -138,6 +140,7 @@ class AdaptiveDps(yang.AbstractYangServiceHandler):
 
         # START OF FETCHING THE LEAF PARAMETERS
         inputdict['applet_name'] = config.get_field_value('applet_name')
+        inputdict['description'] = config.get_field_value('description')
         # END OF FETCHING THE LEAF PARAMETERS
 
         dev = []

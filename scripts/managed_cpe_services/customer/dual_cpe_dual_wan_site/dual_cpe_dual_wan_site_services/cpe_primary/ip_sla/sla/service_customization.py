@@ -73,7 +73,7 @@ from cpedeployment.cpedeployment_lib import getDeviceObject
 from cpedeployment.cpedeployment_lib import getCurrentObjectConfig
 from cpedeployment.cpedeployment_lib import ServiceModelContext
 from cpedeployment.cpedeployment_lib import getParentObject 
-from cpedeployment.cpedeployment_lib import log,ip_sla
+from cpedeployment.cpedeployment_lib import log,ip_sla, update_ip_sla
 
 
 class ServiceDataCustomization:
@@ -110,7 +110,7 @@ class ServiceDataCustomization:
     @staticmethod
     def process_service_update_data(smodelctx, sdata, **kwargs):
       """callback called for update operation"""
-      raise Exception('Update forbidden for node sla at path managed-cpe-services/customer/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services/cpe-primary/ip-sla/sla')
+      #raise Exception('Update forbidden for node sla at path managed-cpe-services/customer/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services/cpe-primary/ip-sla/sla')
       modify = True
       if modify and kwargs is not None:
         for key, value in kwargs.iteritems():
@@ -119,6 +119,8 @@ class ServiceDataCustomization:
       if modify:
         config = kwargs['config']
         inputdict = kwargs['inputdict']
+
+      update_ip_sla(sdata, 'cpe_primary_dual')
 
     @staticmethod
     def process_service_delete_data(smodelctx, sdata, **kwargs):

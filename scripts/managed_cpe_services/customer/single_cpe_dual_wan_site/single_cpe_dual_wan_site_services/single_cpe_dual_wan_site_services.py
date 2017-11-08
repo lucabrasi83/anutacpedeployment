@@ -62,7 +62,7 @@ class SingleCpeDualWanSiteServices(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = None
         devbindobjs={}
@@ -73,6 +73,9 @@ class SingleCpeDualWanSiteServices(yang.AbstractYangServiceHandler):
         inputdict['bgp_as'] = config.get_field_value('bgp_as')
         inputdict['description'] = config.get_field_value('description')
         inputdict['resource_pool'] = config.get_field_value('resource_pool')
+        inputdict['greenfield_site'] = config.get_field_value('greenfield_site')
+        inputdict['brownfield_site'] = config.get_field_value('brownfield_site')
+        inputdict['created_on'] = config.get_field_value('created_on')
         # END OF FETCHING THE LEAF PARAMETERS
 
         inputkeydict = {}
@@ -94,7 +97,17 @@ class SingleCpeDualWanSiteServices(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
+
+        inputdict = {}
+
+        # START OF FETCHING THE LEAF PARAMETERS
+        inputdict['site_name'] = config.get_field_value('site_name')
+        inputdict['bgp_as'] = config.get_field_value('bgp_as')
+        inputdict['description'] = config.get_field_value('description')
+        inputdict['resource_pool'] = config.get_field_value('resource_pool')
+        # END OF FETCHING THE LEAF PARAMETERS
+
         dev = None
         #Use the custom method to process the data
         service_customization.ServiceDataCustomization.process_service_update_data(smodelctx, sdata, dev=dev, parentobj=parentobj, config=config)
@@ -109,7 +122,16 @@ class SingleCpeDualWanSiteServices(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
+
+        inputdict = {}
+
+        # START OF FETCHING THE LEAF PARAMETERS
+        inputdict['site_name'] = config.get_field_value('site_name')
+        inputdict['bgp_as'] = config.get_field_value('bgp_as')
+        inputdict['description'] = config.get_field_value('description')
+        inputdict['resource_pool'] = config.get_field_value('resource_pool')
+        # END OF FETCHING THE LEAF PARAMETERS
         dev = None
         #Use the custom method to process the data
         service_customization.ServiceDataCustomization.process_service_delete_data(smodelctx, sdata, dev=dev, parentobj=parentobj, config=config)

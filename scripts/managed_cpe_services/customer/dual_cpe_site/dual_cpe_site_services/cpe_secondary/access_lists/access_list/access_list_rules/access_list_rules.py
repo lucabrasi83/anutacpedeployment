@@ -70,7 +70,7 @@ class AccessListRules(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = None
         devbindobjs={}
@@ -93,6 +93,8 @@ class AccessListRules(yang.AbstractYangServiceHandler):
         inputdict['dscp'] = config.get_field_value('dscp')
         inputdict['source_object_group'] = config.get_field_value('source_object_group')
         inputdict['destination_object_group'] = config.get_field_value('destination_object_group')
+        inputdict['source_port_operator'] = config.get_field_value('source_port_operator')
+        inputdict['dest_port_operator'] = config.get_field_value('dest_port_operator')
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'cpe-secondary')
@@ -122,7 +124,7 @@ class AccessListRules(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         _Gen_obj = getLocalObject(sdata, 'cpe-secondary')
         device_mgmt_ip_address = _Gen_obj.cpe_secondary.device_ip
@@ -143,7 +145,7 @@ class AccessListRules(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         _Gen_obj = getLocalObject(sdata, 'cpe-secondary')
         device_mgmt_ip_address = _Gen_obj.cpe_secondary.device_ip

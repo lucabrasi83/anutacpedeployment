@@ -68,7 +68,7 @@ class BgpPeers(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = None
         devbindobjs={}
@@ -131,7 +131,7 @@ class BgpPeers(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         _Gen_obj = getLocalObject(sdata, 'end-points')
         device_mgmt_ip_address = _Gen_obj.end_points.device_ip
@@ -152,7 +152,7 @@ class BgpPeers(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         _Gen_obj = getLocalObject(sdata, 'end-points')
         device_mgmt_ip_address = _Gen_obj.end_points.device_ip

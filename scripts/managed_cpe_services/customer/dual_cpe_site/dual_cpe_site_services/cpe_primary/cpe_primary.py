@@ -64,7 +64,7 @@ class CpePrimary(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = None
         devbindobjs={}
@@ -112,7 +112,7 @@ class CpePrimary(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         #Fetch Device Object
         dev = getDeviceObject(config.get_field_value('device_ip'), sdata)
@@ -130,7 +130,7 @@ class CpePrimary(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         #Fetch Device Object
         dev = getDeviceObject(config.get_field_value('device_ip'), sdata)

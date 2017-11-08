@@ -68,7 +68,7 @@ class FailoverFallback(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -82,10 +82,13 @@ class FailoverFallback(yang.AbstractYangServiceHandler):
           inputdict['sequence_number'] = '89'
         inputdict['name'] = config.get_field_value('name')
         inputdict['device'] = config.get_field_value('device')
-        inputdict['cpe_primary_mpls_wan_neighbor'] = config.get_field_value('cpe_primary_mpls_wan_neighbor')
-        inputdict['cpe_primary_inet_wan_neighbor'] = config.get_field_value('cpe_primary_inet_wan_neighbor')
-        inputdict['cpe_secondary_mpls_wan_neighbor'] = config.get_field_value('cpe_secondary_mpls_wan_neighbor')
-        inputdict['cpe_secondary_inet_wan_neighbor'] = config.get_field_value('cpe_secondary_inet_wan_neighbor')
+        inputdict['cpe_primary_mpls_wan_ebgp_neighbor'] = config.get_field_value('cpe_primary_mpls_wan_ebgp_neighbor')
+        inputdict['cpe_primary_inet_wan_ebgp_neighbor'] = config.get_field_value('cpe_primary_inet_wan_ebgp_neighbor')
+        inputdict['cpe_secondary_mpls_wan_ebgp_neighbor'] = config.get_field_value('cpe_secondary_mpls_wan_ebgp_neighbor')
+        inputdict['cpe_secondary_inet_wan_ebgp_neighbor'] = config.get_field_value('cpe_secondary_inet_wan_ebgp_neighbor')
+        inputdict['dps_tunnel_id'] = config.get_field_value('dps_tunnel_id')
+        inputdict['failover_dps'] = config.get_field_value('failover_dps')
+        inputdict['fallback_dps'] = config.get_field_value('fallback_dps')
         inputdict['failover_wan'] = config.get_field_value('failover_wan')
         inputdict['fallback_wan'] = config.get_field_value('fallback_wan')
         inputdict['failover_b2b'] = config.get_field_value('failover_b2b')
@@ -114,7 +117,7 @@ class FailoverFallback(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -128,10 +131,13 @@ class FailoverFallback(yang.AbstractYangServiceHandler):
           inputdict['sequence_number'] = '89'
         inputdict['name'] = config.get_field_value('name')
         inputdict['device'] = config.get_field_value('device')
-        inputdict['cpe_primary_mpls_wan_neighbor'] = config.get_field_value('cpe_primary_mpls_wan_neighbor')
-        inputdict['cpe_primary_inet_wan_neighbor'] = config.get_field_value('cpe_primary_inet_wan_neighbor')
-        inputdict['cpe_secondary_mpls_wan_neighbor'] = config.get_field_value('cpe_secondary_mpls_wan_neighbor')
-        inputdict['cpe_secondary_inet_wan_neighbor'] = config.get_field_value('cpe_secondary_inet_wan_neighbor')
+        inputdict['cpe_primary_mpls_wan_ebgp_neighbor'] = config.get_field_value('cpe_primary_mpls_wan_ebgp_neighbor')
+        inputdict['cpe_primary_inet_wan_ebgp_neighbor'] = config.get_field_value('cpe_primary_inet_wan_ebgp_neighbor')
+        inputdict['cpe_secondary_mpls_wan_ebgp_neighbor'] = config.get_field_value('cpe_secondary_mpls_wan_ebgp_neighbor')
+        inputdict['cpe_secondary_inet_wan_ebgp_neighbor'] = config.get_field_value('cpe_secondary_inet_wan_ebgp_neighbor')
+        inputdict['dps_tunnel_id'] = config.get_field_value('dps_tunnel_id')
+        inputdict['failover_dps'] = config.get_field_value('failover_dps')
+        inputdict['fallback_dps'] = config.get_field_value('fallback_dps')
         inputdict['failover_wan'] = config.get_field_value('failover_wan')
         inputdict['fallback_wan'] = config.get_field_value('fallback_wan')
         inputdict['failover_b2b'] = config.get_field_value('failover_b2b')
@@ -148,10 +154,13 @@ class FailoverFallback(yang.AbstractYangServiceHandler):
           pinputdict['sequence_number'] = '89'
         pinputdict['name'] = pconfig.get_field_value('name')
         pinputdict['device'] = pconfig.get_field_value('device')
-        pinputdict['cpe_primary_mpls_wan_neighbor'] = pconfig.get_field_value('cpe_primary_mpls_wan_neighbor')
-        pinputdict['cpe_primary_inet_wan_neighbor'] = pconfig.get_field_value('cpe_primary_inet_wan_neighbor')
-        pinputdict['cpe_secondary_mpls_wan_neighbor'] = pconfig.get_field_value('cpe_secondary_mpls_wan_neighbor')
-        pinputdict['cpe_secondary_inet_wan_neighbor'] = pconfig.get_field_value('cpe_secondary_inet_wan_neighbor')
+        pinputdict['cpe_primary_mpls_wan_ebgp_neighbor'] = config.get_field_value('cpe_primary_mpls_wan_ebgp_neighbor')
+        pinputdict['cpe_primary_inet_wan_ebgp_neighbor'] = config.get_field_value('cpe_primary_inet_wan_ebgp_neighbor')
+        pinputdict['cpe_secondary_mpls_wan_ebgp_neighbor'] = config.get_field_value('cpe_secondary_mpls_wan_ebgp_neighbor')
+        pinputdict['cpe_secondary_inet_wan_ebgp_neighbor'] = config.get_field_value('cpe_secondary_inet_wan_ebgp_neighbor')
+        pinputdict['dps_tunnel_id'] = pconfig.get_field_value('dps_tunnel_id')
+        pinputdict['failover_dps'] = pconfig.get_field_value('failover_dps')
+        pinputdict['fallback_dps'] = pconfig.get_field_value('fallback_dps')
         pinputdict['failover_wan'] = pconfig.get_field_value('failover_wan')
         pinputdict['fallback_wan'] = pconfig.get_field_value('fallback_wan')
         pinputdict['failover_b2b'] = pconfig.get_field_value('failover_b2b')
@@ -173,7 +182,7 @@ class FailoverFallback(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -187,10 +196,13 @@ class FailoverFallback(yang.AbstractYangServiceHandler):
           inputdict['sequence_number'] = '89'
         inputdict['name'] = config.get_field_value('name')
         inputdict['device'] = config.get_field_value('device')
-        inputdict['cpe_primary_mpls_wan_neighbor'] = config.get_field_value('cpe_primary_mpls_wan_neighbor')
-        inputdict['cpe_primary_inet_wan_neighbor'] = config.get_field_value('cpe_primary_inet_wan_neighbor')
-        inputdict['cpe_secondary_mpls_wan_neighbor'] = config.get_field_value('cpe_secondary_mpls_wan_neighbor')
-        inputdict['cpe_secondary_inet_wan_neighbor'] = config.get_field_value('cpe_secondary_inet_wan_neighbor')
+        inputdict['cpe_primary_mpls_wan_ebgp_neighbor'] = config.get_field_value('cpe_primary_mpls_wan_ebgp_neighbor')
+        inputdict['cpe_primary_inet_wan_ebgp_neighbor'] = config.get_field_value('cpe_primary_inet_wan_ebgp_neighbor')
+        inputdict['cpe_secondary_mpls_wan_ebgp_neighbor'] = config.get_field_value('cpe_secondary_mpls_wan_ebgp_neighbor')
+        inputdict['cpe_secondary_inet_wan_ebgp_neighbor'] = config.get_field_value('cpe_secondary_inet_wan_ebgp_neighbor')
+        inputdict['dps_tunnel_id'] = config.get_field_value('dps_tunnel_id')
+        inputdict['failover_dps'] = config.get_field_value('failover_dps')
+        inputdict['fallback_dps'] = config.get_field_value('fallback_dps')
         inputdict['failover_wan'] = config.get_field_value('failover_wan')
         inputdict['fallback_wan'] = config.get_field_value('fallback_wan')
         inputdict['failover_b2b'] = config.get_field_value('failover_b2b')

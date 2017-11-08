@@ -64,7 +64,7 @@ class TripleCpeSiteServices(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -77,6 +77,9 @@ class TripleCpeSiteServices(yang.AbstractYangServiceHandler):
         inputdict['bgp_as'] = config.get_field_value('bgp_as')
         inputdict['description'] = config.get_field_value('description')
         inputdict['resource_pool'] = config.get_field_value('resource_pool')
+        inputdict['greenfield_site'] = config.get_field_value('greenfield_site')
+        inputdict['brownfield_site'] = config.get_field_value('brownfield_site')
+        inputdict['created_on'] = config.get_field_value('created_on')
         # END OF FETCHING THE LEAF PARAMETERS
 
         # START OF FETCHING THE PARENT KEY LEAF PARAMETERS
@@ -100,7 +103,7 @@ class TripleCpeSiteServices(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -129,7 +132,7 @@ class TripleCpeSiteServices(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}

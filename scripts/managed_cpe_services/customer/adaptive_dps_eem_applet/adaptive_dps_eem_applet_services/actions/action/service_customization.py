@@ -187,6 +187,7 @@ class ServiceDataCustomization:
 def adaptive_dps_actions_action_def(entity, conf, sdata,**kwargs):
     interface_name = None
     mode = None
+    device = None
     inputdict = kwargs['inputdict']
     if entity == 'cpe':
         device = devicemgr.getDeviceById(conf.single_cpe_site_services.cpe.device_ip)
@@ -207,6 +208,9 @@ def adaptive_dps_actions_action_def(entity, conf, sdata,**kwargs):
     elif entity == 'cpe_tertiary_triple':
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_tertiary.device_ip)
     #device = devicemgr.getDeviceById(inputdict['device_ip'])
+
+    if device == None:
+        raise Exception('''Please select correct value in cpe drop-down based on service type. For dual_cpe_site [cpe_primary/cpe_secondary], dual_cpe_dual_wan_site[cpe_primary,cpe_secondary], triple_cpe_site[cpe_primary,cpe_secondary,cpe_tertiary]''')
 
     applet_action_obj = eem_applets.event_manager_applet.actions.action.action() 
     applet_action_obj.label = inputdict['label']
