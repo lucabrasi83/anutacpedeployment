@@ -88,7 +88,7 @@ class ServiceDataCustomization:
     @staticmethod
     def process_service_update_data(smodelctx, sdata, **kwargs):
       """callback called for update operation"""
-      raise Exception('Update forbidden for node update-policy at path managed-cpe-services/customer/qos-service/policy-update/update-policy')
+      #raise Exception('Update forbidden for node update-policy at path managed-cpe-services/customer/qos-service/policy-update/update-policy')
       modify = True
       if modify and kwargs is not None:
         for key, value in kwargs.iteritems():

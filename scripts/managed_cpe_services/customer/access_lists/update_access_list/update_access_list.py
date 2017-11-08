@@ -64,7 +64,7 @@ class UpdateAccessList(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -78,7 +78,7 @@ class UpdateAccessList(yang.AbstractYangServiceHandler):
         inputdict['access_list_entry'] = config.get_field_value('access_list_entry')
         inputdict['acl_sequence_num'] = config.get_field_value('acl_sequence_num')
         inputdict['operation'] = config.get_field_value('operation')
-        inputdict['acl_name'] = config.get_field_value('acl_name')
+        #inputdict['acl_name'] = config.get_field_value('acl_name')
         inputdict['action'] = config.get_field_value('action')
         inputdict['protocol'] = config.get_field_value('protocol')
         inputdict['service_obj_name'] = config.get_field_value('service_obj_name')
@@ -88,6 +88,8 @@ class UpdateAccessList(yang.AbstractYangServiceHandler):
         inputdict['destination_condition'] = config.get_field_value('destination_condition')
         inputdict['destination_object'] = config.get_field_value('destination_object')
         inputdict['destination_object_group'] = config.get_field_value('destination_object_group')
+        inputdict['source_port_operator'] = config.get_field_value('source_port_operator')
+        inputdict['dest_port_operator'] = config.get_field_value('dest_port_operator')
         inputdict['port_number'] = config.get_field_value('port_number')
         inputdict['match_packets'] = config.get_field_value('match_packets')
         inputdict['precedence'] = config.get_field_value('precedence')
@@ -136,7 +138,7 @@ class UpdateAccessList(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -150,7 +152,7 @@ class UpdateAccessList(yang.AbstractYangServiceHandler):
         inputdict['access_list_entry'] = config.get_field_value('access_list_entry')
         inputdict['acl_sequence_num'] = config.get_field_value('acl_sequence_num')
         inputdict['operation'] = config.get_field_value('operation')
-        inputdict['acl_name'] = config.get_field_value('acl_name')
+        #inputdict['acl_name'] = config.get_field_value('acl_name')
         inputdict['action'] = config.get_field_value('action')
         inputdict['protocol'] = config.get_field_value('protocol')
         inputdict['service_obj_name'] = config.get_field_value('service_obj_name')
@@ -201,7 +203,7 @@ class UpdateAccessList(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -215,7 +217,7 @@ class UpdateAccessList(yang.AbstractYangServiceHandler):
         inputdict['access_list_entry'] = config.get_field_value('access_list_entry')
         inputdict['acl_sequence_num'] = config.get_field_value('acl_sequence_num')
         inputdict['operation'] = config.get_field_value('operation')
-        inputdict['acl_name'] = config.get_field_value('acl_name')
+        #inputdict['acl_name'] = config.get_field_value('acl_name')
         inputdict['action'] = config.get_field_value('action')
         inputdict['protocol'] = config.get_field_value('protocol')
         inputdict['service_obj_name'] = config.get_field_value('service_obj_name')

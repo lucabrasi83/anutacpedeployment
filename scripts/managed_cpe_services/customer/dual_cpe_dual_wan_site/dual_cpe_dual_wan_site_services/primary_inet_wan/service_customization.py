@@ -82,7 +82,7 @@ class ServiceDataCustomization:
     @staticmethod
     def process_service_update_data(smodelctx, sdata, **kwargs):
       """callback called for update operation"""
-      raise Exception('Update forbidden for node primary-inet-wan at path managed-cpe-services/customer/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services/primary-inet-wan')
+      #raise Exception('Update forbidden for node primary-inet-wan at path managed-cpe-services/customer/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services/primary-inet-wan')
       modify = True
       if modify and kwargs is not None:
         for key, value in kwargs.iteritems():

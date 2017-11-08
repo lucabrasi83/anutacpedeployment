@@ -73,7 +73,7 @@ class MoveRule(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -91,7 +91,7 @@ class MoveRule(yang.AbstractYangServiceHandler):
         device_mgmt_ip_address = _Gen_obj.wanop_secondary.device_ip
 
         #Fetch Device Object
-        dev = getDeviceObject(device_mgmt_ip_address)
+        dev = getDeviceObject(device_mgmt_ip_address,sdata)
 
         # START OF FETCHING THE PARENT KEY LEAF PARAMETERS
         inputkeydict['managed_cpe_services_customer_wanop_services_type2_site_type2_site_site_name'] = sdata.getRcPath().split('/')[-4].split('=')[1]
@@ -113,7 +113,7 @@ class MoveRule(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -137,7 +137,7 @@ class MoveRule(yang.AbstractYangServiceHandler):
         device_mgmt_ip_address = _Gen_obj.wanop_secondary.device_ip
 
         #Fetch Device Object
-        dev = getDeviceObject(device_mgmt_ip_address)
+        dev = getDeviceObject(device_mgmt_ip_address,sdata)
 
         #Use the custom method to process the data
         service_customization.ServiceDataCustomization.process_service_update_data(smodelctx, sdata, id=id, dev=dev, parentobj=parentobj, config=config, pconfig=pconfig, hopaque=opaque_args, inputdict=inputdict, pinputdict=pinputdict)
@@ -153,7 +153,7 @@ class MoveRule(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -171,7 +171,7 @@ class MoveRule(yang.AbstractYangServiceHandler):
         device_mgmt_ip_address = _Gen_obj.wanop_secondary.device_ip
 
         #Fetch Device Object
-        dev = getDeviceObject(device_mgmt_ip_address)
+        dev = getDeviceObject(device_mgmt_ip_address,sdata)
 
         #Use the custom method to process the data
         service_customization.ServiceDataCustomization.process_service_delete_data(smodelctx, sdata, id=id, dev=dev, parentobj=parentobj, config=config, hopaque=opaque_args, inputdict=inputdict)

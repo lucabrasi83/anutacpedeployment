@@ -60,6 +60,7 @@ from cpedeployment.cpedeployment_lib import log
 from servicemodel.controller.devices.device import vrfs
 from servicemodel.controller.devices.device import interfaces
 
+
 class ServiceDataCustomization:
 
     @staticmethod
@@ -132,11 +133,12 @@ def fail_fall(smodelctx, sdata, **kwargs):
     inputdict = kwargs['inputdict']
     device = inputdict['device']
     dev = devicemgr.getDeviceById(device)
-    failover_lan = inputdict['failover_lan']
-    fallback_lan = inputdict['fallback_lan']
-
-    cpe_primary_wan_neighbor = inputdict['cpe_primary_wan_neighbor']
-    cpe_secondary_wan_neighbor = inputdict['cpe_secondary_wan_neighbor']
+    
+    cpe_primary_wan_neighbor = inputdict['cpe_primary_wan_ebgp_neighbor']
+    cpe_secondary_wan_neighbor = inputdict['cpe_secondary_wan_ebgp_neighbor']
+    dps_tunnel_id = inputdict['dps_tunnel_id']
+    failover_dps = inputdict['failover_dps']
+    fallback_dps = inputdict['fallback_dps']
     failover_wan = inputdict['failover_wan']
     fallback_wan = inputdict['fallback_wan']
     vrf = None
@@ -162,7 +164,7 @@ def fail_fall(smodelctx, sdata, **kwargs):
                                 primobj.shut = "true"
                             if fallback_wan == 'true':
                                 primobj.shut = "false"
-                            router_bgp_neighbor_url = dev.url + '/vrfs/vrf=%s/router-bgp' % (vrf)
+                            router_bgp_neighbor_url = dev.url + '/l3features:vrfs/vrf=%s/router-bgp' % (vrf)
                             yang.Sdk.createData(router_bgp_neighbor_url, primobj.getxml(filter=True), sdata.getSession(), False)
 
     vrf = None
@@ -187,32 +189,25 @@ def fail_fall(smodelctx, sdata, **kwargs):
                                 primobj.shut = "true"
                             if fallback_wan == 'true':
                                 primobj.shut = "false"
-                            router_bgp_neighbor_url = dev.url + '/vrfs/vrf=%s/router-bgp' % (vrf)
+                            router_bgp_neighbor_url = dev.url + '/l3features:vrfs/vrf=%s/router-bgp' % (vrf)
                             yang.Sdk.createData(router_bgp_neighbor_url, primobj.getxml(filter=True), sdata.getSession(), False)
 
-    obj = getLocalObject(sdata, 'single-cpe-dual-wan-site-services=')
-    if hasattr(obj.single_cpe_dual_wan_site_services.cpe_lan, 'end_points'):
-        endpoints = util.convert_to_list(obj.single_cpe_dual_wan_site_services.cpe_lan.end_points)
-        for endpoint in endpoints:
-            if device == endpoint.device_ip:
-                if endpoint.interface_type == 'Physical':
-                    interface_name = endpoint.interface_name
-                elif endpoint.interface_type == 'Sub-Interface':
-                    interface_name = endpoint.interface_name + '.' + str(endpoint.vlan_id)
-                if failover_lan == 'true':
-                    failobj = interfaces.interface.interface()
-                    failobj.name = interface_name
-                    failobj.long_name = interface_name
-                    failobj.admin_state = 'DOWN'
-                    yang.Sdk.createData(dev.url + '/interfaces', failobj.getxml(filter=True), sdata.getSession(), False)
+    
+    #Failover/Fallback DMVPN DPS Tunnel
+    if failover_dps == 'true':
+        failobj = interfaces.interface.interface()
+        failobj.name = dps_tunnel_id
+        failobj.long_name = dps_tunnel_id
+        failobj.admin_state = 'DOWN'
+        yang.Sdk.createData(dev.url + '/interface:interfaces', failobj.getxml(filter=True), sdata.getSession(), False)
 
-                if fallback_lan == 'true':
-                    fallobj = interfaces.interface.interface()
-                    fallobj.name = interface_name
-                    fallobj.long_name = interface_name
-                    fallobj.admin_state = 'UP'
-                    yang.Sdk.createData(dev.url + '/interfaces', fallobj.getxml(filter=True), sdata.getSession(), False)
-
+    if fallback_dps == 'true':
+        fallobj = interfaces.interface.interface()
+        fallobj.name = dps_tunnel_id
+        fallobj.long_name = dps_tunnel_id
+        fallobj.admin_state = 'UP'
+        yang.Sdk.createData(dev.url + '/interface:interfaces', fallobj.getxml(filter=True), sdata.getSession(), False)
+    
 
 class DeletePreProcessor(yang.SessionPreProcessor):
     def processBeforeReserve(self, session):

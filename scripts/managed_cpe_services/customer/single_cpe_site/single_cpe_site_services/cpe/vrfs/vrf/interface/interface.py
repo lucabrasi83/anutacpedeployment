@@ -46,6 +46,7 @@ from servicemodel import devicemgr
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject
 from cpedeployment.cpedeployment_lib import getCurrentObjectConfig
+from cpedeployment.cpedeployment_lib import getPreviousObjectConfig
 from cpedeployment.cpedeployment_lib import ServiceModelContext
 from cpedeployment.cpedeployment_lib import getParentObject
 from cpedeployment.cpedeployment_lib import log
@@ -72,7 +73,7 @@ class Interface(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -108,13 +109,14 @@ class Interface(yang.AbstractYangServiceHandler):
     def update(self, id, sdata):
         #Fetch Local Config Object
         config = getCurrentObjectConfig(id, sdata, 'interface')
+        pconfig = getPreviousObjectConfig(id, sdata, 'interface')
         opaque_args = self.opaque_args
 
         #Fetch Service Model Context Object
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -123,7 +125,8 @@ class Interface(yang.AbstractYangServiceHandler):
         opaque_args = self.opaque_args
 
         # START OF FETCHING THE LEAF PARAMETERS
-        inputdict['entry_sequence_number'] = config.get_field_value('entry_sequence_number')
+        #Fetch previous Entry Sequence Number for Update Operation
+        inputdict['entry_sequence_number'] = pconfig.get_field_value('entry_sequence_number')
         inputdict['interface_name'] = config.get_field_value('interface_name')
         # END OF FETCHING THE LEAF PARAMETERS
 
@@ -134,7 +137,7 @@ class Interface(yang.AbstractYangServiceHandler):
         dev = getDeviceObject(device_mgmt_ip_address, sdata)
 
         #Use the custom method to process the data
-        service_customization.ServiceDataCustomization.process_service_update_data(smodelctx, sdata, id=id, dev=dev, parentobj=parentobj, config=config, hopaque=opaque_args, inputdict=inputdict)
+        service_customization.ServiceDataCustomization.process_service_update_data(smodelctx, sdata, dev, id=id, device=dev, parentobj=parentobj, config=config, hopaque=opaque_args, inputdict=inputdict)
 
     def delete(self, id, sdata):
         sdata.getSession().addYangSessionPreReserveProcessor(self.delete_pre_processor)
@@ -147,7 +150,7 @@ class Interface(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}

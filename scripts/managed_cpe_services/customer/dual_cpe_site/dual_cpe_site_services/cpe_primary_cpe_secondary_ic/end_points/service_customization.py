@@ -56,9 +56,11 @@ from cpedeployment.cpedeployment_lib import ServiceModelContext
 from cpedeployment.cpedeployment_lib import getParentObject 
 from cpedeployment.cpedeployment_lib import log
 
-from cpedeployment.endpoint_lib import back_endpoint
+#from cpedeployment.endpoint_lib import back_endpoint
+from cpedeployment.endpoint_lib import new_back_endpoint
 from cpedeployment.endpoint_lib import deallocate_ipaddress_from_ipam
 from cpedeployment.endpoint_lib import delete_physical_interface
+from cpedeployment.endpoint_lib import update_b2b_endpoint
 
 class ServiceDataCustomization:
 
@@ -73,6 +75,7 @@ class ServiceDataCustomization:
       if modify:
         config = kwargs['config']
         inputdict = kwargs['inputdict']
+        inputkeydict = kwargs['inputkeydict']
 
     @staticmethod
     def process_service_device_bindings(smodelctx, sdata, dev, **kwargs):
@@ -86,8 +89,9 @@ class ServiceDataCustomization:
         config = kwargs['config']
         inputdict = kwargs['inputdict']
         devbindobjs = kwargs['devbindobjs']
+        inputkeydict = kwargs['inputkeydict']
         for device in util.convert_to_list(dev):
-            back_endpoint('cpe_primary_cpe_secondary_ic', smodelctx, sdata, device, **kwargs)
+            new_back_endpoint('cpe_primary_cpe_secondary_ic', smodelctx, sdata, device, **kwargs)
 
 
     @staticmethod
@@ -98,6 +102,21 @@ class ServiceDataCustomization:
         for key, value in kwargs.iteritems():
           log("%s == %s" %(key,value))
 
+      if modify:
+        config = kwargs['config']
+        inputdict = kwargs['inputdict']
+        id = kwargs['id']
+        opaque_args = kwargs['hopaque']
+
+        #Previous config and previous inputdict
+        pconfig = kwargs['pconfig']
+        pinputdict = kwargs['pinputdict']
+
+        dev = kwargs['dev']
+
+        for device in util.convert_to_list(dev):
+            update_b2b_endpoint(sdata, device, **kwargs)
+
     @staticmethod
     def process_service_delete_data(smodelctx, sdata, **kwargs):
       """callback called for delete operation"""
@@ -106,10 +125,12 @@ class ServiceDataCustomization:
         for key, value in kwargs.iteritems():
           log("%s == %s" %(key,value))
 
-      dev = kwargs['dev']
-      for device in util.convert_to_list(dev):
-          #deallocate_ipaddress_from_ipam('cpe_primary_cpe_secondary_ic', smodelctx, sdata, device, **kwargs)
-          delete_physical_interface('cpe_primary_cpe_secondary_ic', smodelctx, sdata, device, **kwargs)
+      if modify:
+        config = kwargs['config']
+        inputdict = kwargs['inputdict']
+        dev = kwargs['dev']
+        for device in util.convert_to_list(dev):
+            delete_physical_interface('cpe_primary_cpe_secondary_ic', smodelctx, sdata, device, **kwargs)
 
 
 class DeletePreProcessor(yang.SessionPreProcessor):

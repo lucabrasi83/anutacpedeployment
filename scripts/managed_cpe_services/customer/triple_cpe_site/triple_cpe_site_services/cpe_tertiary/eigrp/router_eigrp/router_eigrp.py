@@ -70,7 +70,7 @@ class RouterEigrp(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -83,6 +83,8 @@ class RouterEigrp(yang.AbstractYangServiceHandler):
         inputdict['vrf_name'] = config.get_field_value('vrf_name')
         inputdict['router_id'] = config.get_field_value('router_id')
         inputdict['nsf'] = config.get_field_value('nsf')
+        inputdict['distance_internal_routes'] = config.get_field_value('distance_internal_routes')
+        inputdict['distance_external_routes'] = config.get_field_value('distance_external_routes')
         inputdict['eigrp_stub'] = config.get_field_value('eigrp_stub')
         # END OF FETCHING THE LEAF PARAMETERS
 
@@ -114,7 +116,7 @@ class RouterEigrp(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -127,6 +129,8 @@ class RouterEigrp(yang.AbstractYangServiceHandler):
         inputdict['vrf_name'] = config.get_field_value('vrf_name')
         inputdict['router_id'] = config.get_field_value('router_id')
         inputdict['nsf'] = config.get_field_value('nsf')
+        inputdict['distance_internal_routes'] = config.get_field_value('distance_internal_routes')
+        inputdict['distance_external_routes'] = config.get_field_value('distance_external_routes')
         inputdict['eigrp_stub'] = config.get_field_value('eigrp_stub')
         # END OF FETCHING THE LEAF PARAMETERS
 
@@ -150,7 +154,7 @@ class RouterEigrp(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -163,6 +167,8 @@ class RouterEigrp(yang.AbstractYangServiceHandler):
         inputdict['vrf_name'] = config.get_field_value('vrf_name')
         inputdict['router_id'] = config.get_field_value('router_id')
         inputdict['nsf'] = config.get_field_value('nsf')
+        inputdict['distance_internal_routes'] = config.get_field_value('distance_internal_routes')
+        inputdict['distance_external_routes'] = config.get_field_value('distance_external_routes')
         inputdict['eigrp_stub'] = config.get_field_value('eigrp_stub')
         # END OF FETCHING THE LEAF PARAMETERS
 

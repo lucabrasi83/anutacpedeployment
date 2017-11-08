@@ -124,7 +124,7 @@ def bgp_peer(entity, smodelctx, sdata, device, **kwargs):
     if vrf is None:
         vrf = "GLOBAL"
 
-    router_bgp_neighbor_url = device.url + '/vrfs/vrf=%s/router-bgp' % (vrf)
+    router_bgp_neighbor_url = device.url + '/l3features:vrfs/vrf=%s/router-bgp' % (vrf)
     yang.Sdk.createData(router_bgp_neighbor_url, bgp_neighbor_obj.getxml(filter=True), sdata.getSession())
 
     # creating entries for associated services
@@ -239,7 +239,7 @@ def update_bgp_peer(entity, smodelctx, sdata, device, **kwargs):
     if vrf is None:
         vrf = "GLOBAL"
 
-    router_bgp_neighbor_url = device.url + '/vrfs/vrf=%s/router-bgp/neighbor=%s' % (vrf, peer_ip)
+    router_bgp_neighbor_url = device.url + '/l3features:vrfs/vrf=%s/router-bgp/neighbor=%s' % (vrf, peer_ip)
 
     payload = bgp_neighbor_obj.getxml(filter=True)
 

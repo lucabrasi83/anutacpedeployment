@@ -103,7 +103,7 @@ class ServiceDataCustomization:
     @staticmethod
     def process_service_update_data(smodelctx, sdata, **kwargs):
       """callback called for update operation"""
-      raise Exception('Update forbidden for node eigrp at path managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/cpe-tertiary-inet-wan/end-points/eigrp')
+      #raise Exception('Update forbidden for node eigrp at path managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/cpe-tertiary-inet-wan/end-points/eigrp')
       modify = True
       if modify and kwargs is not None:
         for key, value in kwargs.items():

@@ -76,6 +76,8 @@ from cpedeployment.cpedeployment_lib import ServiceModelContext
 from cpedeployment.cpedeployment_lib import getParentObject 
 from cpedeployment.cpedeployment_lib import log
 
+from cpedeployment.endpoint_lib import update_lan_profile
+
 class ServiceDataCustomization:
 
     @staticmethod
@@ -108,7 +110,7 @@ class ServiceDataCustomization:
     @staticmethod
     def process_service_update_data(smodelctx, sdata, **kwargs):
       """callback called for update operation"""
-      raise Exception('Update forbidden for node lan-profile at path managed-cpe-services/customer/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services/cpe-lan/lan-profile')
+      #raise Exception('Update forbidden for node lan-profile at path managed-cpe-services/customer/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services/cpe-lan/lan-profile')
       modify = True
       if modify and kwargs is not None:
         for key, value in kwargs.iteritems():
@@ -117,6 +119,14 @@ class ServiceDataCustomization:
       if modify:
         config = kwargs['config']
         inputdict = kwargs['inputdict']
+        id = kwargs['id']
+        opaque_args = kwargs['hopaque']
+
+        #Previous config and previous inputdict
+        pconfig = kwargs['pconfig']
+        pinputdict = kwargs['pinputdict']
+
+        update_lan_profile(sdata, **kwargs)
 
     @staticmethod
     def process_service_delete_data(smodelctx, sdata, **kwargs):

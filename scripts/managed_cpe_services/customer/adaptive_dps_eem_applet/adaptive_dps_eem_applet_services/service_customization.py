@@ -187,6 +187,7 @@ class ServiceDataCustomization:
 def adaptive_dps_def(entity, conf, sdata, **kwargs):
     interface_name = None
     mode = None
+    device = None
     inputdict = kwargs['inputdict']
     if entity == 'cpe':
         device = devicemgr.getDeviceById(conf.single_cpe_site_services.cpe.device_ip)
@@ -206,9 +207,13 @@ def adaptive_dps_def(entity, conf, sdata, **kwargs):
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_secondary.device_ip)
     elif entity == 'cpe_tertiary_triple':
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_tertiary.device_ip)
+    
+    if device == None:
+        raise Exception('''Please select correct value in cpe drop-down based on service type. For dual_cpe_site [cpe_primary/cpe_secondary], dual_cpe_dual_wan_site[cpe_primary,cpe_secondary], triple_cpe_site[cpe_primary,cpe_secondary,cpe_tertiary]''')
 
     applet_obj = eem_applets.event_manager_applet.event_manager_applet() 
     applet_obj.applet_name = inputdict['applet_name']
+    applet_obj.description = inputdict['description']
     yang.Sdk.createData(device.url+"/eem-applets", applet_obj.getxml(filter=True), sdata.getSession())
     
 class DeletePreProcessor(yang.SessionPreProcessor):

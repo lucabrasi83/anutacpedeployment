@@ -70,7 +70,7 @@ class Vrf(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -82,6 +82,10 @@ class Vrf(yang.AbstractYangServiceHandler):
         inputdict['name'] = config.get_field_value('name')
         inputdict['vrf_name'] = config.get_field_value('vrf_name')
         inputdict['bgp_router_id'] = config.get_field_value('bgp_router_id')
+        inputdict['bgp_distance'] = config.get_field_value('bgp_distance')
+        inputdict['bgp_distance_external'] = config.get_field_value('bgp_distance_external')
+        inputdict['bgp_distance_internal'] = config.get_field_value('bgp_distance_internal')
+        inputdict['bgp_distance_local'] = config.get_field_value('bgp_distance_local')
         inputdict['bgp_address_family'] = config.get_field_value('bgp_address_family')
         inputdict['bgp_keepalive_timer'] = config.get_field_value('bgp_keepalive_timer')
         inputdict['bgp_holdtime_timer'] = config.get_field_value('bgp_holdtime_timer')
@@ -97,6 +101,8 @@ class Vrf(yang.AbstractYangServiceHandler):
         inputdict['redistribute_static_route_policy'] = config.get_field_value('redistribute_static_route_policy')
         inputdict['aggregate_summary_networks'] = config.get_field_value('aggregate_summary_networks')
         inputdict['summary_networks'] = config.get_field_value('summary_networks')
+        inputdict['bgp_settings'] = config.get_field_value('bgp_settings')
+        inputdict['bgp_redis_internal'] = config.get_field_value('bgp_redis_internal')
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'cpe-tertiary')
@@ -127,7 +133,7 @@ class Vrf(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -139,6 +145,10 @@ class Vrf(yang.AbstractYangServiceHandler):
         inputdict['name'] = config.get_field_value('name')
         inputdict['vrf_name'] = config.get_field_value('vrf_name')
         inputdict['bgp_router_id'] = config.get_field_value('bgp_router_id')
+        inputdict['bgp_distance'] = config.get_field_value('bgp_distance')
+        inputdict['bgp_distance_external'] = config.get_field_value('bgp_distance_external')
+        inputdict['bgp_distance_internal'] = config.get_field_value('bgp_distance_internal')
+        inputdict['bgp_distance_local'] = config.get_field_value('bgp_distance_local')
         inputdict['bgp_address_family'] = config.get_field_value('bgp_address_family')
         inputdict['bgp_keepalive_timer'] = config.get_field_value('bgp_keepalive_timer')
         inputdict['bgp_holdtime_timer'] = config.get_field_value('bgp_holdtime_timer')
@@ -154,6 +164,8 @@ class Vrf(yang.AbstractYangServiceHandler):
         inputdict['redistribute_static_route_policy'] = config.get_field_value('redistribute_static_route_policy')
         inputdict['aggregate_summary_networks'] = config.get_field_value('aggregate_summary_networks')
         inputdict['summary_networks'] = config.get_field_value('summary_networks')
+        inputdict['bgp_settings'] = config.get_field_value('bgp_settings')
+        inputdict['bgp_redis_internal'] = config.get_field_value('bgp_redis_internal')
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'cpe-tertiary')
@@ -176,7 +188,7 @@ class Vrf(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -188,6 +200,10 @@ class Vrf(yang.AbstractYangServiceHandler):
         inputdict['name'] = config.get_field_value('name')
         inputdict['vrf_name'] = config.get_field_value('vrf_name')
         inputdict['bgp_router_id'] = config.get_field_value('bgp_router_id')
+        inputdict['bgp_distance'] = config.get_field_value('bgp_distance')
+        inputdict['bgp_distance_external'] = config.get_field_value('bgp_distance_external')
+        inputdict['bgp_distance_internal'] = config.get_field_value('bgp_distance_internal')
+        inputdict['bgp_distance_local'] = config.get_field_value('bgp_distance_local')
         inputdict['bgp_address_family'] = config.get_field_value('bgp_address_family')
         inputdict['bgp_keepalive_timer'] = config.get_field_value('bgp_keepalive_timer')
         inputdict['bgp_holdtime_timer'] = config.get_field_value('bgp_holdtime_timer')
@@ -203,6 +219,8 @@ class Vrf(yang.AbstractYangServiceHandler):
         inputdict['redistribute_static_route_policy'] = config.get_field_value('redistribute_static_route_policy')
         inputdict['aggregate_summary_networks'] = config.get_field_value('aggregate_summary_networks')
         inputdict['summary_networks'] = config.get_field_value('summary_networks')
+        inputdict['bgp_settings'] = config.get_field_value('bgp_settings')
+        inputdict['bgp_redis_internal'] = config.get_field_value('bgp_redis_internal')
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'cpe-tertiary')

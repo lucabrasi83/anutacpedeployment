@@ -17,7 +17,7 @@ from servicemodel.controller.devices.device import vrfs
 from servicemodel.controller.devices.device import interfaces
 
 from cpedeployment_lib import getLocalObject
-
+from cpedeployment_lib import route_maps
 
 def eigrpEnd(entity, smodelctx, sdata, dev, **kwargs):
     inputdict = kwargs['inputdict']
@@ -66,20 +66,22 @@ def eigrpEnd(entity, smodelctx, sdata, dev, **kwargs):
     if util.isNotEmpty(passive_interface):
         eigrp_passive_obj.passive_interface = passive_interface
 
-    eigrp_passive_url = dev.url + '/vrfs/vrf=%s/router-eigrp/eigrp=%s' % (vrf,as_number)
+    eigrp_passive_url = dev.url + '/l3features:vrfs/vrf=%s/router-eigrp/eigrp=%s' % (vrf,as_number)
     yang.Sdk.createData(eigrp_passive_url, eigrp_passive_obj.getxml(filter=True), sdata.getSession())
 
     eigrpdistlistobj = vrfs.vrf.router_eigrp.eigrp.distribute_list.distribute_list()
     eigrpdistlistobj.interface = interface
-    eigrp_distlist_url = dev.url + '/vrfs/vrf=%s/router-eigrp/eigrp=%s' % (vrf, as_number)
+    eigrp_distlist_url = dev.url + '/l3features:vrfs/vrf=%s/router-eigrp/eigrp=%s' % (vrf, as_number)
     if util.isNotEmpty(in_route_map):
         eigrpdistlistobj.route_map = in_route_map
         eigrpdistlistobj.filter = 'in'
+        route_maps(in_route_map, dev, sdata)
         yang.Sdk.createData(eigrp_distlist_url, eigrpdistlistobj.getxml(filter=True), sdata.getSession())
 
     if util.isNotEmpty(out_route_map):
         eigrpdistlistobj.route_map = out_route_map
         eigrpdistlistobj.filter = 'out'
+        route_maps(out_route_map, dev, sdata)
         yang.Sdk.createData(eigrp_distlist_url, eigrpdistlistobj.getxml(filter=True), sdata.getSession())
 
     eigrpintobj = interfaces.interface.eigrp.as_number.as_number()
@@ -91,7 +93,7 @@ def eigrpEnd(entity, smodelctx, sdata, dev, **kwargs):
     eigrpintobj.hold_time = hold_time
     if split_horizon == 'true':
         eigrpintobj.split_horizon = split_horizon
-    eigrpinturl = dev.url + '/interfaces/interface=%s/eigrp' % (str(interface).replace('/', '%2F'))
+    eigrpinturl = dev.url + '/interface:interfaces/interface=%s/eigrp' % (str(interface).replace('/', '%2F'))
     yang.Sdk.createData(eigrpinturl, eigrpintobj.getxml(filter=True), sdata.getSession())
 
 
@@ -142,17 +144,18 @@ def eigrpSummary(entity, smodelctx, sdata, dev, **kwargs):
     addr = addrStr.split('.')
     cidr = int(cidrStr)
     mask = [0, 0, 0, 0]
-    for i in range(cidr):
+    for i in xrange(cidr):
         mask[i/8] = mask[i/8] + (1 << (7 - i % 8))
-    net = []
-    for i in range(4):
-        net.append(int(addr[i]) & mask[i])
+    #net = []
+    #for i in range(4):
+        #net.append(int(addr[i]) & mask[i])
+    net = [int(addr[i]) & mask[i] for i in xrange(4)]
 
     network = ".".join(map(str, net))
     eigrpsumnet = interfaces.interface.eigrp.as_number.summary_network.summary_network()
     eigrpsumnet.ip_address = network
     eigrpsumnet.netmask = netmask
-    eigrpinturl = dev.url + '/interfaces/interface=%s/eigrp/as-number=%s' % (str(interface).replace('/', '%2F'), as_number)
+    eigrpinturl = dev.url + '/interface:interfaces/interface=%s/eigrp/as-number=%s' % (str(interface).replace('/', '%2F'), as_number)
     yang.Sdk.createData(eigrpinturl, eigrpsumnet.getxml(filter=True), sdata.getSession())
 
     if summary_metric == 'true' and util.isNotEmpty(bandwidth_metric) and util.isNotEmpty(delay_metric) and util.isNotEmpty(reliability_metric) and util.isNotEmpty(load_metric) and util.isNotEmpty(mtu):
@@ -163,7 +166,7 @@ def eigrpSummary(entity, smodelctx, sdata, dev, **kwargs):
         eigrpsummetric.reliability_metric = reliability_metric
         eigrpsummetric.load_metric = load_metric
         eigrpsummetric.mtu = mtu
-        eigrp_summetric_url = dev.url + '/vrfs/vrf=%s/router-eigrp/eigrp=%s' % (vrf, as_number)
+        eigrp_summetric_url = dev.url + '/l3features:vrfs/vrf=%s/router-eigrp/eigrp=%s' % (vrf, as_number)
         yang.Sdk.createData(eigrp_summetric_url, eigrpsummetric.getxml(filter=True), sdata.getSession())
 
 
@@ -180,7 +183,7 @@ def key_chain_add(key_chain_name, sdata, dev, **kwargs):
     keychainobj = key_chain.router_key_chain.router_key_chain()
     keychainobj.key_chain_name = key_chain_name
     yang.Sdk.createData(dev.url, '<key-chain/>', sdata.getSession(), False)
-    key_chain_url = dev.url + '/key-chain'
+    key_chain_url = dev.url + '/l3features:key-chain'
     yang.Sdk.createData(key_chain_url, keychainobj.getxml(filter=True), sdata.getSession())
 
     if hasattr(obj.router_key_chain, 'keys'):
@@ -189,5 +192,5 @@ def key_chain_add(key_chain_name, sdata, dev, **kwargs):
             keyobj = key_chain.router_key_chain.keys.keys()
             keyobj.key_identifier = key.key_identifier
             keyobj.key_string_password = key.key_string_password
-            key_url = dev.url + '/key-chain/router-key-chain=%s' % (key_chain_name)
+            key_url = dev.url + '/l3features:key-chain/router-key-chain=%s' % (key_chain_name)
             yang.Sdk.createData(key_url, keyobj.getxml(filter=True), sdata.getSession())

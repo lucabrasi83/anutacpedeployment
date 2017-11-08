@@ -58,7 +58,8 @@ class Customer(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        #parentobj = None
+        parentobj = None
 
         dev = None
         devbindobjs={}
@@ -84,7 +85,8 @@ class Customer(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        #parentobj = None
+        parentobj = None
         dev = None
         #Use the custom method to process the data
         service_customization.ServiceDataCustomization.process_service_update_data(smodelctx, sdata, dev=dev, parentobj=parentobj, config=config)
@@ -138,7 +140,7 @@ class Customer(yang.AbstractYangServiceHandler):
                 raise Exception("Should not delete the customer without deleting triple-cpe-site-services")
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
         dev = None
         #Use the custom method to process the data
         service_customization.ServiceDataCustomization.process_service_delete_data(smodelctx, sdata, dev=dev, parentobj=parentobj, config=config)

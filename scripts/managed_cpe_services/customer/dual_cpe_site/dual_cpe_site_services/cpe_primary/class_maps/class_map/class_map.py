@@ -68,7 +68,7 @@ class ClassMap(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = None
         devbindobjs={}
@@ -105,7 +105,7 @@ class ClassMap(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         _Gen_obj = getLocalObject(sdata, 'cpe-primary')
         device_mgmt_ip_address = _Gen_obj.cpe_primary.device_ip
@@ -126,7 +126,7 @@ class ClassMap(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         _Gen_obj = getLocalObject(sdata, 'cpe-primary')
         device_mgmt_ip_address = _Gen_obj.cpe_primary.device_ip

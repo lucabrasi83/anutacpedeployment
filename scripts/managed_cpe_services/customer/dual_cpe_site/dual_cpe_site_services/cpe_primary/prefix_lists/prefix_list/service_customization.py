@@ -65,12 +65,12 @@ class ServiceDataCustomization:
       if modify:
         config = kwargs['config']
         inputdict = kwargs['inputdict']
-
+      entity = 'cpe_primary'
       if isinstance(dev, list) is True:
           for device in dev:
-              prefix_list_gen(smodelctx, sdata, device,**kwargs)
+              prefix_list_gen(smodelctx, sdata, device, entity, **kwargs)
       else:
-          prefix_list_gen(smodelctx, sdata, dev,**kwargs)
+          prefix_list_gen(smodelctx, sdata, dev, entity, **kwargs)
 
     @staticmethod
     def process_service_device_bindings(smodelctx, sdata, dev, **kwargs):
@@ -88,7 +88,7 @@ class ServiceDataCustomization:
     @staticmethod
     def process_service_update_data(smodelctx, sdata, **kwargs):
       """callback called for update operation"""
-      raise Exception('Update forbidden for node prefix-list at path managed-cpe-services/customer/dual-cpe-site/dual-cpe-site-services/cpe-primary/prefix-lists/prefix-list')
+      #raise Exception('Update forbidden for node prefix-list at path managed-cpe-services/customer/dual-cpe-site/dual-cpe-site-services/cpe-primary/prefix-lists/prefix-list')
       modify = False
       if modify and kwargs is not None:
         for key, value in kwargs.iteritems():

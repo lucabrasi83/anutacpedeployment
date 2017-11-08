@@ -71,6 +71,9 @@ class ServiceDataCustomization:
                 log("%s == %s" %(key,value))
 
         if modify:
+            uri = sdata.getRcPath()
+            uri_list = uri.split('/',5)
+            url = '/'.join(uri_list[0:4])
             config = kwargs['config']
             inputdict = kwargs['inputdict']
             inputkeydict = kwargs['inputkeydict']
@@ -78,9 +81,9 @@ class ServiceDataCustomization:
                 if len(inputdict['single_cpe_sites']) > 0:
                     if isinstance(inputdict['single_cpe_sites'], list) is True:
                         for site in inputdict['single_cpe_sites']:
-                            uri = sdata.getRcPath()
-                            uri_list = uri.split('/',5)
-                            url = '/'.join(uri_list[0:4])
+                            #uri = sdata.getRcPath()
+                            #uri_list = uri.split('/',5)
+                            #url = '/'.join(uri_list[0:4])
                             site_output = yang.Sdk.getData(url+"/single-cpe-site/single-cpe-site-services="+str(site), '', sdata.getTaskId())
                             conf = util.parseXmlString(site_output)
                             entity = 'cpe'
@@ -90,9 +93,9 @@ class ServiceDataCustomization:
                                 create_community(entity, conf, sdata, **kwargs)
                     else:
                         site = inputdict['single_cpe_sites']
-                        uri = sdata.getRcPath()
-                        uri_list = uri.split('/',5)
-                        url = '/'.join(uri_list[0:4])
+                        #uri = sdata.getRcPath()
+                        #uri_list = uri.split('/',5)
+                        #url = '/'.join(uri_list[0:4])
                         site_output = yang.Sdk.getData(url+"/single-cpe-site/single-cpe-site-services="+str(site), '',sdata.getTaskId())
                         conf = util.parseXmlString(site_output)
                         entity = 'cpe'
@@ -105,9 +108,9 @@ class ServiceDataCustomization:
                 if len(inputdict['dual_cpe_sites']) > 0:
                     if isinstance(inputdict['dual_cpe_sites'], list) is True:
                         for site in inputdict['dual_cpe_sites']:
-                            uri = sdata.getRcPath()
-                            uri_list = uri.split('/',5)
-                            url = '/'.join(uri_list[0:4])
+                            #uri = sdata.getRcPath()
+                            #uri_list = uri.split('/',5)
+                            #url = '/'.join(uri_list[0:4])
                             site_output = yang.Sdk.getData(url+"/dual-cpe-site/dual-cpe-site-services="+str(site), '', sdata.getTaskId())
                             conf = util.parseXmlString(site_output)
                             entity = 'cpe_primary'
@@ -122,9 +125,9 @@ class ServiceDataCustomization:
                                 create_community(entity, conf, sdata, **kwargs)
                     else:
                         site = inputdict['dual_cpe_sites']
-                        uri = sdata.getRcPath()
-                        uri_list = uri.split('/',5)
-                        url = '/'.join(uri_list[0:4])
+                        #uri = sdata.getRcPath()
+                        #uri_list = uri.split('/',5)
+                        #url = '/'.join(uri_list[0:4])
                         site_output = yang.Sdk.getData(url+"/dual-cpe-site/dual-cpe-site-services="+str(site), '', sdata.getTaskId())
                         conf = util.parseXmlString(site_output)
                         entity = 'cpe_primary'
@@ -142,9 +145,9 @@ class ServiceDataCustomization:
                 if len(inputdict['single_cpe_dual_wan_sites']) > 0:
                     if isinstance(inputdict['single_cpe_dual_wan_sites'], list) is True:
                         for site in inputdict['single_cpe_dual_wan_sites']:
-                            uri = sdata.getRcPath()
-                            uri_list = uri.split('/',5)
-                            url = '/'.join(uri_list[0:4])
+                            #uri = sdata.getRcPath()
+                            #uri_list = uri.split('/',5)
+                            #url = '/'.join(uri_list[0:4])
                             site_output = yang.Sdk.getData(url+"/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
                             conf = util.parseXmlString(site_output)
                             entity = 'cpe_dual'
@@ -154,9 +157,9 @@ class ServiceDataCustomization:
                                 create_community(entity, conf, sdata, **kwargs)
                     else:
                         site = inputdict['single_cpe_dual_wan_sites']
-                        uri = sdata.getRcPath()
-                        uri_list = uri.split('/',5)
-                        url = '/'.join(uri_list[0:4])
+                        #uri = sdata.getRcPath()
+                        #uri_list = uri.split('/',5)
+                        #url = '/'.join(uri_list[0:4])
                         site_output = yang.Sdk.getData(url+"/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
                         conf = util.parseXmlString(site_output)
                         entity = 'cpe_dual'
@@ -169,9 +172,9 @@ class ServiceDataCustomization:
                 if len(inputdict['triple_cpe_sites']) > 0:
                     if isinstance(inputdict['triple_cpe_sites'], list) is True:
                         for site in inputdict['triple_cpe_sites']:
-                            uri = sdata.getRcPath()
-                            uri_list = uri.split('/',5)
-                            url = '/'.join(uri_list[0:4])
+                            #uri = sdata.getRcPath()
+                            #uri_list = uri.split('/',5)
+                            #url = '/'.join(uri_list[0:4])
                             site_output = yang.Sdk.getData(url+"/triple-cpe-site/triple-cpe-site-services="+str(site), '', sdata.getTaskId())
                             conf = util.parseXmlString(site_output)
                             entity = 'cpe_primary_triple'
@@ -191,9 +194,9 @@ class ServiceDataCustomization:
                                 create_community(entity, conf, sdata, **kwargs)
                     else:
                         site = inputdict['triple_cpe_sites']
-                        uri = sdata.getRcPath()
-                        uri_list = uri.split('/',5)
-                        url = '/'.join(uri_list[0:4])
+                        #uri = sdata.getRcPath()
+                        #uri_list = uri.split('/',5)
+                        #url = '/'.join(uri_list[0:4])
                         site_output = yang.Sdk.getData(url+"/triple-cpe-site/triple-cpe-site-services="+str(site), '',sdata.getTaskId())
                         conf = util.parseXmlString(site_output)
                         entity = 'cpe_primary_triple'
@@ -216,9 +219,9 @@ class ServiceDataCustomization:
                 if len(inputdict['dual_cpe_dual_wan_sites']) > 0:
                     if isinstance(inputdict['dual_cpe_dual_wan_sites'], list) is True:
                         for site in inputdict['dual_cpe_dual_wan_sites']:
-                            uri = sdata.getRcPath()
-                            uri_list = uri.split('/',5)
-                            url = '/'.join(uri_list[0:4])
+                            #uri = sdata.getRcPath()
+                            #uri_list = uri.split('/',5)
+                            #url = '/'.join(uri_list[0:4])
                             site_output = yang.Sdk.getData(url+"/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
                             conf = util.parseXmlString(site_output)
                             entity = 'cpe_primary_dual'
@@ -233,9 +236,9 @@ class ServiceDataCustomization:
                                 create_community(entity, conf, sdata, **kwargs)
                     else:
                         site = inputdict['dual_cpe_dual_wan_sites']
-                        uri = sdata.getRcPath()
-                        uri_list = uri.split('/',5)
-                        url = '/'.join(uri_list[0:4])
+                        #uri = sdata.getRcPath()
+                        #uri_list = uri.split('/',5)
+                        #url = '/'.join(uri_list[0:4])
                         site_output = yang.Sdk.getData(url+"/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
                         conf = util.parseXmlString(site_output)
                         entity = 'cpe_primary_dual'
@@ -321,10 +324,10 @@ def delete_community(entity, conf, sdata, **kwargs):
             device_com = []
             if hasattr(conf_community.extcommunity_lists, 'extcommunity_list'):
                 conf_community.extcommunity_lists.extcommunity_list = util.convert_to_list(conf_community.extcommunity_lists.extcommunity_list)
-                for com in conf_community.extcommunity_lists.extcommunity_list:
-                    if com.extcommunity_list_name == community_list_name and com.value == value:
-                        device_com.append(com.extcommunity_list_name)
-
+                #for com in conf_community.extcommunity_lists.extcommunity_list:
+                    #if com.extcommunity_list_name == community_list_name and com.value == value:
+                        #device_com.append(com.extcommunity_list_name)
+                device_com = [com.extcommunity_list_name for com in conf_community.extcommunity_lists.extcommunity_list if com.extcommunity_list_name == community_list_name and com.value == value]  
             if community_list_name in device_com:
                 community_obj = extcommunity_lists.extcommunity_list.extcommunity_list()
                 community_obj.extcommunity_list_name = community_list_name
@@ -354,9 +357,10 @@ def delete_community(entity, conf, sdata, **kwargs):
             device_com = []
             if hasattr(conf_community.community_lists, 'community_list'):
                 conf_community.community_lists.community_list = util.convert_to_list(conf_community.community_lists.community_list)
-                for com in conf_community.community_lists.community_list:
-                    if com.community_list_name == community_list_name and com.value == value:
-                        device_com.append(com.community_list_name)
+                #for com in conf_community.community_lists.community_list:
+                    #if com.community_list_name == community_list_name and com.value == value:
+                        #device_com.append(com.community_list_name)
+                device_com = [com.community_list_name for com in conf_community.community_lists.community_list if com.community_list_name == community_list_name and com.value == value]
 
             if community_list_name in device_com:
                 community_obj = community_lists.community_list.community_list()
@@ -413,12 +417,12 @@ def create_community(entity, conf, sdata, **kwargs):
         try:
             device_community = yang.Sdk.getData(url_device_community, '', sdata.getTaskId())
             conf_community = util.parseXmlString(device_community)
-            device_com = []
+            #device_com = []
             if hasattr(conf_community.extcommunity_lists, 'extcommunity_list'):
                 conf_community.extcommunity_lists.extcommunity_list = util.convert_to_list(conf_community.extcommunity_lists.extcommunity_list)
-                for com in conf_community.extcommunity_lists.extcommunity_list:
-                    device_com.append(com.extcommunity_list_name)
-
+                #for com in conf_community.extcommunity_lists.extcommunity_list:
+                    #device_com.append(com.extcommunity_list_name)
+                device_com = [com.extcommunity_list_name for com in conf_community.extcommunity_lists.extcommunity_list]
             if community_list_name in device_com:
                 community_list_obj = extcommunity_lists.extcommunity_list.extcommunity_list()
                 if util.isNotEmpty(community_list_entry):
@@ -431,7 +435,7 @@ def create_community(entity, conf, sdata, **kwargs):
                     community_list_obj.extcomm = extcomm
                 if util.isNotEmpty(value):
                     community_list_obj.value = value
-                community_list_url = device.url + '/extcommunity-lists'
+                community_list_url = device.url + '/l3features:extcommunity-lists'
                 yang.Sdk.createData(community_list_url, community_list_obj.getxml(filter=True), sdata.getSession(), False)
             else:
                 print "Extcommunity list is not in device: ", device
@@ -442,11 +446,12 @@ def create_community(entity, conf, sdata, **kwargs):
         try:
             device_community = yang.Sdk.getData(url_device_community, '', sdata.getTaskId())
             conf_community = util.parseXmlString(device_community)
-            device_com = []
+            #device_com = []
             if hasattr(conf_community.community_lists, 'community_list'):
                 conf_community.community_lists.community_list = util.convert_to_list(conf_community.community_lists.community_list)
-                for com in conf_community.community_lists.community_list:
-                    device_com.append(com.community_list_name)
+                #for com in conf_community.community_lists.community_list:
+                    #device_com.append(com.community_list_name)
+                device_com = [com.community_list_name for com in conf_community.community_lists.community_list]
 
             if community_list_name in device_com:
                 community_list_obj = community_lists.community_list.community_list()
@@ -458,7 +463,7 @@ def create_community(entity, conf, sdata, **kwargs):
                     community_list_obj.condition = condition
                 if util.isNotEmpty(value):
                     community_list_obj.value = value
-                community_list_url = device.url + '/community-lists'
+                community_list_url = device.url + '/l3features:community-lists'
                 yang.Sdk.createData(community_list_url, community_list_obj.getxml(filter=True), sdata.getSession(), False)
             else:
                 print "Community list is not in device: ", device

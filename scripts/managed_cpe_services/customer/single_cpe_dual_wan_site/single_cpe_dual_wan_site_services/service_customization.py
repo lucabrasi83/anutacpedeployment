@@ -62,6 +62,16 @@ class ServiceDataCustomization:
       if modify:
         config = kwargs['config']
         inputdict = kwargs['inputdict']
+        import time
+        now = time.strftime("%Y-%b-%d %I:%M %p %Z", time.localtime())
+        if sdata.isServiceDiscoveryEnabled() == True:
+            payload = '<brownfield-site>true</brownfield-site>'
+        else:
+            payload = '<greenfield-site>true</greenfield-site>'
+
+        payload_time = '<created-on>' + now + '</created-on>'
+        yang.Sdk.createData(sdata.getRcPath(), payload, sdata.getSession(), False)
+        yang.Sdk.createData(sdata.getRcPath(), payload_time, sdata.getSession(), False)
 
     @staticmethod
     def process_service_device_bindings(smodelctx, sdata, dev, **kwargs):
@@ -79,7 +89,7 @@ class ServiceDataCustomization:
     @staticmethod
     def process_service_update_data(smodelctx, sdata, **kwargs):
       """callback called for update operation"""
-      raise Exception('Update forbidden for node single-cpe-dual-wan-site-services at path managed-cpe-services/customer/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services')
+      #raise Exception('Update forbidden for node single-cpe-dual-wan-site-services at path managed-cpe-services/customer/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services')
       modify = False
       if modify and kwargs is not None:
         for key, value in kwargs.iteritems():
@@ -144,6 +154,8 @@ class CreatePreProcessor(yang.SessionPreProcessor):
         """Add any move operations for creation"""
         log('operations: %s' % (operations))
         yang.moveOperations(operations, ['CreateInterface', 'UpdateInterface'], ['CreateQPolicyMap'], True)
+        yang.moveOperations(operations, ['CreateInterfaceOspf', 'CreateInterfaceHSRP'], ['CreateInterface', 'UpdateInterface'], True)
+        util.log_debug('pass00: operations: %s' % (operations))
         # yang.moveOperations(operations, ['CreateInterface'], ['UpdateVrf'], True)
         # print 'pass01: operations: %s' % (operations)
         # yang.moveOperations(operations, ['CreateInterface'], ['CreateVrf'], True)

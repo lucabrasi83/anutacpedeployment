@@ -68,7 +68,7 @@ class FailoverFallback(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -82,12 +82,13 @@ class FailoverFallback(yang.AbstractYangServiceHandler):
           inputdict['sequence_number'] = '89'
         inputdict['name'] = config.get_field_value('name')
         inputdict['device'] = config.get_field_value('device')
-        inputdict['cpe_primary_wan_neighbor'] = config.get_field_value('cpe_primary_wan_neighbor')
-        inputdict['cpe_secondary_wan_neighbor'] = config.get_field_value('cpe_secondary_wan_neighbor')
+        inputdict['cpe_primary_wan_ebgp_neighbor'] = config.get_field_value('cpe_primary_wan_ebgp_neighbor')
+        inputdict['cpe_secondary_wan_ebgp_neighbor'] = config.get_field_value('cpe_secondary_wan_ebgp_neighbor')
+        inputdict['dps_tunnel_id'] = config.get_field_value('dps_tunnel_id')
+        inputdict['failover_dps'] = config.get_field_value('failover_dps')
+        inputdict['fallback_dps'] = config.get_field_value('fallback_dps')
         inputdict['failover_wan'] = config.get_field_value('failover_wan')
         inputdict['fallback_wan'] = config.get_field_value('fallback_wan')
-        inputdict['failover_lan'] = config.get_field_value('failover_lan')
-        inputdict['fallback_lan'] = config.get_field_value('fallback_lan')
         # END OF FETCHING THE LEAF PARAMETERS
 
         # START OF FETCHING THE PARENT KEY LEAF PARAMETERS
@@ -110,7 +111,7 @@ class FailoverFallback(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -124,12 +125,13 @@ class FailoverFallback(yang.AbstractYangServiceHandler):
           inputdict['sequence_number'] = '89'
         inputdict['name'] = config.get_field_value('name')
         inputdict['device'] = config.get_field_value('device')
-        inputdict['cpe_primary_wan_neighbor'] = config.get_field_value('cpe_primary_wan_neighbor')
-        inputdict['cpe_secondary_wan_neighbor'] = config.get_field_value('cpe_secondary_wan_neighbor')
+        inputdict['cpe_primary_wan_ebgp_neighbor'] = config.get_field_value('cpe_primary_wan_ebgp_neighbor')
+        inputdict['cpe_secondary_wan_ebgp_neighbor'] = config.get_field_value('cpe_secondary_wan_ebgp_neighbor')
+        inputdict['dps_tunnel_id'] = config.get_field_value('dps_tunnel_id')
+        inputdict['failover_dps'] = config.get_field_value('failover_dps')
+        inputdict['fallback_dps'] = config.get_field_value('fallback_dps')
         inputdict['failover_wan'] = config.get_field_value('failover_wan')
         inputdict['fallback_wan'] = config.get_field_value('fallback_wan')
-        inputdict['failover_lan'] = config.get_field_value('failover_lan')
-        inputdict['fallback_lan'] = config.get_field_value('fallback_lan')
         # END OF FETCHING THE LEAF PARAMETERS
 
         pinputdict = {}
@@ -140,12 +142,13 @@ class FailoverFallback(yang.AbstractYangServiceHandler):
           pinputdict['sequence_number'] = '89'
         pinputdict['name'] = pconfig.get_field_value('name')
         pinputdict['device'] = pconfig.get_field_value('device')
-        pinputdict['cpe_primary_wan_neighbor'] = pconfig.get_field_value('cpe_primary_wan_neighbor')
-        pinputdict['cpe_secondary_wan_neighbor'] = pconfig.get_field_value('cpe_secondary_wan_neighbor')
+        pinputdict['cpe_primary_wan_ebgp_neighbor'] = pconfig.get_field_value('cpe_primary_wan_ebgp_neighbor')
+        pinputdict['cpe_secondary_wan_ebgp_neighbor'] = pconfig.get_field_value('cpe_secondary_wan_ebgp_neighbor')
+        pinputdict['dps_tunnel_id'] = pconfig.get_field_value('dps_tunnel_id')
+        pinputdict['failover_dps'] = pconfig.get_field_value('failover_dps')
+        pinputdict['fallback_dps'] = pconfig.get_field_value('fallback_dps')
         pinputdict['failover_wan'] = pconfig.get_field_value('failover_wan')
         pinputdict['fallback_wan'] = pconfig.get_field_value('fallback_wan')
-        pinputdict['failover_lan'] = pconfig.get_field_value('failover_lan')
-        pinputdict['fallback_lan'] = pconfig.get_field_value('fallback_lan')
         dev = []
         #Use the custom method to process the data
         service_customization.ServiceDataCustomization.process_service_update_data(smodelctx, sdata, id=id, dev=dev, parentobj=parentobj, config=config, pconfig=pconfig, hopaque=opaque_args, inputdict=inputdict, pinputdict=pinputdict)
@@ -161,7 +164,7 @@ class FailoverFallback(yang.AbstractYangServiceHandler):
         smodelctx = None
 
         #Fetch Parent Object
-        parentobj = getParentObject(sdata)
+        parentobj = None
 
         dev = []
         inputkeydict = {}
@@ -175,12 +178,13 @@ class FailoverFallback(yang.AbstractYangServiceHandler):
           inputdict['sequence_number'] = '89'
         inputdict['name'] = config.get_field_value('name')
         inputdict['device'] = config.get_field_value('device')
-        inputdict['cpe_primary_wan_neighbor'] = config.get_field_value('cpe_primary_wan_neighbor')
-        inputdict['cpe_secondary_wan_neighbor'] = config.get_field_value('cpe_secondary_wan_neighbor')
+        inputdict['cpe_primary_wan_ebgp_neighbor'] = config.get_field_value('cpe_primary_wan_ebgp_neighbor')
+        inputdict['cpe_secondary_wan_ebgp_neighbor'] = config.get_field_value('cpe_secondary_wan_ebgp_neighbor')
+        inputdict['dps_tunnel_id'] = config.get_field_value('dps_tunnel_id')
+        inputdict['failover_dps'] = config.get_field_value('failover_dps')
+        inputdict['fallback_dps'] = config.get_field_value('fallback_dps')
         inputdict['failover_wan'] = config.get_field_value('failover_wan')
         inputdict['fallback_wan'] = config.get_field_value('fallback_wan')
-        inputdict['failover_lan'] = config.get_field_value('failover_lan')
-        inputdict['fallback_lan'] = config.get_field_value('fallback_lan')
         # END OF FETCHING THE LEAF PARAMETERS
 
         dev = []

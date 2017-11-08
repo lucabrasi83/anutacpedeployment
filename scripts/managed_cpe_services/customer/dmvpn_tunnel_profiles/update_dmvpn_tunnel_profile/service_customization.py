@@ -70,6 +70,9 @@ class ServiceDataCustomization:
                 log("%s == %s" %(key,value))
 
         if modify:
+            uri = sdata.getRcPath()
+            uri_list = uri.split('/',5)
+            url = '/'.join(uri_list[0:4])
             config = kwargs['config']
             inputdict = kwargs['inputdict']
             inputkeydict = kwargs['inputkeydict']
@@ -77,9 +80,9 @@ class ServiceDataCustomization:
                 if len(inputdict['single_cpe_sites']) > 0:
                     if isinstance(inputdict['single_cpe_sites'], list) is True:
                         for site in inputdict['single_cpe_sites']:
-                            uri = sdata.getRcPath()
-                            uri_list = uri.split('/',5)
-                            url = '/'.join(uri_list[0:4])
+                            #uri = sdata.getRcPath()
+                            #uri_list = uri.split('/',5)
+                            #url = '/'.join(uri_list[0:4])
                             site_output = yang.Sdk.getData(url+"/single-cpe-site/single-cpe-site-services="+str(site), '', sdata.getTaskId())
                             conf = util.parseXmlString(site_output)
                             entity = 'cpe'
@@ -89,9 +92,9 @@ class ServiceDataCustomization:
                                 create_dmvpn(entity, conf, sdata, smodelctx, **kwargs)
                     else:
                         site = inputdict['single_cpe_sites']
-                        uri = sdata.getRcPath()
-                        uri_list = uri.split('/',5)
-                        url = '/'.join(uri_list[0:4])
+                        #uri = sdata.getRcPath()
+                        #uri_list = uri.split('/',5)
+                        #url = '/'.join(uri_list[0:4])
                         site_output = yang.Sdk.getData(url+"/single-cpe-site/single-cpe-site-services="+str(site), '',sdata.getTaskId())
                         conf = util.parseXmlString(site_output)
                         entity = 'cpe'
@@ -104,9 +107,9 @@ class ServiceDataCustomization:
                 if len(inputdict['dual_cpe_sites']) > 0:
                     if isinstance(inputdict['dual_cpe_sites'], list) is True:
                         for site in inputdict['dual_cpe_sites']:
-                            uri = sdata.getRcPath()
-                            uri_list = uri.split('/',5)
-                            url = '/'.join(uri_list[0:4])
+                            #uri = sdata.getRcPath()
+                            #uri_list = uri.split('/',5)
+                            #url = '/'.join(uri_list[0:4])
                             site_output = yang.Sdk.getData(url+"/dual-cpe-site/dual-cpe-site-services="+str(site), '', sdata.getTaskId())
                             conf = util.parseXmlString(site_output)
                             entity = 'cpe_primary'
@@ -121,9 +124,9 @@ class ServiceDataCustomization:
                                 create_dmvpn(entity, conf, sdata, smodelctx **kwargs)
                     else:
                         site = inputdict['dual_cpe_sites']
-                        uri = sdata.getRcPath()
-                        uri_list = uri.split('/',5)
-                        url = '/'.join(uri_list[0:4])
+                        #uri = sdata.getRcPath()
+                        #uri_list = uri.split('/',5)
+                        #url = '/'.join(uri_list[0:4])
                         site_output = yang.Sdk.getData(url+"/dual-cpe-site/dual-cpe-site-services="+str(site), '', sdata.getTaskId())
                         conf = util.parseXmlString(site_output)
                         entity = 'cpe_primary'
@@ -141,9 +144,9 @@ class ServiceDataCustomization:
                 if len(inputdict['single_cpe_dual_wan_sites']) > 0:
                     if isinstance(inputdict['single_cpe_dual_wan_sites'], list) is True:
                         for site in inputdict['single_cpe_dual_wan_sites']:
-                            uri = sdata.getRcPath()
-                            uri_list = uri.split('/',5)
-                            url = '/'.join(uri_list[0:4])
+                            #uri = sdata.getRcPath()
+                            #uri_list = uri.split('/',5)
+                            #url = '/'.join(uri_list[0:4])
                             site_output = yang.Sdk.getData(url+"/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
                             conf = util.parseXmlString(site_output)
                             entity = 'cpe_dual'
@@ -153,9 +156,9 @@ class ServiceDataCustomization:
                                 create_dmvpn(entity, conf, sdata, smodelctx, **kwargs)
                     else:
                         site = inputdict['single_cpe_dual_wan_sites']
-                        uri = sdata.getRcPath()
-                        uri_list = uri.split('/',5)
-                        url = '/'.join(uri_list[0:4])
+                        #uri = sdata.getRcPath()
+                        #uri_list = uri.split('/',5)
+                        #url = '/'.join(uri_list[0:4])
                         site_output = yang.Sdk.getData(url+"/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
                         conf = util.parseXmlString(site_output)
                         entity = 'cpe_dual'
@@ -167,9 +170,9 @@ class ServiceDataCustomization:
                 if len(inputdict['triple_cpe_sites']) > 0:
                     if isinstance(inputdict['triple_cpe_sites'], list) is True:
                         for site in inputdict['triple_cpe_sites']:
-                            uri = sdata.getRcPath()
-                            uri_list = uri.split('/',5)
-                            url = '/'.join(uri_list[0:4])
+                            #uri = sdata.getRcPath()
+                            #uri_list = uri.split('/',5)
+                            #url = '/'.join(uri_list[0:4])
                             site_output = yang.Sdk.getData(url+"/triple-cpe-site/triple-cpe-site-services="+str(site), '', sdata.getTaskId())
                             conf = util.parseXmlString(site_output)
                             entity = 'cpe_primary_triple'
@@ -189,9 +192,9 @@ class ServiceDataCustomization:
                                 create_dmvpn(entity, conf, sdata, smodelctx, **kwargs)
                     else:
                         site = inputdict['triple_cpe_sites']
-                        uri = sdata.getRcPath()
-                        uri_list = uri.split('/',5)
-                        url = '/'.join(uri_list[0:4])
+                        #uri = sdata.getRcPath()
+                        #uri_list = uri.split('/',5)
+                        #url = '/'.join(uri_list[0:4])
                         site_output = yang.Sdk.getData(url+"/triple-cpe-site/triple-cpe-site-services="+str(site), '',sdata.getTaskId())
                         conf = util.parseXmlString(site_output)
                         entity = 'cpe_primary_triple'
@@ -214,9 +217,9 @@ class ServiceDataCustomization:
                 if len(inputdict['dual_cpe_dual_wan_sites']) > 0:
                     if isinstance(inputdict['dual_cpe_dual_wan_sites'], list) is True:
                         for site in inputdict['dual_cpe_dual_wan_sites']:
-                            uri = sdata.getRcPath()
-                            uri_list = uri.split('/',5)
-                            url = '/'.join(uri_list[0:4])
+                            #uri = sdata.getRcPath()
+                            #uri_list = uri.split('/',5)
+                            #url = '/'.join(uri_list[0:4])
                             site_output = yang.Sdk.getData(url+"/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
                             conf = util.parseXmlString(site_output)
                             entity = 'cpe_primary_dual'
@@ -231,9 +234,9 @@ class ServiceDataCustomization:
                                 create_dmvpn(entity, conf, sdata, smodelctx, **kwargs)
                     else:
                         site = inputdict['dual_cpe_dual_wan_sites']
-                        uri = sdata.getRcPath()
-                        uri_list = uri.split('/',5)
-                        url = '/'.join(uri_list[0:4])
+                        #uri = sdata.getRcPath()
+                        #uri_list = uri.split('/',5)
+                        #url = '/'.join(uri_list[0:4])
                         site_output = yang.Sdk.getData(url+"/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services="+str(site), '', sdata.getTaskId())
                         conf = util.parseXmlString(site_output)
                         entity = 'cpe_primary_dual'
@@ -264,7 +267,7 @@ class ServiceDataCustomization:
     @staticmethod
     def process_service_update_data(smodelctx, sdata, **kwargs):
       """callback called for update operation"""
-      raise Exception('Update forbidden for node update-dmvpn-tunnel-profile at path managed-cpe-services/customer/dmvpn-tunnel-profiles/update-dmvpn-tunnel-profile')
+      #raise Exception('Update forbidden for node update-dmvpn-tunnel-profile at path managed-cpe-services/customer/dmvpn-tunnel-profiles/update-dmvpn-tunnel-profile')
       modify = True
       if modify and kwargs is not None:
         for key, value in kwargs.iteritems():
@@ -324,8 +327,9 @@ def delete_dmvpn(entity, conf, sdata, **kwargs):
         device_tunnel = []
         if hasattr(conf_tunnel.dmvpntunnels, 'dmvpntunnel'):
             conf_tunnel.dmvpntunnels.dmvpntunnel = util.convert_to_list(conf_tunnel.dmvpntunnels.dmvpntunnel)
-            for tunnel in conf_tunnel.dmvpntunnels.dmvpntunnel:
-                device_tunnel.append(tunnel.name)
+            #for tunnel in conf_tunnel.dmvpntunnels.dmvpntunnel:
+                #device_tunnel.append(tunnel.name)
+            device_tunnel = [tunnel.name for tunnel in conf_tunnel.dmvpntunnels.dmvpntunnel]
 
         if tunnel_id in device_tunnel:
             url_device_tunnel_nhrp = '/controller:devices/device=%s/dmvpn:dmvpntunnels/dmvpntunnel=%s' %(device.device.id, tunnel_id)
@@ -334,9 +338,10 @@ def delete_dmvpn(entity, conf, sdata, **kwargs):
             device_tunnel_nhrp = []
             if hasattr(conf_tunnel_nhrp.dmvpntunnel, 'nhrp_maps'):
                 conf_tunnel_nhrp.dmvpntunnel.nhrp_maps = util.convert_to_list(conf_tunnel_nhrp.dmvpntunnel.nhrp_maps)
-                for nhrp in conf_tunnel_nhrp.dmvpntunnel.nhrp_maps:
-                    if nhrp.sourceip == wan_tunnel_ip and nhrp.destip == wan_public_ip:
-                        device_tunnel_nhrp.append(nhrp.sourceip)
+                #for nhrp in conf_tunnel_nhrp.dmvpntunnel.nhrp_maps:
+                    #if nhrp.sourceip == wan_tunnel_ip and nhrp.destip == wan_public_ip:
+                        #device_tunnel_nhrp.append(nhrp.sourceip)
+                device_tunnel_nhrp = [nhrp.sourceip for nhrp in conf_tunnel_nhrp.dmvpntunnel.nhrp_maps if nhrp.sourceip == wan_tunnel_ip and nhrp.destip == wan_public_ip]
             if wan_tunnel_ip in device_tunnel_nhrp:
                 dmvpn_obj_nhrp = dmvpntunnels.dmvpntunnel.nhrp_maps.nhrp_maps()
                 dmvpn_obj_nhrp.sourceip = wan_tunnel_ip
@@ -426,8 +431,9 @@ def create_dmvpn(entity, conf, sdata, smodelctx, **kwargs):
         device_tunnel = []
         if hasattr(conf_tunnel.dmvpntunnels, 'dmvpntunnel'):
             conf_tunnel.dmvpntunnels.dmvpntunnel = util.convert_to_list(conf_tunnel.dmvpntunnels.dmvpntunnel)
-            for tunnel in conf_tunnel.dmvpntunnels.dmvpntunnel:
-                device_tunnel.append(tunnel.name)
+            #for tunnel in conf_tunnel.dmvpntunnels.dmvpntunnel:
+                #device_tunnel.append(tunnel.name)
+            device_tunnel = [tunnel.name for tunnel in conf_tunnel.dmvpntunnels.dmvpntunnel]
 
         if tunnel_id in device_tunnel:
             dmvpn_obj = dmvpntunnels.dmvpntunnel.dmvpntunnel()
@@ -458,7 +464,7 @@ def create_dmvpn(entity, conf, sdata, smodelctx, **kwargs):
             if util.isNotEmpty(wan_tunnel_ip) and util.isNotEmpty(wan_public_ip):
                 nhrp_maps_obj_2 = dmvpn_obj.nhrp_maps.add(sourceip=wan_tunnel_ip, destip=wan_public_ip)
                 nhrp_maps_obj_2.nhrp_type = 'nhs'
-            yang.Sdk.createData(device.url+'/dmvpntunnels', dmvpn_obj.getxml(filter=True), sdata.getSession(), False)
+            yang.Sdk.createData(device.url+'/dmvpn:dmvpntunnels', dmvpn_obj.getxml(filter=True), sdata.getSession(), False)
         else:
             print "Dmvpn tunnel is not in device: ", device
     else:
