@@ -362,7 +362,9 @@ def create_match_condition(entity, conf, sdata, **kwargs):
     access_group = inputdict['access_group']
     qos_group = inputdict['qos_group']
 
-    url_device_class = '/controller:devices/device=%s/qos:class-maps' %(device.device.id)
+    url_device_class = '/controller:devices/device=%s/qos:class-maps/class-map=%s' %(device.device.id, cls_name)
+
+    '''
     device_class = yang.Sdk.getData(url_device_class, '', sdata.getTaskId())
     conf_cls = util.parseXmlString(device_class)
 
@@ -372,7 +374,9 @@ def create_match_condition(entity, conf, sdata, **kwargs):
         #for cls in conf_cls.class_maps.class_map:
             #device_cls.append(cls.name)
         device_cls = [cls.name for cls in conf_cls.class_maps.class_map]
-    if cls_name in device_cls:
+    '''
+    #if cls_name in device_cls:
+    if yang.Sdk.dataExists(url_device_class):
         cls_map_obj = class_maps.class_map.class_map()
         cls_map_obj.name = cls_name
         if len(inputdict['dscp']) > 0:
@@ -423,25 +427,31 @@ def create_match_condition(entity, conf, sdata, **kwargs):
                         match_obj.only_http = 'true'
                         yang.Sdk.createData(device.url+"/qos:class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession(), False)
 
-        url_device_acl = '/controller:devices/device=%s' %(device.device.id)
+        '''
+        url_device_acl = '/controller:devices/device=%s/acl:access-lists' %(device.device.id)
+        
         device_acl = yang.Sdk.getData(url_device_acl, '', sdata.getTaskId())
         conf_acl = util.parseXmlString(device_acl)
         device_access_group = []
-        uri = sdata.getRcPath()
-        uri_list = uri.split('/',5)
-        url = '/'.join(uri_list[0:4])
+        
         if hasattr(conf_acl.device, 'access_lists'):
             if hasattr(conf_acl.device, 'access_list'):
                 conf_acl.device.access_lists.access_list = util.convert_to_list(conf_acl.device.access_lists.access_list)
                 #for access_dyn in conf_acl.device.access_lists.access_list:
                     #device_access_group.append(access_dyn.name)
                 device_access_group = [access_dyn.name for access_dyn in conf_acl.device.access_lists.access_list]
+        '''
+        uri = sdata.getRcPath()
+        uri_list = uri.split('/',5)
+        url = '/'.join(uri_list[0:4])
         if util.isNotEmpty(access_group):
 
             if len(inputdict['access_group']) > 0:
                 if isinstance(inputdict['access_group'], list) is True:
                     for eachacl in inputdict['access_group']:
-                        if eachacl not in device_access_group:
+                        url_device_acl = '/controller:devices/device=%s/acl:access-lists/access-list=%s' %(device.device.id, eachacl)
+                        #if eachacl not in device_access_group:
+                        if not yang.Sdk.dataExists(url_device_acl):
                             access_group_def(url, eachacl, device, sdata)
 
                         match_obj = class_maps.class_map.class_match_condition.class_match_condition()
@@ -449,7 +459,9 @@ def create_match_condition(entity, conf, sdata, **kwargs):
                         match_obj.match_value = eachacl
                         yang.Sdk.createData(device.url+"/qos:class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession(), False)
                 else:
-                    if access_group not in device_access_group:
+                    url_device_acl = '/controller:devices/device=%s/acl:access-lists/access-list=%s' %(device.device.id, access_group)
+                    #if access_group not in device_access_group:
+                    if not yang.Sdk.dataExists(url_device_acl):
                             access_group_def(url, access_group, device, sdata)
 
                     match_obj = class_maps.class_map.class_match_condition.class_match_condition()

@@ -147,7 +147,8 @@ class DeletePreProcessor(yang.SessionPreProcessor):
         #yang.moveOperations(operations, ['DeleteVrf'], ['DeleteCryptoWithIKE'], True)
         print 'pass11: operations: %s' % (operations)
         yang.moveOperations(operations, ['DeleteSLA'], ['DeleteTrack', 'Deletelistobject', 'DeleteSLASchedule'], True)
-
+        print 'pass12: operations: %s' % (operations)
+        yang.moveOperations(operations, ['DeleteAccessList', 'DeleteAclRule'], ['UpdateInterface'], True)
 
 class CreatePreProcessor(yang.SessionPreProcessor):
     def processBeforeReserve(self, session):

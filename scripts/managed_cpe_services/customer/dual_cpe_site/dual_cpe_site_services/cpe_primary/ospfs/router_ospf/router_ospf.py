@@ -92,18 +92,13 @@ class RouterOspf(yang.AbstractYangServiceHandler):
         inputdict['global_acl_name'] = config.get_field_value('global_acl_name')
         inputdict['site_acl_name'] = config.get_field_value('site_acl_name')
         inputdict['maximum_paths'] = config.get_field_value('maximum_paths')
-        if inputdict.get('maximum_paths') is None:
-          inputdict['maximum_paths'] = '1'
         inputdict['default_information'] = config.get_field_value('default_information')
         inputdict['default_inf_key1'] = config.get_field_value('default_inf_key1')
         inputdict['default_inf_key2'] = config.get_field_value('default_inf_key2')
         inputdict['default_inf_key3'] = config.get_field_value('default_inf_key3')
         inputdict['default_inf_metric'] = config.get_field_value('default_inf_metric')
-        if inputdict.get('default_inf_metric') is None:
-          inputdict['default_inf_metric'] = '500'
         inputdict['default_inf_metric_type'] = config.get_field_value('default_inf_metric_type')
-        if inputdict.get('default_inf_metric_type') is None:
-          inputdict['default_inf_metric_type'] = '1'
+        inputdict['default_inf_always'] = config.get_field_value('default_inf_always')
         inputdict['default_inf_route_map'] = config.get_field_value('default_inf_route_map')
         inputdict['distribute_list'] = config.get_field_value('distribute_list')
         inputdict['dis_list_route_map'] = config.get_field_value('dis_list_route_map')
@@ -159,18 +154,13 @@ class RouterOspf(yang.AbstractYangServiceHandler):
         inputdict['global_acl_name'] = config.get_field_value('global_acl_name')
         inputdict['site_acl_name'] = config.get_field_value('site_acl_name')
         inputdict['maximum_paths'] = config.get_field_value('maximum_paths')
-        if inputdict.get('maximum_paths') is None:
-          inputdict['maximum_paths'] = '1'
         inputdict['default_information'] = config.get_field_value('default_information')
         inputdict['default_inf_key1'] = config.get_field_value('default_inf_key1')
         inputdict['default_inf_key2'] = config.get_field_value('default_inf_key2')
         inputdict['default_inf_key3'] = config.get_field_value('default_inf_key3')
         inputdict['default_inf_metric'] = config.get_field_value('default_inf_metric')
-        if inputdict.get('default_inf_metric') is None:
-          inputdict['default_inf_metric'] = '500'
         inputdict['default_inf_metric_type'] = config.get_field_value('default_inf_metric_type')
-        if inputdict.get('default_inf_metric_type') is None:
-          inputdict['default_inf_metric_type'] = '1'
+        inputdict['default_inf_always'] = config.get_field_value('default_inf_always')
         inputdict['default_inf_route_map'] = config.get_field_value('default_inf_route_map')
         inputdict['distribute_list'] = config.get_field_value('distribute_list')
         inputdict['dis_list_route_map'] = config.get_field_value('dis_list_route_map')

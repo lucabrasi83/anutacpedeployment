@@ -76,6 +76,7 @@ class ClassName(yang.AbstractYangServiceHandler):
 
         # START OF FETCHING THE LEAF PARAMETERS
         inputdict['name'] = config.get_field_value('name')
+        inputdict['class_sequence'] = config.get_field_value('class_sequence')
         # END OF FETCHING THE LEAF PARAMETERS
 
         inputkeydict = {}
