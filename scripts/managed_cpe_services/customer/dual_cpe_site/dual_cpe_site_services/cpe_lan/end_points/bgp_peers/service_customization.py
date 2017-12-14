@@ -100,7 +100,7 @@ class ServiceDataCustomization:
         inputdict = kwargs['inputdict']
         devbindobjs = kwargs['devbindobjs']
         for device in util.convert_to_list(dev):
-            bgp_peer('cpe_lan_dualsite', smodelctx, sdata, device, **kwargs)
+            bgp_peer('cpe_primary', 'cpe_lan_dualsite', smodelctx, sdata, device, **kwargs)
 
     @staticmethod
     def process_service_update_data(smodelctx, sdata, **kwargs):
@@ -112,7 +112,7 @@ class ServiceDataCustomization:
 
       dev = kwargs['dev']
       for device in util.convert_to_list(dev):
-          update_bgp_peer('cpe_lan_dualsite', smodelctx, sdata, device, **kwargs)
+          update_bgp_peer('cpe_primary', 'cpe_lan_dualsite', smodelctx, sdata, device, **kwargs)
 
     @staticmethod
     def process_service_delete_data(smodelctx, sdata, **kwargs):

@@ -600,6 +600,7 @@ def delete_route_map_from_redistribute_dps(entity, conf, sdata, **kwargs):
 def dps(entity, conf, sdata, **kwargs):
     device = None
     interface_name = None
+    b2b_interface_name = None
     mode = None
     bgp_as = None
     bgp_address_family = None
@@ -890,18 +891,18 @@ def dps(entity, conf, sdata, **kwargs):
                 if endpoint.device_ip == conf.dual_cpe_site_services.cpe_primary.device_ip:
                     if endpoint.dps == "true":
                         if endpoint.interface_type == 'Physical':
-                            interface_name = endpoint.interface_name
+                            b2b_interface_name = endpoint.interface_name
                         if endpoint.interface_type == 'Sub-Interface':
-                            interface_name = endpoint.interface_name
+                            b2b_interface_name = endpoint.interface_name
         elif entity == 'cpe_secondary':
             obj = util.convert_to_list(conf.dual_cpe_site_services.cpe_primary_cpe_secondary_ic.end_points)
             for endpoint in obj:
                 if endpoint.device_ip == conf.dual_cpe_site_services.cpe_secondary.device_ip:
                     if endpoint.dps == "true":
                         if endpoint.interface_type == 'Physical':
-                            interface_name = endpoint.interface_name
+                            b2b_interface_name = endpoint.interface_name
                         if endpoint.interface_type == 'Sub-Interface':
-                            interface_name = endpoint.interface_name
+                            b2b_interface_name = endpoint.interface_name
         elif entity == 'cpe_primary_dual':
             if lan_vrf is not None:
                 vrf = lan_vrf
@@ -910,41 +911,41 @@ def dps(entity, conf, sdata, **kwargs):
                 if endpoint.device_ip == conf.dual_cpe_dual_wan_site_services.cpe_primary.device_ip:
                     if endpoint.dps == "true":
                         if endpoint.interface_type == 'Physical':
-                            interface_name = endpoint.interface_name
+                            b2b_interface_name = endpoint.interface_name
                         if endpoint.interface_type == 'Sub-Interface':
-                            interface_name = endpoint.interface_name
+                            b2b_interface_name = endpoint.interface_name
         elif entity == 'cpe_secondary_dual':
             obj = util.convert_to_list(conf.dual_cpe_dual_wan_site_services.cpe_primary_cpe_secondary_ic.end_points)
             for endpoint in obj:
                 if endpoint.device_ip == conf.dual_cpe_dual_wan_site_services.cpe_secondary.device_ip:
                     if endpoint.dps == "true":
                         if endpoint.interface_type == 'Physical':
-                            interface_name = endpoint.interface_name
+                            b2b_interface_name = endpoint.interface_name
                         if endpoint.interface_type == 'Sub-Interface':
-                            interface_name = endpoint.interface_name
+                            b2b_interface_name = endpoint.interface_name
         elif entity == 'cpe_primary_triple':
             obj = util.convert_to_list(conf.triple_cpe_site_services.cpe_primary_cpe_secondary_ic.end_points)
             for endpoint in obj:
                 if endpoint.device_ip == conf.triple_cpe_site_services.cpe_primary.device_ip:
                     if endpoint.dps == "true":
                         if endpoint.interface_type == 'Physical':
-                            interface_name = endpoint.interface_name
+                            b2b_interface_name = endpoint.interface_name
                         if endpoint.interface_type == 'Sub-Interface':
-                            interface_name = endpoint.interface_name
+                            b2b_interface_name = endpoint.interface_name
         elif entity == 'cpe_secondary_triple':
             obj = util.convert_to_list(conf.triple_cpe_site_services.cpe_primary_cpe_secondary_ic.end_points)
             for endpoint in obj:
                 if endpoint.device_ip == conf.triple_cpe_site_services.cpe_secondary.device_ip:
                     if endpoint.dps == "true":
                         if endpoint.interface_type == 'Physical':
-                            interface_name = endpoint.interface_name
+                            b2b_interface_name = endpoint.interface_name
                         if endpoint.interface_type == 'Sub-Interface':
-                            interface_name = endpoint.interface_name
+                            b2b_interface_name = endpoint.interface_name
 
-        if util.isEmpty(interface_name) or interface_name is None:
+        if util.isEmpty(b2b_interface_name) or b2b_interface_name is None:
             raise Exception('Please check DPS flag is checked on Site Service B2B interface')
         mode = 'sub-interface'
-        interface_name = interface_name + '.' + str(inputdict['vlan_id'])
+        b2b_interface_name = b2b_interface_name + '.' + str(inputdict['vlan_id'])
         cidr = inputdict['cidr']
         interface_ip = inputdict['interface_ip']
         ip_addr = IpamPoolID(sdata.getTaskId(), sdata, cidr)
@@ -961,10 +962,10 @@ def dps(entity, conf, sdata, **kwargs):
         serv_uri = sdata.getRcPath()
         yang.Sdk.createData(serv_uri, payload, sdata.getSession())
         intf_obj = interfaces.interface.interface()
-        if util.isEmpty(interface_name):
+        if util.isEmpty(b2b_interface_name):
             raise Exception('Please check b2b interface on site')
-        intf_obj.name = interface_name
-        intf_obj.long_name = interface_name
+        intf_obj.name = b2b_interface_name
+        intf_obj.long_name = b2b_interface_name
         intf_obj.mode = mode
         if util.isNotEmpty(inputdict['b2b_description']):
             intf_obj.description = inputdict['b2b_description']
@@ -1037,7 +1038,7 @@ def dps(entity, conf, sdata, **kwargs):
 
         if util.isNotEmpty(inputdict['connected_route_map']):
             if util.isEmpty(interface_name):
-                raise Exception('Please check interface on cpe in site')
+                raise Exception('Please check DPS flag is checked on LAN interface on the site service')
             route_maps(inputdict['connected_route_map'], device, sdata, interface_name)
             ospf_connect_obj = vrfs.vrf.router_ospf.redistribute.ospf_redistribute.ospf_redistribute()
             ospf_connect_obj.protocol = 'connected'
@@ -1059,6 +1060,7 @@ def dps(entity, conf, sdata, **kwargs):
             ospf_static_obj = vrfs.vrf.router_ospf.redistribute.ospf_redistribute.ospf_redistribute()
             ospf_static_obj.protocol = 'ospf'
             ospf_static_obj.bgp_as_number = None
+            ospf_static_obj.subnet = "true"
             ospf_static_obj.process_id_entry = inputdict['ospf_redistribution_id']
             if util.isNotEmpty(inputdict['ospf_route_map']):
                 route_maps(inputdict['ospf_route_map'], device, sdata)
@@ -1078,6 +1080,7 @@ def dps(entity, conf, sdata, **kwargs):
             ospf_static_obj = vrfs.vrf.router_ospf.redistribute.ospf_redistribute.ospf_redistribute()
             ospf_static_obj.protocol = 'bgp'
             ospf_static_obj.bgp_as_number = bgp_as
+            ospf_static_obj.subnet = "true"
             ospf_static_obj.route_map = inputdict['bgp_route_map']
             if util.isNotEmpty(inputdict['bgp_tag']):
                 ospf_static_obj.tag = inputdict['bgp_tag']
@@ -1085,6 +1088,24 @@ def dps(entity, conf, sdata, **kwargs):
                 ospf_static_obj.value1 = inputdict['bgp_metric']
             if util.isNotEmpty(inputdict['bgp_metric_type']):
                 ospf_static_obj.value2 = inputdict['bgp_metric_type']
+            ospf_static_url = device.url + '/l3features:vrfs/vrf=%s/router-ospf=%s/redistribute' % (vrf, inputdict['ospf_id'])
+            yang.Sdk.createData(ospf_static_url, ospf_static_obj.getxml(filter=True), sdata.getSession())
+
+        if inputdict['lan_eigrp_redistribution'] == 'true':
+            if util.isNotEmpty(inputdict['eigrp_route_map']):
+                route_maps(inputdict['eigrp_route_map'], device, sdata)
+            ospf_static_obj = vrfs.vrf.router_ospf.redistribute.ospf_redistribute.ospf_redistribute()
+            ospf_static_obj.protocol = 'eigrp'
+            ospf_static_obj.subnet = "true"
+            ospf_static_obj.bgp_as_number = None
+            ospf_static_obj.eigrp_as_number = inputdict['eigrp_as']
+            ospf_static_obj.route_map = inputdict['eigrp_route_map']
+            if util.isNotEmpty(inputdict['eigrp_tag']):
+                ospf_static_obj.tag = inputdict['eigrp_tag']
+            if util.isNotEmpty(inputdict['eigrp_metric']):
+                ospf_static_obj.value1 = inputdict['eigrp_metric']
+            if util.isNotEmpty(inputdict['eigrp_metric_type']):
+                ospf_static_obj.value2 = inputdict['eigrp_metric_type']
             ospf_static_url = device.url + '/l3features:vrfs/vrf=%s/router-ospf=%s/redistribute' % (vrf, inputdict['ospf_id'])
             yang.Sdk.createData(ospf_static_url, ospf_static_obj.getxml(filter=True), sdata.getSession())
 
@@ -1302,15 +1323,26 @@ def dps(entity, conf, sdata, **kwargs):
         tunnel_source = 'Loopback' + str(inputdict['loopback_interface_id'])
         dmvpn_obj.tunnel_source = tunnel_source
         dmvpn_obj.routing_protocol = 'ospf'
+
+        if hasattr(obj_dmvpn.dmvpn_tunnel_profile, 'ipsec_profile'):
+            from cpedeployment.endpoint_lib import IpsecCreation
+            ipsecProfileSelected = obj_dmvpn.dmvpn_tunnel_profile.ipsec_profile
+            IpsecCreation(sdata, device, ipsecProfileSelected, tunnel_fvrf, obj_dmvpn.dmvpn_tunnel_profile.wan_public_ip, None)
+            dmvpn_obj.ipsec_profile_name = obj_dmvpn.dmvpn_tunnel_profile.ipsec_profile
+            xml_output = yang.Sdk.getData(url+"/ipsec/ipsec-profiles/ipsec-profile="+str(obj_dmvpn.dmvpn_tunnel_profile.ipsec_profile), '', sdata.getTaskId())
+            obj1 = util.parseXmlString(xml_output)
+            dmvpn_obj.shared = obj1.ipsec_profile.get_field_value('shared')
+
         yang.Sdk.createData(device.url+'/dmvpn:dmvpntunnels', dmvpn_obj.getxml(filter=True), sdata.getSession())
 
+        '''
         #Create Interface Node in device model
         intf_obj_tun = interfaces.interface.interface()
         intf_obj_tun.name = "Tunnel" + str(obj_dmvpn.dmvpn_tunnel_profile.tunnel_id)
         intf_obj_tun.long_name = "Tunnel" + str(obj_dmvpn.dmvpn_tunnel_profile.tunnel_id)
 
         yang.Sdk.createData(device.url+'/interface:interfaces', intf_obj_tun.getxml(filter=True), sdata.getSession(), True)
-
+        '''
         if inputdict['hub'] != 'true':
             dmvpn_obj_nhrp = dmvpntunnels.dmvpntunnel.nhrp_maps.nhrp_maps()
             dmvpn_obj_nhrp.sourceip = obj_dmvpn.dmvpn_tunnel_profile.wan_tunnel_ip
@@ -1650,7 +1682,20 @@ class DeletePreProcessor(yang.SessionPreProcessor):
         yang.moveOperations(operations, ['DeleteQPolicyMap'], ['DeleteQPolicyMapClassEntry','UpdateQPolicyMapClassEntry'], True)
         print 'pass3: operations: %s' % (operations)
         yang.moveOperations(operations, ['DeleteQClassMap'], ['DeleteQPolicyMap'], True)
-        print 'pass4: operations: %s' % (operations)
+        print 'pass5: operations: %s' % (operations)
+        yang.moveOperations(operations, ['DeleteIpsecProfileWithIKE'], ['DeleteDmvpnTunnel'], True)
+        print 'pass6: operations: %s' % (operations)
+        yang.moveOperations(operations, ['DeleteTransformSetWithIKE'], ['DeleteIpsecProfileWithIKE'], True)
+        print 'pass7: operations: %s' % (operations)
+        yang.moveOperations(operations, ['DeleteCryptoProfileMatchWithIKE'], ['DeleteTransformSetWithIKE'], True)
+        print 'pass8: operations: %s' % (operations)
+        yang.moveOperations(operations, ['DeleteCryptoProfileWithIKE'], ['DeleteCryptoProfileMatchWithIKE'], True)
+        print 'pass9: operations: %s' % (operations)
+        yang.moveOperations(operations, ['DeleteCryptoPolicyWithIKE'], ['DeleteCryptoProfileWithIKE'], True)
+        print 'pass10: operations: %s' % (operations)
+        yang.moveOperations(operations, ['DeleteCryptoPreSharedKeyWithIKE'], ['DeleteCryptoPolicyWithIKE'], True)
+        print 'pass11: operations: %s' % (operations)
+        yang.moveOperations(operations, ['DeleteCryptoWithIKE'], ['DeleteCryptoPreSharedKeyWithIKE'], True)
 
 
 class CreatePreProcessor(yang.SessionPreProcessor):

@@ -395,7 +395,8 @@ def create_acl(entity, conf, sdata, **kwargs):
     dscp = inputdict['dscp']
     source_port = inputdict['source_port']
 
-    url_device_acl = '/controller:devices/device=%s/acl:access-lists' %(device.device.id)
+    url_device_acl = '/controller:devices/device=%s/acl:access-lists/access-list=%s' %(device.device.id, access_list_name)
+    '''
     dev_acl = yang.Sdk.getData(url_device_acl, '', sdata.getTaskId())
     conf_acl = util.parseXmlString(dev_acl)
 
@@ -407,6 +408,9 @@ def create_acl(entity, conf, sdata, **kwargs):
         device_acl = [acl.name for acl in conf_acl.access_lists.access_list]
 
     if access_list_name in device_acl:
+    '''
+    if yang.Sdk.dataExists(url_device_acl):
+        name_rule = []
         access_rule_obj = access_lists.access_list.acl_rules.acl_rule.acl_rule()
         port_dict = { '179': 'bgp', '19': 'chargen', '514': 'cmd', '13': 'daytime', '9': 'discard', '53': 'domain',
                           '3949': 'drip', '7': 'echo', '512': 'exec', '79': 'finger', '21': 'ftp', '20': 'ftp-data',
@@ -428,13 +432,17 @@ def create_acl(entity, conf, sdata, **kwargs):
             #name_rule = acl_sequence_num + ' ' + action + ' ' + protocol
             #name_rule = action + ' ' + protocol
         if util.isNotEmpty(protocol):
-            name_rule = action + ' ' + protocol
+            #name_rule = action + ' ' + protocol
+            name_rule.append(action)
+            name_rule.append(protocol)
         else:
-            name_rule = action
+            #name_rule = action
+            name_rule.append(action)
         if util.isNotEmpty(service_obj_name):
             object_group_def(service_obj_name, device, sdata)
             access_rule_obj.service_obj_name = service_obj_name
-            name_rule += ' ' + service_obj_name
+            #name_rule += ' ' + service_obj_name
+            name_rule.append(service_obj_name)
         access_rule_obj.source_condition_type = source_condition
         if source_condition == 'cidr':
             cidr_pattern = '^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}' + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])' + '/(([0-9])|([1-2][0-9])|(3[0-2]))$';
@@ -456,21 +464,28 @@ def create_acl(entity, conf, sdata, **kwargs):
             net = [int(addr[i]) & mask[i] for i in xrange(4)]
 
             network = ".".join(map(str, net))
-            name_rule += ' ' + network + ' ' + netmask
+            #name_rule += ' ' + network + ' ' + netmask
+            name_rule.append(network)
+            name_rule.append(netmask)
             access_rule_obj.source_ip = network
         if source_condition == 'host':
             host_pattern = '^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}' + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$';
             if re.match(host_pattern,source_object) == None:
                 raise Exception ("Please provide valid ip-address for source-object in access-list")
             access_rule_obj.source_ip = source_object
-            name_rule += ' ' + 'host' + ' ' + source_object
+            #name_rule += ' ' + 'host' + ' ' + source_object
+            name_rule.append('host')
+            name_rule.append(source_object)
         if source_condition == 'objectgroup':
             if util.isNotEmpty(source_object_group):
                 object_group_def(source_object_group, device, sdata)
                 access_rule_obj.source_obj_name = source_object_group
-                name_rule += ' ' + 'object-group' + ' ' + source_object_group
+                #name_rule += ' ' + 'object-group' + ' ' + source_object_group
+                name_rule.append('object-group')
+                name_rule.append(source_object_group)
         if source_condition == 'any':
-            name_rule += ' ' + 'any'
+            #name_rule += ' ' + 'any'
+            name_rule.append('any')
         if util.isNotEmpty(source_port):
                 if util.isEmpty(source_port_operator):
                     raise Exception("Please provide Source Port Operator in acl")
@@ -482,7 +497,10 @@ def create_acl(entity, conf, sdata, **kwargs):
                     each_port = ([udp_port_dict[each] if each in udp_port_dict else each for each in each_port])
                 source_port = ' '.join(each_port)
                 access_rule_obj.source_port = source_port
-                name_rule += ' ' + source_port_operator + ' ' + source_port
+                #name_rule += ' ' + source_port_operator + ' ' + source_port
+                name_rule.append(source_port_operator)
+                name_rule.append(source_port)
+        access_rule_obj.dest_condition_type = destination_condition
         if destination_condition == 'cidr':
             cidr_pattern = '^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}' + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])' + '/(([0-9])|([1-2][0-9])|(3[0-2]))$';
             if re.match(cidr_pattern,destination_object) == None:
@@ -503,21 +521,28 @@ def create_acl(entity, conf, sdata, **kwargs):
             net = [int(addr[i]) & mask[i] for i in xrange(4)]
 
             network = ".".join(map(str, net))
-            name_rule += ' ' + network + ' ' + netmask
+            #name_rule += ' ' + network + ' ' + netmask
+            name_rule.append(network)
+            name_rule.append(netmask)
             access_rule_obj.dest_ip = network
         if destination_condition == 'host':
             host_pattern = '^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}' + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$';
             if re.match(host_pattern,destination_object) == None:
                 raise Exception ("Please provide valid ip-address for destination-object in access-list")
             access_rule_obj.dest_ip = destination_object
-            name_rule += ' ' + 'host' + ' ' + destination_object
+            #name_rule += ' ' + 'host' + ' ' + destination_object
+            name_rule.append('host')
+            name_rule.append(destination_object)
         if destination_condition == 'objectgroup':
             if util.isNotEmpty(destination_object_group):
                 object_group_def(destination_object_group, device, sdata)
                 access_rule_obj.dest_obj_name = destination_object_group
-                name_rule += ' ' + 'object-group' + ' ' + destination_object_group
+                #name_rule += ' ' + 'object-group' + ' ' + destination_object_group
+                name_rule.append('object-group')
+                name_rule.append(destination_object_group)
         if destination_condition == 'any':
-            name_rule += ' ' + 'any'
+            #name_rule += ' ' + 'any'
+            name_rule.append('any')
         if util.isNotEmpty(port_number):
                 if util.isEmpty(dest_port_operator):
                     raise Exception("Please provide Destination Port Operator in acl")
@@ -529,20 +554,25 @@ def create_acl(entity, conf, sdata, **kwargs):
                     each_port = ([udp_port_dict[each] if each in udp_port_dict else each for each in each_port])
                 port_number = ' '.join(each_port)
                 access_rule_obj.dest_port = port_number
-                name_rule += ' ' + dest_port_operator + ' ' + port_number
+                #name_rule += ' ' + dest_port_operator + ' ' + port_number
+                name_rule.append(dest_port_operator)
+                name_rule.append(port_number)
         if util.isNotEmpty(match_packets):
             access_rule_obj.match_packets = match_packets
-            name_rule += ' ' + match_packets
+            #name_rule += ' ' + match_packets
+            name_rule.append(match_packets)
         if match_packets == 'precedence':
             if util.isNotEmpty(precedence):
                 access_rule_obj.precedence = precedence
-                name_rule += ' ' + precedence
+                #name_rule += ' ' + precedence
+                name_rule.append(precedence)
         else:
             if util.isNotEmpty(dscp):
                 access_rule_obj.precedence = dscp
-                name_rule += ' ' + dscp
-        print "ACL_RULE_NAME: ", name_rule
-        access_rule_obj.name = name_rule
+                #name_rule += ' ' + dscp
+                name_rule.append(dscp)
+        
+        access_rule_obj.name = ' '.join(name_rule)
         #access_rules_url = device.url + "/access-lists/access-list=%s" %(access_list_name)
         #yang.Sdk.createData(access_rules_url, '<acl-rules/>', sdata.getSession())
 
@@ -578,7 +608,8 @@ def delete_acl(entity, conf, sdata, **kwargs):
     action = inputdict['action']
     protocol = inputdict['protocol']
 
-    url_device_acl = '/controller:devices/device=%s/acl:access-lists' %(device.device.id)
+    url_device_acl = '/controller:devices/device=%s/acl:access-lists/access-list=%s' %(device.device.id, access_list_name)
+    '''
     dev_acl = yang.Sdk.getData(url_device_acl, '', sdata.getTaskId())
     conf_acl = util.parseXmlString(dev_acl)
 
@@ -588,19 +619,25 @@ def delete_acl(entity, conf, sdata, **kwargs):
         #for acl in conf_acl.access_lists.access_list:
             #device_acl.append(acl.name)
         device_acl = [acl.name for acl in conf_acl.access_lists.access_list]
-    dev_acl_rule = []
     if access_list_name in device_acl:
+    '''
+    #dev_acl_rule = []
+    
+    if yang.Sdk.dataExists(url_device_acl):
+        '''
         url_device_acl_rule = '/controller:devices/device=%s/acl:access-lists/access-list=%s' %(device.device.id, access_list_name)
         device_acl_rule = yang.Sdk.getData(url_device_acl_rule, '', sdata.getTaskId())
         conf_acl_rule = util.parseXmlString(device_acl_rule)
 
+        
         if hasattr(conf_acl_rule.access_list, 'acl_rules'):
             if hasattr(conf_acl_rule.access_list.acl_rules, 'acl_rule'):
                 conf_acl_rule.access_list.acl_rules.acl_rule = util.convert_to_list(conf_acl_rule.access_list.acl_rules.acl_rule)
                 #for rule in conf_acl_rule.access_list.acl_rules.acl_rule:
                     #dev_acl_rule.append(rule.name)
                 dev_acl_rule = [rule.name for rule in conf_acl_rule.access_list.acl_rules.acl_rule]
-
+        '''
+        name_rule = []
         inputdict = kwargs['inputdict']
         access_list_name = inputdict['access_list_name']
         acl_sequence_num = inputdict['acl_sequence_num']
@@ -642,12 +679,16 @@ def delete_acl(entity, conf, sdata, **kwargs):
             access_rule_obj.linenumber = acl_sequence_num
             #name_rule = acl_sequence_num + ' ' + action + ' ' + protocol
         if util.isNotEmpty(protocol):
-            name_rule = action + ' ' + protocol
+            #name_rule = action + ' ' + protocol
+            name_rule.append(action)
+            name_rule.append(protocol)
         else:
-            name_rule = action
+            #name_rule = action
+            name_rule.append(action)
         if util.isNotEmpty(service_obj_name):
             access_rule_obj.service_obj_name = service_obj_name
-            name_rule += ' ' + service_obj_name
+            #name_rule += ' ' + service_obj_name
+            name_rule.append(service_obj_name)
         access_rule_obj.source_condition_type = source_condition
         if source_condition == 'cidr':
             cidr_pattern = '^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}' + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])' + '/(([0-9])|([1-2][0-9])|(3[0-2]))$';
@@ -668,20 +709,27 @@ def delete_acl(entity, conf, sdata, **kwargs):
                 #net.append(int(addr[i]) & mask[i])
             net = [int(addr[i]) & mask[i] for i in range(4)]
             network = ".".join(map(str, net))
-            name_rule += ' ' + network + ' ' + netmask
+            #name_rule += ' ' + network + ' ' + netmask
+            name_rule.append(network)
+            name_rule.append(netmask)
             access_rule_obj.source_ip = network
         if source_condition == 'host':
             host_pattern = '^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}' + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$';
             if re.match(host_pattern,source_object) == None:
                 raise Exception("Please provide valid ip-address for source-object in access-list")
             access_rule_obj.source_ip = source_object
-            name_rule += ' ' + 'host' + ' ' + source_object
+            #name_rule += ' ' + 'host' + ' ' + source_object
+            name_rule.append('host')
+            name_rule.append(source_object)
         if source_condition == 'objectgroup':
             if source_object_group is not None:
                 access_rule_obj.source_obj_name = source_object_group
-                name_rule += ' ' + 'object-group' + ' ' + source_object_group
+                #name_rule += ' ' + 'object-group' + ' ' + source_object_group
+                name_rule.append('object-group')
+                name_rule.append(source_object_group)
         if source_condition == 'any':
-            name_rule += ' ' + 'any'
+            #name_rule += ' ' + 'any'
+            name_rule.append('any')
         if util.isNotEmpty(source_port):
                 if util.isEmpty(source_port_operator):
                     raise Exception("Please provide Source Port Operator in acl")
@@ -693,7 +741,9 @@ def delete_acl(entity, conf, sdata, **kwargs):
                     each_port = ([udp_port_dict[each] if each in udp_port_dict else each for each in each_port])
                 source_port = ' '.join(each_port)
                 access_rule_obj.source_port = source_port
-                name_rule += ' ' + source_port_operator + ' ' + source_port
+                #name_rule += ' ' + source_port_operator + ' ' + source_port
+                name_rule.append(source_port_operator)
+                name_rule.append(source_port)
         access_rule_obj.dest_condition_type = destination_condition
         if destination_condition == 'cidr':
             cidr_pattern = '^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}' + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])' + '/(([0-9])|([1-2][0-9])|(3[0-2]))$';
@@ -715,20 +765,27 @@ def delete_acl(entity, conf, sdata, **kwargs):
             net = [int(addr[i]) & mask[i] for i in xrange(4)]
 
             network = ".".join(map(str, net))
-            name_rule += ' ' + network + ' ' + netmask
+            #name_rule += ' ' + network + ' ' + netmask
+            name_rule.append(network)
+            name_rule.append(netmask)
             access_rule_obj.dest_ip = network
         if destination_condition == 'host':
             host_pattern = '^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}' + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$';
             if re.match(host_pattern,destination_object) == None:
                 raise Exception ("Please provide valid ip-address for destination-object in access-list")
             access_rule_obj.dest_ip = destination_object
-            name_rule += ' ' + 'host' + ' ' + destination_object
+            #name_rule += ' ' + 'host' + ' ' + destination_object
+            name_rule.append('host')
+            name_rule.append(destination_object)
         if destination_condition == 'objectgroup':
             if destination_object_group is not None:
                 access_rule_obj.dest_obj_name = destination_object_group
-                name_rule += ' ' + 'object-group' + ' ' + destination_object_group
+                #name_rule += ' ' + 'object-group' + ' ' + destination_object_group
+                name_rule.append('object-group')
+                name_rule.append(destination_object_group)
         if destination_condition == 'any':
-            name_rule += ' ' + 'any'
+            #name_rule += ' ' + 'any'
+            name_rule.append('any')
         if util.isNotEmpty(port_number):
                 if util.isEmpty(dest_port_operator):
                     raise Exception("Please provide Destination Port Operator in acl")
@@ -740,20 +797,26 @@ def delete_acl(entity, conf, sdata, **kwargs):
                     each_port = ([udp_port_dict[each] if each in udp_port_dict else each for each in each_port])
                 port_number = ' '.join(each_port)
                 access_rule_obj.dest_port = port_number
-                name_rule += ' ' + dest_port_operator + ' ' + port_number
+                #name_rule += ' ' + dest_port_operator + ' ' + port_number
+                name_rule.append(dest_port_operator)
+                name_rule.append(port_number)
         if util.isNotEmpty(match_packets):
             access_rule_obj.match_packets = match_packets
-            name_rule += ' ' + match_packets
+            #name_rule += ' ' + match_packets
+            name_rule.append(match_packets)
         if match_packets == 'precedence':
             if util.isNotEmpty(precedence):
                 access_rule_obj.precedence = precedence
-                name_rule += ' ' + precedence
+                #name_rule += ' ' + precedence
+                name_rule.append(precedence)
         else:
             if util.isNotEmpty(dscp):
                 access_rule_obj.precedence = dscp
-                name_rule += ' ' + dscp
-        print "ACL_RULE_NAME: ", name_rule
-        if name_rule in dev_acl_rule:
+                #name_rule += ' ' + dscp
+                name_rule.append(dscp)
+        name_rule = ' '.join(name_rule)
+        access_list_url = '/controller:devices/device=%s/acl:access-lists/access-list=%s/acl-rules/acl-rule=%s' % (device.device.id, access_list_name, name_rule.replace(' ', '%20'))
+        if yang.Sdk.dataExists(access_list_url):
             access_rule_obj.name = name_rule
             name_rule = name_rule.replace(' ', '%20')
             access_list_url = '/controller:devices/device=%s/acl:access-lists/access-list=%s/acl-rules/acl-rule=%s' % (device.device.id, access_list_name, name_rule)

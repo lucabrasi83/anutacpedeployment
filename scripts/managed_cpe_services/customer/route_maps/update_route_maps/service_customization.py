@@ -254,8 +254,17 @@ def create_route_map(entity, conf, sdata, **kwargs):
 
     inputdict = kwargs['inputdict']
     route_map_name = inputdict['route_map_name']
+    sequence_number = inputdict['sequence_number']
+    action = inputdict['action']
+    entry = inputdict['entry']
+    condition_type = inputdict['condition_type']
+    condition_value = inputdict['value']
+    set_type = inputdict['set_type']
+    set_ip = inputdict['ip']
+    set_value = inputdict['set_value']
 
-    url_device_route_map = '/controller:devices/device=%s/l3features:route-maps' %(device.device.id)
+    url_device_route_map = '/controller:devices/device=%s/l3features:route-maps/route-map=%s' %(device.device.id, route_map_name)
+    '''
     device_route_map = yang.Sdk.getData(url_device_route_map, '', sdata.getTaskId())
     conf_route = util.parseXmlString(device_route_map)
 
@@ -266,7 +275,10 @@ def create_route_map(entity, conf, sdata, **kwargs):
             #device_route.append(routemap.name)
         device_route = [routemap.name for routemap in conf_route.route_maps.route_map]
     if route_map_name in device_route:
-        url_device_route_map_entries = '/controller:devices/device=%s/l3features:route-maps/route-map=%s' %(device.device.id, route_map_name)
+    '''
+    if yang.Sdk.dataExists(url_device_route_map):
+        url_device_route_map_entries = '/controller:devices/device=%s/l3features:route-maps/route-map=%s/route-map-entries=%s' %(device.device.id, route_map_name, sequence_number)
+        '''
         device_route_map_entries = yang.Sdk.getData(url_device_route_map_entries, '', sdata.getTaskId())
         conf_route_entries = util.parseXmlString(device_route_map_entries)
         device_route_entries = []
@@ -277,6 +289,8 @@ def create_route_map(entity, conf, sdata, **kwargs):
             device_route_entries = [routemap_entries.seq for routemap_entries in conf_route_entries.route_maps_entries]
 
         if sequence_number in device_route_entries:
+        '''
+        if yang.Sdk.dataExists(url_device_route_map_entries):
             if entry == 'match-condition':
                 matchcondition_obj = route_maps.route_map.route_map_entries.match_condition.match_condition()
                 if condition_type is not None:
@@ -293,7 +307,7 @@ def create_route_map(entity, conf, sdata, **kwargs):
                     uri = sdata.getRcPath()
                     uri_list = uri.split('/',5)
                     url = '/'.join(uri_list[0:4])
-
+                    '''
                     acl_output = yang.Sdk.getData(url+"/access-lists", '', sdata.getTaskId())
                     acl_obj = util.parseXmlString(acl_output)
                     if hasattr(acl_obj, 'access_lists'):
@@ -301,7 +315,10 @@ def create_route_map(entity, conf, sdata, **kwargs):
                             for acl_name in util.convert_to_list(acl_obj.access_lists.access_list):
                                 if hasattr(acl_name, 'name'):
                                     if acl_name.name == condition_value:
-                                        access_group_def(url, condition_value, device, sdata)
+                    '''
+                    acl_output_url = url+"/access-lists/access-list=%s" % (condition_value)
+                    if yang.Sdk.dataExists(acl_output_url):
+                        access_group_def(url, condition_value, device, sdata)
                 match_condition_url = device.url + '/l3features:route-maps/route-map=%s/route-map-entries=%s' % (route_map_name,sequence_number)
                 yang.Sdk.createData(match_condition_url, matchcondition_obj.getxml(filter=True), sdata.getSession(), False)
                 
@@ -328,6 +345,7 @@ def create_route_map(entity, conf, sdata, **kwargs):
                     uri_list = uri.split('/',5)
                     url = '/'.join(uri_list[0:4])
 
+                    '''
                     acl_output = yang.Sdk.getData(url+"/access-lists", '', sdata.getTaskId())
                     acl_obj = util.parseXmlString(acl_output)
                     if hasattr(acl_obj, 'access_lists'):
@@ -335,7 +353,11 @@ def create_route_map(entity, conf, sdata, **kwargs):
                             for acl_name in util.convert_to_list(acl_obj.access_lists.access_list):
                                 if hasattr(acl_name, 'name'):
                                     if acl_name.name == condition_value:
-                                        access_group_def(url, condition_value, device, sdata)
+                    '''
+                    acl_output_url = url+"/access-lists/access-list=%s" % (condition_value)
+                    if yang.Sdk.dataExists(acl_output_url):
+                        access_group_def(url, condition_value, device, sdata)
+                                        
                 match_condition_url = device.url + '/l3features:route-maps/route-map=%s/route-map-entries=%s' % (route_map_name,sequence_number)
                 yang.Sdk.createData(match_condition_url, matchcondition_obj.getxml(filter=True), sdata.getSession(), False)
 

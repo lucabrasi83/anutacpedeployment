@@ -61,7 +61,7 @@ def get_payload_for_import_export_update_service2(endpoint, import_route_map=Non
     return buf
 
 
-def bgp_peer(entity, smodelctx, sdata, device, **kwargs):
+def bgp_peer(cpeentity, entity, smodelctx, sdata, device, **kwargs):
     inputdict = kwargs['inputdict']
     BGP_peer_name = inputdict['BGP_peer_name']
     #peer = inputdict['peer']
@@ -100,9 +100,14 @@ def bgp_peer(entity, smodelctx, sdata, device, **kwargs):
     bgp_neighbor_obj.description = peer_description
     bgp_neighbor_obj.next_hop_self = next_hop_self
     bgp_neighbor_obj.send_community = send_community
+
     if import_route_map != "":
+        from cpedeployment_lib import route_maps
+        route_maps(import_route_map, device, sdata, None, cpeentity)
         bgp_neighbor_obj.in_route_map = import_route_map
     if export_route_map != "":
+        from cpedeployment_lib import route_maps
+        route_maps(export_route_map, device, sdata, None, cpeentity)
         bgp_neighbor_obj.out_route_map = export_route_map
     bgp_neighbor_obj.soft_reconfiguration = soft_reconfiguration
     bgp_neighbor_obj.password = password
@@ -206,12 +211,10 @@ def bgp_peer(entity, smodelctx, sdata, device, **kwargs):
         yang.Sdk.createData('%spolicy-update-services' % parent_uri, pyld, sdata.getSession(), False)
 
 
-def update_bgp_peer(entity, smodelctx, sdata, device, **kwargs):
+def update_bgp_peer(cpeentity, entity, smodelctx, sdata, device, **kwargs):
     config = util.parseXmlString(sdata.getPayload()).bgp_peers
-
     previousconfig = util.parseXmlString(sdata.getPreviousPayload()).bgp_peers
     peer_ip = previousconfig.get_field_value('peer_ip')
-
     in_route_map = config.get_field_value('import_route_map')
     out_route_map = config.get_field_value('export_route_map')
 
@@ -244,6 +247,8 @@ def update_bgp_peer(entity, smodelctx, sdata, device, **kwargs):
     payload = bgp_neighbor_obj.getxml(filter=True)
 
     if in_route_map is not None:
+        from cpedeployment_lib import route_maps
+        route_maps(in_route_map, device, sdata, None, cpeentity)
         raw_payload = '<%s>%s</%s>' % ('in-route-map', in_route_map, 'in-route-map')
 
         payload = payload.replace('</neighbor>', '%s</neighbor>' % raw_payload)
@@ -251,6 +256,8 @@ def update_bgp_peer(entity, smodelctx, sdata, device, **kwargs):
         yang.Sdk.createData(router_bgp_neighbor_url, raw_payload, sdata.getSession(), False)
 
     if out_route_map is not None:
+        from cpedeployment_lib import route_maps
+        route_maps(out_route_map, device, sdata, None, cpeentity)
         raw_payload = '<%s>%s</%s>' % ('out-route-map', out_route_map, 'out-route-map')
         payload = payload.replace('</neighbor>', '%s</neighbor>' % raw_payload)
 

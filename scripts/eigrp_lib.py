@@ -48,6 +48,10 @@ def eigrpEnd(entity, smodelctx, sdata, dev, **kwargs):
         if interface_type == "Sub-Interface":
             if vlan_id is not None:
                 interface = interface + '.' + str(vlan_id)
+    if interface_type == "SVI":
+        if hasattr(obj.end_points, 'vlan_id'):
+            vlan_id = obj.end_points.vlan_id
+        interface = "Vlan" + str(vlan_id)
     if interface_type == "Tunnel":
         if hasattr(obj.end_points, 'dmvpn_profile'):
             dmvpn_profile = obj.end_points.dmvpn_profile

@@ -164,7 +164,7 @@ def getLocalObject(sdata, elem):
     if obj == None:
       log('getLocalObject:cache-miss key=%s' % (key))
       xml_output = yang.Sdk.getData(rcpath, '', sdata.getTaskId())
-      log('%s object: %s' % (elem, xml_output))
+      #log('%s object: %s' % (elem, xml_output))
       obj = util.parseXmlString(xml_output)
       sdata.setSessionItem(key, obj, True)
     else:
@@ -191,6 +191,7 @@ def natstatic(smodelctx, sdata, dev, **kwargs):
     natstaticobj.inside_global_ip = inside_global_ip
     if network == 'false':
         natstaticobj.route_map_name = route_map
+        route_maps(route_map, dev, sdata)
     natstaticobj.network = network
     if network == 'true':
         if '/' not in prefix_length and util.isNotEmpty(prefix_length):
@@ -257,6 +258,14 @@ def nat_trans_pool(smodelctx, sdata, dev, **kwargs):
         list = None
     if hasattr(obj.address_translation, 'value'):
         value = obj.address_translation.value
+        from endpoint_lib import access_group_def
+        uri = sdata.getRcPath()
+        uri_list = uri.split('/',5)
+        url = '/'.join(uri_list[0:4])
+        acl_url = url+"/access-lists/access-list=%s" % (value)
+        if yang.Sdk.dataExists(acl_url):
+            access_group_def(url, value, dev, sdata)
+        
     else:
         value = None
     natobj = ip_nat.address_translation.address_translation()
@@ -296,6 +305,14 @@ def nat_trans_int(smodelctx, sdata, dev, **kwargs):
         list = None
     if hasattr(obj.address_translation, 'value'):
         value = obj.address_translation.value
+        from endpoint_lib import access_group_def
+        uri = sdata.getRcPath()
+        uri_list = uri.split('/',5)
+        url = '/'.join(uri_list[0:4])
+        acl_url = url+"/access-lists/access-list=%s" % (value)
+        if yang.Sdk.dataExists(acl_url):
+            access_group_def(url, value, dev, sdata)
+        
     else:
         value = None
     natobj = ip_nat.address_translation.address_translation()
@@ -446,6 +463,7 @@ def eigrpPassive(entity, smodelctx, sdata, dev, **kwargs):
                 if hasattr(obj.dual_cpe_site_services.cpe_secondary, 'vrf_name'):
                     vrf = obj.dual_cpe_site_services.cpe_secondary.vrf_name
 
+    '''
     if vrf is None:
         vrf = 'GLOBAL'
 
@@ -457,7 +475,32 @@ def eigrpPassive(entity, smodelctx, sdata, dev, **kwargs):
 
     eigrp_passive_url = dev.url + '/l3features:vrfs/vrf=%s/router-eigrp/eigrp=%s' % (vrf,process_id)
     yang.Sdk.createData(eigrp_passive_url, eigrp_passive_obj.getxml(filter=True), sdata.getSession())
+    '''
+    if vrf is None:
+        vrf = 'GLOBAL'
+    eigrp_passive_url = dev.url + '/l3features:vrfs/vrf=%s/router-eigrp/eigrp=%s' % (vrf,process_id)
 
+    if interface != 'default':
+        passive_url = '/controller:devices/device=%s/l3features:vrfs/vrf=%s/router-eigrp/eigrp=%s/passive-interface=default' % (dev.device.id, vrf, process_id)
+        if not yang.Sdk.dataExists(passive_url):
+            eigrp_passive_obj = vrfs.vrf.router_eigrp.eigrp.passive_interface.passive_interface()
+            eigrp_passive_obj.interface = 'default'
+            eigrp_passive_obj.passive_interface = 'true'
+            yang.Sdk.createData(eigrp_passive_url, eigrp_passive_obj.getxml(filter=True), sdata.getSession(), False)
+
+    eigrp_passive_obj = vrfs.vrf.router_eigrp.eigrp.passive_interface.passive_interface()
+
+    if util.isNotEmpty(passive_interface):
+        if passive_interface == 'false':
+            eigrp_passive_obj.passive_interface = passive_interface
+            if util.isNotEmpty(interface):
+                eigrp_passive_obj.interface = interface
+        elif interface == 'default' and passive_interface == 'true':
+            eigrp_passive_obj.passive_interface = passive_interface
+            if util.isNotEmpty(interface):
+                eigrp_passive_obj.interface = interface
+
+    yang.Sdk.createData(eigrp_passive_url, eigrp_passive_obj.getxml(filter=True), sdata.getSession())
 
 def eigrp(entity, smodelctx, sdata, dev, **kwargs):
     inputdict = kwargs['inputdict']
@@ -762,6 +805,7 @@ def ospf_on_bgp(entity, smodelctx, sdata, device, **kwargs):
                 rebgpredisobj1.ospf_external2 = "2"
             if util.isNotEmpty(route_map):
                 rebgpredisobj1.route_map = route_map
+                route_maps(route_map, device, sdata)
 
             router_bgp_redist_url = device.url + '/l3features:vrfs/vrf=%s/router-bgp' % (vrf)
             yang.Sdk.createData(router_bgp_redist_url, rebgpredisobj1.getxml(filter=True), sdata.getSession())
@@ -790,6 +834,7 @@ def ospf(entity, smodelctx, sdata, device, **kwargs):
     distribute_list = inputdict['distribute_list']
     dis_list_route_map = inputdict['dis_list_route_map']
     dis_list_route_update = inputdict['dis_list_route_update']
+    default_inf_always = inputdict["default_inf_always"]
 
     if util.isEmpty(vrf):
         vrf = 'GLOBAL'
@@ -815,6 +860,7 @@ def ospf(entity, smodelctx, sdata, device, **kwargs):
             ospf_obj.acl_name = site_acl_name
     if util.isNotEmpty(maximum_paths):
         ospf_obj.maximum_paths = maximum_paths
+    '''
     if default_information == 'true':
         ospf_obj.default_information = default_information
         if util.isNotEmpty(default_inf_metric):
@@ -823,12 +869,28 @@ def ospf(entity, smodelctx, sdata, device, **kwargs):
             ospf_obj.default_inf_value1 = default_inf_metric_type
         if util.isNotEmpty(default_inf_route_map):
             ospf_obj.default_inf_value2 = default_inf_route_map
+    '''
     if distribute_list == 'true':
         if util.isNotEmpty(dis_list_route_map) and util.isNotEmpty(dis_list_route_update):
             ospf_obj.dis_list_route_map = dis_list_route_map
             ospf_obj.dis_list_route_update = dis_list_route_update
     ospf_url = device.url + '/l3features:vrfs/vrf=%s' % (vrf)
     yang.Sdk.createData(ospf_url, ospf_obj.getxml(filter=True), sdata.getSession())
+
+    if default_information == 'true':
+        ospf_obj_def = vrfs.vrf.router_ospf.inject_default_route.inject_default_route()
+        if util.isNotEmpty(default_inf_metric):
+            ospf_obj_def.metric = default_inf_metric
+        if util.isNotEmpty(default_inf_metric_type):
+            if default_inf_metric_type != "2":
+                ospf_obj_def.metric_type = default_inf_metric_type
+        if util.isNotEmpty(default_inf_route_map):
+            route_maps(default_inf_route_map, device, sdata)
+            ospf_obj_def.route_map = default_inf_route_map
+        if util.isNotEmpty(default_inf_always):
+            ospf_obj_def.always = default_inf_always
+        ospf_def_url = device.url + '/l3features:vrfs/vrf=%s/router-ospf=%s' % (vrf, process_id)
+        yang.Sdk.createData(ospf_def_url, ospf_obj_def.getxml(filter=True), sdata.getSession())
 
 
 def ospf_networks(entity, vrf, smodelctx, sdata, device_ip, **kwargs):
@@ -893,6 +955,8 @@ def access_list(smodelctx, sdata, dev, **kwargs):
         access_obj.acl_type = access_list_entry
         if name is not None:
             access_obj.name = name
+    
+    '''
     try:
         get_access_list_obj = dev.url+"/acl:access-lists/access-list=%s"%(inputdict['name'])
         access_list_obj = yang.Sdk.getData(get_access_list_obj, '', sdata.getTaskId())
@@ -903,15 +967,26 @@ def access_list(smodelctx, sdata, dev, **kwargs):
         yang.Sdk.createData(access_obj_url, access_obj.getxml(filter=True), sdata.getSession())
     if sdata.isServiceDiscoveryEnabled() == True:
         acl_service_discovery(smodelctx, sdata, dev, **kwargs)
+    '''
+    get_access_list_obj = dev.url+"/acl:access-lists/access-list=%s"%(inputdict['name'])
+    if not yang.Sdk.dataExists(get_access_list_obj):
+        yang.Sdk.createData(dev.url, '<access-lists/>', sdata.getSession(), False)
+        access_obj_url = dev.url + '/access-lists'
+        yang.Sdk.createData(access_obj_url, access_obj.getxml(filter=True), sdata.getSession())
+
+    if sdata.isServiceDiscoveryEnabled() == True:
+        acl_service_discovery(smodelctx, sdata, dev, **kwargs)
+
 
 def acl_service_discovery(smodelctx, sdata, sr_device, **kwargs):
     inputdict = kwargs['inputdict']
     if sdata.isServiceDiscoveryEnabled() == True:
-        access_list_obj = sr_device.url+"/acl:access-lists/access-list=%s"%(inputdict['name'])
-        access_list = yang.Sdk.getData(access_list_obj, '', sdata.getTaskId())
-        obj = util.parseXmlString(access_list)
-        if hasattr(obj.access_list,'acl_rules'):
-            acl_rules_obj = sr_device.url+"/acl:access-lists/access-list=%s/acl-rules"%(inputdict['name'])
+        #access_list_obj = sr_device.url+"/acl:access-lists/access-list=%s"%(inputdict['name'])
+        #access_list = yang.Sdk.getData(access_list_obj, '', sdata.getTaskId())
+        #obj = util.parseXmlString(access_list)
+        #if hasattr(obj.access_list,'acl_rules'):
+        acl_rules_obj = sr_device.url+"/acl:access-lists/access-list=%s/acl-rules"%(inputdict['name'])
+        if yang.Sdk.dataExists(acl_rules_obj):
             acl_rules = yang.Sdk.getData(acl_rules_obj, '', sdata.getTaskId())
             acl_rule = util.convert_to_list(acl_rules)
             for aclrule in acl_rule:
@@ -1452,6 +1527,15 @@ def route_map(route_map_name, route_map_entries, device, sdata, int_name=None, e
                 uri = sdata.getRcPath()
                 uri_list = uri.split('/',5)
                 url = '/'.join(uri_list[0:4])
+                acl_url = url+"/access-lists/access-list=%s" % (condition_value)
+                if yang.Sdk.dataExists(acl_url):
+                    access_group_def(url, condition_value, device, sdata)
+                
+                '''
+                from endpoint_lib import access_group_def
+                uri = sdata.getRcPath()
+                uri_list = uri.split('/',5)
+                url = '/'.join(uri_list[0:4])
 
                 acl_output = yang.Sdk.getData(url+"/access-lists", '', sdata.getTaskId())
                 acl_obj = util.parseXmlString(acl_output)
@@ -1461,6 +1545,7 @@ def route_map(route_map_name, route_map_entries, device, sdata, int_name=None, e
                             if hasattr(acl_name, 'name'):
                                 if acl_name.name == condition_value:
                                     access_group_def(url, condition_value, device, sdata)
+                '''
             match_condition_url = device.url + '/l3features:route-maps/route-map=%s/route-map-entries=%s' % (route_map_name,seq)
             if util.isNotEmpty(matchcondition_obj.value):
                 yang.Sdk.createData(match_condition_url, matchcondition_obj.getxml(filter=True), sdata.getSession())
@@ -1511,7 +1596,9 @@ def route_map(route_map_name, route_map_entries, device, sdata, int_name=None, e
                         if hasattr(obj_bgp_as.triple_cpe_site_services, 'bgp_as'):
                             bgpas = obj_bgp_as.triple_cpe_site_services.bgp_as
                             set_obj1.value = re.sub(r'\bAS\b', bgpas, set_value)
-
+                #Handle Local-AS for Set Community
+                elif "local-AS" in set_value and set_type == 'community':
+                    set_obj1.value = set_value
                 #Handle AS keyword for Set Community and replace by site service AS number
                 elif 'AS' in set_value and set_type == 'community':
                     if entity == 'cpe':
@@ -1587,7 +1674,8 @@ def adv_networks(entity, smodelctx, sdata, device, **kwargs):
     netmask = prefix.netmask
     adv_networks_obj = vrfs.vrf.router_bgp.network.network()
     adv_networks_obj.ip_address = ip_address
-    adv_networks_obj.netmask = netmask
+    if str(netmask) != "0.0.0.0":
+        adv_networks_obj.netmask = netmask
     if util.isNotEmpty(route_map):
         route_maps(route_map, device, sdata)
         adv_networks_obj.route_map = route_map
@@ -1595,13 +1683,14 @@ def adv_networks(entity, smodelctx, sdata, device, **kwargs):
     if util.isEmpty(vrf):
         vrf = 'GLOBAL'
     adv_networks_url1 = device.url + '/l3features:vrfs/vrf=%s' % (vrf)
-    is_router_bgp_xml_output = yang.Sdk.getData(adv_networks_url1, '', sdata.getTaskId())
-    is_router_bgp_obj = util.parseXmlString(is_router_bgp_xml_output)
-    util.log_debug( "is_router_bgp_obj is:", is_router_bgp_obj)
-    if not hasattr(is_router_bgp_obj.vrf, 'router_bgp'):
+    # is_router_bgp_xml_output = yang.Sdk.getData(adv_networks_url1, '', sdata.getTaskId())
+    # is_router_bgp_obj = util.parseXmlString(is_router_bgp_xml_output)
+    # util.log_debug( "is_router_bgp_obj is:", is_router_bgp_obj)
+    # if not hasattr(is_router_bgp_obj.vrf, 'router_bgp'):
+    if not yang.Sdk.dataExists(adv_networks_url1 + "/router-bgp"):
         yang.Sdk.createData(adv_networks_url1, '<router-bgp/>', sdata.getSession(), False)
 
-    adv_networks_url = device.url + '/l3features:vrfs/vrf=%s/router-bgp' % (vrf)
+    adv_networks_url = device.url + '/vrfs/vrf=%s/router-bgp' % (vrf)
     yang.Sdk.createData(adv_networks_url, adv_networks_obj.getxml(filter=True), sdata.getSession())
 
 
@@ -1737,7 +1826,11 @@ def list_entry_def(smodelctx,sdata,device,**kwargs):
         tracks_obj.list_type = list_type
         tracks_obj.boolean_type = boolean_type
         tracks_url = device.url + '/l3features:tracks'
-        yang.Sdk.createData(tracks_url, tracks_obj.getxml(filter=True), sdata.getSession())
+        #yang.Sdk.createData(tracks_url, tracks_obj.getxml(filter=True), sdata.getSession())
+        payload = tracks_obj.getxml(filter=True)
+        fill = '<list-type>' + list_type + '</list-type><boolean-type>' + boolean_type + '</boolean-type></l3features:track>'
+        payload = payload.replace('</l3features:track>', fill)
+        yang.Sdk.createData(tracks_url, payload, sdata.getSession())
 
     if util.isNotEmpty(object_number):
         print "Entered in to object_number"
@@ -1811,12 +1904,15 @@ def staticroute(smodelctx, sdata, dev, **kwarg):
         static_route_url = dev.url + '/routes'
         static_obj = routes.route.options.options()
         get_static_route_url = dev.url + '/l3features:routes/route=%s,%s' % (obj_local.static_route.dest_ip_address,obj_local.static_route.dest_mask)
-    try:
-        xml_output = yang.Sdk.getData(get_static_route_url, '', sdata.getTaskId())
-        obj_get = util.parseXmlString(xml_output)
-        util.log_debug( "obj of route is: ",obj_get)
-        #yang.Sdk.createData(static_route_url, static_obj1.getxml(filter=True), sdata.getSession(), False)
-    except DataNodeNotFoundException:
+    # try:
+    #     xml_output = yang.Sdk.getData(get_static_route_url, '', sdata.getTaskId())
+    #     obj_get = util.parseXmlString(xml_output)
+    #     util.log_debug( "obj of route is: ",obj_get)
+    #     #yang.Sdk.createData(static_route_url, static_obj1.getxml(filter=True), sdata.getSession(), False)
+    # except DataNodeNotFoundException:
+    #     yang.Sdk.createData(static_route_url, static_obj1.getxml(filter=True), sdata.getSession())
+    get_static_route_url = get_static_route_url.split("data")[1]
+    if not yang.Sdk.dataExists(get_static_route_url):
         yang.Sdk.createData(static_route_url, static_obj1.getxml(filter=True), sdata.getSession())
 
     id = []
@@ -1917,8 +2013,6 @@ def community_lists(community_list_name_given, device, sdata, **kwargs):
                 if community_list_obj.extcommunity == 'true':
                     extcommunity_list(sdata, device, community_list_obj)
                 elif community_list_obj.extcommunity == 'false':
-                    if community_list_name_given.isdigit():
-                        raise Exception("Device Error: Community name cannot have all digits")
                     community_list(sdata, device, community_list_obj)
 
 
@@ -1938,7 +2032,11 @@ def community_list(sdata, device, community_list_obj_given):
     if util.isNotEmpty(value):
         community_list_obj.value = value
     community_list_url = device.url + '/l3features:community-lists'
-    yang.Sdk.createData(community_list_url, community_list_obj.getxml(filter=True), sdata.getSession())
+    payload = community_list_obj.getxml()
+    if util.isEmpty(community_list_entry):
+        payload = payload.replace('<community-list-entry>standard</community-list-entry>', '<community-list-entry></community-list-entry>')
+
+    yang.Sdk.createData(community_list_url, payload, sdata.getSession())
 
 
 def extcommunity_lists(extcommunity_list_name_given, dev, sdata, **kwargs):
@@ -2539,15 +2637,17 @@ def vrf(entity, dev, sdata, **kwarg):
         vrfobj = vrfs.vrf.vrf()
         vrfobj.name = vrf_name
         is_vrf_exists = False
-        is_vrf = yang.Sdk.getData(dev.url, '', sdata.getTaskId())
-        is_vrf_exists_obj = util.parseXmlString(is_vrf)
-        util.log_debug( "is_vrf_obj is:", is_vrf_exists_obj)
-        if hasattr(is_vrf_exists_obj.device, 'vrfs'):
-            if hasattr(is_vrf_exists_obj.device.vrfs, 'vrf'):
-                vrf_check_all = util.convert_to_list(is_vrf_exists_obj.device.vrfs.vrf)
-                for vrf_check in vrf_check_all:
-                    if vrf_check.name == vrf_name:
-                        is_vrf_exists = True
+        # is_vrf = yang.Sdk.getData(dev.url, '', sdata.getTaskId())
+        # is_vrf_exists_obj = util.parseXmlString(is_vrf)
+        # util.log_debug( "is_vrf_obj is:", is_vrf_exists_obj)
+        # if hasattr(is_vrf_exists_obj.device, 'vrfs'):
+        #     if hasattr(is_vrf_exists_obj.device.vrfs, 'vrf'):
+        #         vrf_check_all = util.convert_to_list(is_vrf_exists_obj.device.vrfs.vrf)
+        #         for vrf_check in vrf_check_all:
+        #             if vrf_check.name == vrf_name:
+        #                 is_vrf_exists = True
+        if yang.Sdk.dataExists(dev.url + "/l3features:vrfs/vrf=%s" % (vrf_name)):
+            is_vrf_exists = True
         if not is_vrf_exists:
             yang.Sdk.createData(dev.url + '/l3features:vrfs', vrfobj.getxml(filter=True), sdata.getSession())
 
