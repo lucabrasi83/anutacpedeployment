@@ -109,6 +109,10 @@ class EndPoints(yang.AbstractYangServiceHandler):
         inputdict['delay'] = config.get_field_value('delay')
         inputdict['mace_enable'] = config.get_field_value('mace_enable')
         inputdict['wan_interface_bandwidth'] = config.get_field_value('wan_interface_bandwidth')
+        inputdict['bfd'] = config.get_field_value('bfd')
+        inputdict['bfd_interval'] = config.get_field_value('bfd_interval')
+        inputdict['bfd_min_rx'] = config.get_field_value('bfd_min_rx')
+        inputdict['bfd_multiplier'] = config.get_field_value('bfd_multiplier')
         # END OF FETCHING THE LEAF PARAMETERS
 
         #Fetch Device Object
@@ -179,6 +183,10 @@ class EndPoints(yang.AbstractYangServiceHandler):
         inputdict['delay'] = config.get_field_value('delay')
         inputdict['mace_enable'] = config.get_field_value('mace_enable')
         inputdict['wan_interface_bandwidth'] = config.get_field_value('wan_interface_bandwidth')
+        inputdict['bfd'] = config.get_field_value('bfd')
+        inputdict['bfd_interval'] = config.get_field_value('bfd_interval')
+        inputdict['bfd_min_rx'] = config.get_field_value('bfd_min_rx')
+        inputdict['bfd_multiplier'] = config.get_field_value('bfd_multiplier')
         # END OF FETCHING THE LEAF PARAMETERS
 
         # START OF FETCHING THE PREVIOUS LEAF PARAMETERS
@@ -213,6 +221,10 @@ class EndPoints(yang.AbstractYangServiceHandler):
         pinputdict['delay'] = pconfig.get_field_value('delay')
         pinputdict['mace_enable'] = pconfig.get_field_value('mace_enable')
         pinputdict['wan_interface_bandwidth'] = pconfig.get_field_value('wan_interface_bandwidth')
+        pinputdict['bfd'] = pconfig.get_field_value('bfd')
+        pinputdict['bfd_interval'] = pconfig.get_field_value('bfd_interval')
+        pinputdict['bfd_min_rx'] = pconfig.get_field_value('bfd_min_rx')
+        pinputdict['bfd_multiplier'] = pconfig.get_field_value('bfd_multiplier')
         # END OF FETCHING THE LEAF PARAMETERS
 
         #Fetch Device Object

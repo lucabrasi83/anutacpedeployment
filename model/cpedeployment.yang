@@ -263,8 +263,8 @@ module cpedeployment {
 
   typedef string-no-lead-trail-space {
     type string {
-      //pattern "^(\\S?)(?!=\\s)(.*)(\\S+)$";
-      pattern "^(\\S?)(.*)(\\S+)$";
+      pattern "^(\\S?)(?!\\s)(.*)(\\S+)$";
+      //pattern "^(\\S?)(.*)(\\S+)$";
     }
   }
 
@@ -447,7 +447,7 @@ module cpedeployment {
       enum "eigrp";
       enum "ospf";
       enum "bgp";
-      //enum "static";
+      enum "static";
     }
   }
 
@@ -760,6 +760,7 @@ module cpedeployment {
       enum "stun-nat";
       enum "rdp";
       enum "icmp";
+      enum "mgcp";
     }
   }
 
@@ -1284,6 +1285,7 @@ module cpedeployment {
                   "actions";
                 uses rate-conform-def;
                 uses rate-exceed-def;
+                uses rate-violate-def;
               }
             }
           }
@@ -2588,11 +2590,11 @@ module cpedeployment {
       //n-ext:ignore-for-brownfield;
       list route-map {
         key "route-map-name";
-        /*leaf ncx-unique-name {
+        leaf ncx-unique-name {
           type string;
           description
             "string";
-        }*/
+        }
         leaf route-map-name {
           type string-no-space;
           description
@@ -3347,7 +3349,7 @@ module cpedeployment {
         path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../../name]/vrfs/vrf/vrf-name";
       }
       //n-ext:maps-to "/ac:devices/device[id=current()/../../../device-ip]/l3:vrfs/vrf/name";
-      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:ip-sla/sla/vrf-name";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:ip-sla/sla[entry-number=current()/../entry-number]/vrf-name";
     }
     leaf operation-type {
       type enumeration {
@@ -3879,6 +3881,12 @@ module cpedeployment {
         uses loopback-def;
       }
     }
+    container crypto-isakmp-peers {
+      list peers {
+        key "peer-address";
+        uses crypto-isakmp-peer-def;
+      }
+    }
     container bridge {
       uses bridge-def;
     }
@@ -3956,11 +3964,63 @@ module cpedeployment {
       type uint8;
       description
         "Enter EIGRP Distance for internal routes";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3:vrfs/vrf[name=current()/../vrf-name]/router-eigrp/eigrp[process-id=current()/../process-id]/internal-route-distance";
     }
     leaf distance-external-routes {
       type uint8;
       description
         "Enter EIGRP Distance for external routes";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3:vrfs/vrf[name=current()/../vrf-name]/router-eigrp/eigrp[process-id=current()/../process-id]/external-route-distance";
+    }
+    leaf default-metric {
+      type boolean;
+      description
+        "Check to Configure EIGRP Default Metric values";
+    }
+    leaf bandwidth-metric {
+      type uint32 {
+        range "1..4294967295";
+      }
+      description
+        "Enter Bandwidth Metric Value";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3:vrfs/vrf[name=current()/../vrf-name]/router-eigrp/eigrp[process-id=current()/../process-id]/default-metric/bandwidth-metric";
+      when "../default-metric = 'true'";
+    }
+    leaf delay-metric {
+      type uint32 {
+        range "0..4294967295";
+      }
+      description
+        "Enter Delay Metric Value";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3:vrfs/vrf[name=current()/../vrf-name]/router-eigrp/eigrp[process-id=current()/../process-id]/default-metric/delay-metric";
+      when "../default-metric = 'true'";
+    }
+    leaf reliability-metric {
+      type uint8 {
+        range "0..255";
+      }
+      description
+        "Enter Reliability Metric Value";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3:vrfs/vrf[name=current()/../vrf-name]/router-eigrp/eigrp[process-id=current()/../process-id]/default-metric/reliability-metric";
+      when "../default-metric = 'true'";
+    }
+    leaf load-metric {
+      type uint8 {
+        range "0..255";
+      }
+      description
+        "Enter Load Metric Value";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3:vrfs/vrf[name=current()/../vrf-name]/router-eigrp/eigrp[process-id=current()/../process-id]/default-metric/load-metric";
+      when "../default-metric = 'true'";
+    }
+    leaf mtu-metric {
+      type uint16 {
+        range "1..65535";
+      }
+      description
+        "Enter MTU Metric Value";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3:vrfs/vrf[name=current()/../vrf-name]/router-eigrp/eigrp[process-id=current()/../process-id]/default-metric/mtu";
+      when "../default-metric = 'true'";
     }
     list passive-interface {
       key "interface";
@@ -5217,6 +5277,14 @@ module cpedeployment {
       default "30";
       when "../timers = 'true'";
     }
+    leaf bfd-fall-over {
+      type boolean;
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../device-ip]/l3:vrfs/vrf[name=current()/../../vrf]/router-bgp/neighbor[ip-address=current()/../peer-ip]/bfd-fall-over";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../device-ip]/l3:vrfs/vrf[name=GLOBAL]/router-bgp/neighbor[ip-address=current()/../peer-ip]/bfd-fall-over";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../device-ip]/l3:vrfs/vrf[name=current()/../../ivrf]/router-bgp/neighbor[ip-address=current()/../peer-ip]/bfd-fall-over";
+      description
+        "Check to Enable BFD Fall-Over on Peer";
+    }
   }
 
   grouping bgp-peer-props1 {
@@ -5598,6 +5666,56 @@ module cpedeployment {
         "1..16777215";
       when "../interface-type =  'Physical' or ../interface-type =  'Sub-Interface' or ../interface-type =  'SVI'";
     }
+    leaf bfd {
+      type boolean;
+      description
+        "Check to Configure BFD on Interface";
+    }
+    leaf bfd-interval {
+      type uint16 {
+        range "50..999";
+      }
+      description
+        "Enter Transmit interval between BFD packets (milliseconds)";
+      when "../bfd = 'true'";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/if-ext:interval";
+    }
+    leaf bfd-min-rx {
+      type uint16 {
+        range "50..999";
+      }
+      description
+        "Enter Transmit interval between BFD packets (milliseconds)";
+      when "../bfd = 'true'";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/if-ext:min_rx";
+    }
+    leaf bfd-multiplier {
+      type uint8 {
+        range "3..50";
+      }
+      description
+        "Multiplier value used to compute holddown";
+      when "../bfd = 'true'";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/if-ext:multiplier";
+    }
+    list dhcp-helper-addresses {
+      key "helper-address";
+      leaf helper-address {
+        type inet:ipv4-address;
+        description
+          "Enter DHCP Helper IPv4 Address";
+        n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/if-ext:helper-address/if-ext:helper/if-ext:dest-address";
+      }
+      leaf vrf {
+        type leafref {
+          path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../../name]/vrfs/vrf/vrf-name";
+          require-instance false;
+        }
+        description
+          "Enter DHCP Helper VRF";
+        n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/if-ext:helper-address/if-ext:helper[if-ext:dest-address=current()/../helper-address]/if-ext:vrf";
+      }
+    }
   }
 
   grouping end-point-props2 {
@@ -5943,6 +6061,38 @@ module cpedeployment {
       description
         "Select PBR Policy to apply on interface";
       when "../interface-type =  'Tunnel'";
+    }
+    leaf bfd {
+      type boolean;
+      description
+        "Check to Configure BFD on Interface";
+    }
+    leaf bfd-interval {
+      type uint16 {
+        range "50..999";
+      }
+      description
+        "Enter Transmit interval between BFD packets (milliseconds)";
+      when "../bfd = 'true'";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/if-ext:interval";
+    }
+    leaf bfd-min-rx {
+      type uint16 {
+        range "50..999";
+      }
+      description
+        "Enter BFD Minimum Receive Interval Capability (milliseconds)";
+      when "../bfd = 'true'";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/if-ext:min_rx";
+    }
+    leaf bfd-multiplier {
+      type uint8 {
+        range "3..50";
+      }
+      description
+        "Multiplier value used to compute holddown";
+      when "../bfd = 'true'";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/if-ext:multiplier";
     }
   }
 
@@ -7962,7 +8112,7 @@ module cpedeployment {
             "Enter Site BGP AS Number";
           mandatory true;
           //n-ext:maps-to "/ac:devices/device/l3:vrfs/vrf/router-bgp/as-number";
-          n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf[name=GLOBAL]/router-bgp/as-number";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../cpe-primary/device-ip]/l3:vrfs/vrf[name=GLOBAL]/router-bgp/as-number";
         }
         leaf zero-touch-prov {
           type boolean;
@@ -8015,7 +8165,7 @@ module cpedeployment {
           description
             "Enter Site BGP AS Number";
           mandatory true;
-          n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/as-number";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../cpe-primary/device-ip]/l3:vrfs/vrf[name=GLOBAL]/router-bgp/as-number";
         }
         leaf zero-touch-prov {
           type boolean;
@@ -10972,7 +11122,7 @@ module cpedeployment {
           description
             "Enter BGP AS Number";
           mandatory true;
-          n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/as-number";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../cpe-primary/device-ip]/l3:vrfs/vrf[name=GLOBAL]/router-bgp/as-number";
         }
         leaf zero-touch-prov {
           type boolean;
@@ -14946,7 +15096,7 @@ module cpedeployment {
           description
             "Enter Site BGP AS Number";
           mandatory true;
-          n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/as-number";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../cpe/device-ip]/l3:vrfs/vrf[name=GLOBAL]/router-bgp/as-number";
         }
         leaf zero-touch-prov {
           type boolean;
@@ -15140,14 +15290,14 @@ module cpedeployment {
         leaf site-name {
           type string;
           description
-            "string";
+            "Enter Site Name";
         }
         leaf bgp-as {
           type inet:as-number;
           description
             "Enter Site BGP AS Number";
           mandatory true;
-          n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf[name=GLOBAL]/router-bgp/as-number";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../cpe/device-ip]/l3:vrfs/vrf[name=GLOBAL]/router-bgp/as-number";
         }
         leaf zero-touch-prov {
           type boolean;
@@ -18174,6 +18324,82 @@ module cpedeployment {
     }
   }
 
+  grouping crypto-isakmp-peer-def {
+    leaf peer-address {
+      type inet:ipv4-address;
+      description
+        "Enter Crypto ISAKMP Peer IPv4 Address";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/dmvpn:crypto-peers/dmvpn:crypto-peer/address";
+    }
+    leaf vrf {
+      type leafref {
+        path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../../name]/vrfs/vrf/vrf-name";
+      }
+      description
+        "Select Crypto ISAKMP Peer VRF";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/dmvpn:crypto-peers/dmvpn:crypto-peer[address=current()/../peer-address]/vrf-name";
+    }
+    container set-attributes {
+      list attribute {
+        key "name";
+        leaf name {
+          type string-no-space;
+          description
+            "Enter Crypto ISAKMP Peer Set Attributes Name
+             This is an internal field to Anuta NCX";
+        }
+        leaf attribute-type {
+          type enumeration {
+            enum "client-endpoint";
+            enum "password";
+          }
+          description
+            "Select Aggressive Mode Set Attribute Type";
+          //n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/dmvpn:crypto-peers/dmvpn:crypto-peer/set-attributes/attribute";
+        }
+        leaf password {
+          type string-no-lead-trail-space;
+          description
+            "Enter Aggressive Mode Password";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../../device-ip]/dmvpn:crypto-peers/dmvpn:crypto-peer[address=current()/../../../peer-address]/set-attributes[attribute=current()/../attribute-type]/password";
+          when "../attribute-type = 'password'";
+        }
+        leaf endpoint-type {
+          type enumeration {
+            enum "fqdn";
+            enum "ipv4-address";
+            enum "user-fqdn";
+          }
+          description
+            "Select Aggressive Mode Attribute Type";
+          //n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/dmvpn:crypto-peers/dmvpn:crypto-peer/set-attributes[attribute=current()/../attribute-type]/endpoint";
+          when "../attribute-type = 'client-endpoint'";
+        }
+        leaf fqdn {
+          type string-no-lead-trail-space;
+          description
+            "Enter Aggressive Mode FQDN";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../../device-ip]/dmvpn:crypto-peers/dmvpn:crypto-peer[address=current()/../../../peer-address]/set-attributes[attribute=current()/../attribute-type]/fqdn";
+          when "../attribute-type = 'client-endpoint' and ../endpoint-type = 'fqdn'";
+        }
+        leaf ipv4-address {
+          type inet:ipv4-address;
+          description
+            "Enter Aggressive Mode IPv4 Address";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../../device-ip]/dmvpn:crypto-peers/dmvpn:crypto-peer[address=current()/../../../peer-address]/set-attributes[attribute=current()/../attribute-type]/ipv4-address";
+          when "../attribute-type = 'client-endpoint' and ../endpoint-type = 'ipv4-address'";
+        }
+        leaf user-fqdn {
+          type string-no-lead-trail-space;
+          description
+            "Enter Aggressive Mode User-FQDN";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../../device-ip]/dmvpn:crypto-peers/dmvpn:crypto-peer[address=current()/../../../peer-address]/set-attributes[attribute=current()/../attribute-type]/user-fqdn";
+          when "../attribute-type = 'client-endpoint' and ../endpoint-type = 'user-fqdn'";
+        }
+      }
+    }
+  }
+
   grouping advertise-network-dps {
     leaf name {
       type string;
@@ -18270,13 +18496,20 @@ module cpedeployment {
         uses network-group;
       }
     }
+    container services {
+      list service {
+        key "name";
+        uses service-group;
+      }
+    }
   }
 
   grouping network-group {
     leaf name {
       type string-no-lead-trail-space;
       description
-        "string";
+        "Enter Network Object Group
+         This is an internal field to Anuta NCX";
       n-ext:maps-to "/ac:devices/ac:device/acl:object-groups-acl/object-group[name=current()/../../../name]/networks/network/name";
       //n-ext:maps-to "/ac:devices/device/acl:object-groups-acl/object-group/networks/network/name";
     }
@@ -18289,7 +18522,7 @@ module cpedeployment {
     leaf group-object {
       type string-no-space;
       description
-        "string";
+        "Enter Nested Object Group";
       n-ext:maps-to "/ac:devices/ac:device/acl:object-groups-acl/object-group[name=current()/../../../name]/networks/network[name=current()/../name]/group-object";
       //n-ext:maps-to "/ac:devices/device/acl:object-groups-acl/object-group/networks/network/group-object";
     }
@@ -18309,6 +18542,93 @@ module cpedeployment {
       //n-ext:maps-to "/ac:devices/device/acl:object-groups-acl/object-group[name=current()/../../../name]/networks/network[name=current()/../name]/netmask";
       n-ext:maps-to "/ac:devices/ac:device/acl:object-groups-acl/object-group[name=current()/../../../name]/networks/network";
       n-ext:prefix-maps-to "ip-address,netmask";
+    }
+  }
+
+  grouping service-group {
+    leaf name {
+      type string-no-lead-trail-space;
+      description
+        "Enter Service Object Group name.
+         This is an internal field for Anuta NCX";
+    }
+    leaf group-object {
+      type string-no-space;
+      description
+        "Enter Nested Group Object";
+    }
+    leaf protocol-type {
+      type enumeration {
+        enum "IP-Protocol-Number";
+        enum "Protocol-Name";
+      }
+      description
+        "Select Protocol Type for service
+         IP-Protocol-Number will allow to enter the IP Protocol Value (eg: 47 for GRE)
+         Protocol-Name will allow to enter the protocol name (eg: icmp, tcp, udp)";
+    }
+    leaf ip-protocol {
+      type uint8 {
+        range "0..255";
+      }
+      description
+        "Enter IP Protocol Number";
+      when "../protocol-type = 'IP-Protocol-Number'";
+    }
+    leaf protocol-name {
+      type enumeration {
+        enum "tcp";
+        enum "udp";
+        enum "tcp-udp";
+        enum "ip";
+        enum "icmp";
+        enum "ospf";
+        enum "ahp";
+        enum "eigrp";
+        enum "esp";
+        enum "igmp";
+        enum "ipinip";
+        enum "nos";
+        enum "pim";
+      }
+      description
+        "Select Protocol Name";
+      when "../protocol-type = 'Protocol-Name'";
+    }
+    leaf port-operation {
+      type enumeration {
+        enum "source";
+      }
+      description
+        "Select to match source traffic direction";
+      when "../protocol-name = 'tcp' or ../protocol-name = 'udp' or ../protocol-name = 'tcp-udp'";
+    }
+    leaf operator {
+      type enumeration {
+        enum "eq";
+        enum "lt";
+        enum "gt";
+        enum "range";
+      }
+      description
+        "Select Port Operator";
+      when "../protocol-name = 'tcp' or ../protocol-name = 'udp' or ../protocol-name = 'tcp-udp'";
+    }
+    leaf port-number {
+      type uint16 {
+        range "0..65535";
+      }
+      description
+        "Enter Port Number";
+      when "../protocol-name = 'tcp' or ../protocol-name = 'udp' or ../protocol-name = 'tcp-udp'";
+    }
+    leaf end-port {
+      type uint16 {
+        range "0..65535";
+      }
+      description
+        "Enter End Port of the range";
+      when "../protocol-name = 'tcp' or ../protocol-name = 'udp' or ../protocol-name = 'tcp-udp' and ../operator = 'range'";
     }
   }
 

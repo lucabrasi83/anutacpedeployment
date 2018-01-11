@@ -105,6 +105,10 @@ class EndPoints(yang.AbstractYangServiceHandler):
         inputdict['mace_enable'] = config.get_field_value('mace_enable')
         inputdict['tcp_mss'] = config.get_field_value('tcp_mss')
         inputdict['bandwidth'] = config.get_field_value('bandwidth')
+        inputdict['bfd'] = config.get_field_value('bfd')
+        inputdict['bfd_interval'] = config.get_field_value('bfd_interval')
+        inputdict['bfd_min_rx'] = config.get_field_value('bfd_min_rx')
+        inputdict['bfd_multiplier'] = config.get_field_value('bfd_multiplier')
         # END OF FETCHING THE LEAF PARAMETERS
 
         #Fetch Device Object
@@ -171,6 +175,10 @@ class EndPoints(yang.AbstractYangServiceHandler):
         inputdict['mace_enable'] = config.get_field_value('mace_enable')
         inputdict['tcp_mss'] = config.get_field_value('tcp_mss')
         inputdict['bandwidth'] = config.get_field_value('bandwidth')
+        inputdict['bfd'] = config.get_field_value('bfd')
+        inputdict['bfd_interval'] = config.get_field_value('bfd_interval')
+        inputdict['bfd_min_rx'] = config.get_field_value('bfd_min_rx')
+        inputdict['bfd_multiplier'] = config.get_field_value('bfd_multiplier')
         # END OF FETCHING THE LEAF PARAMETERS
 
         dev = getDeviceObject(prevconfig.get_field_value('device_ip'), sdata)
@@ -225,6 +233,10 @@ class EndPoints(yang.AbstractYangServiceHandler):
         inputdict['mace_enable'] = config.get_field_value('mace_enable')
         inputdict['tcp_mss'] = config.get_field_value('tcp_mss')
         inputdict['bandwidth'] = config.get_field_value('bandwidth')
+        inputdict['bfd'] = config.get_field_value('bfd')
+        inputdict['bfd_interval'] = config.get_field_value('bfd_interval')
+        inputdict['bfd_min_rx'] = config.get_field_value('bfd_min_rx')
+        inputdict['bfd_multiplier'] = config.get_field_value('bfd_multiplier')
         # END OF FETCHING THE LEAF PARAMETERS
 
         #Fetch Device Object

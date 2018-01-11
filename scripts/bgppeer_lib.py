@@ -101,6 +101,9 @@ def bgp_peer(cpeentity, entity, smodelctx, sdata, device, **kwargs):
     bgp_neighbor_obj.next_hop_self = next_hop_self
     bgp_neighbor_obj.send_community = send_community
 
+    if inputdict.get('bfd_fall_over') is not None:
+        bgp_neighbor_obj.bfd_fall_over = inpudict['bfd_fall_over']
+
     if import_route_map != "":
         from cpedeployment_lib import route_maps
         route_maps(import_route_map, device, sdata, None, cpeentity)

@@ -26,6 +26,7 @@ from servicemodel.controller.devices.device import object_groups_acl
 from servicemodel.controller.devices.device import access_lists
 from servicemodel.controller.devices.device import vrfs
 
+
 import re
 from com.anuta.api import DataNodeNotFoundException
 #from com.anuta.dataengine.api.engine.errors import ResourceConflictException
@@ -254,6 +255,11 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
     nat_outside = inputdict['nat_outside']
     wan_bandwidth = inputdict['wan_interface_bandwidth']
     delay = inputdict['delay']
+    bfd_enabled = inputdict['bfd']
+    bfd_interval = inputdict['bfd_interval']
+    bfd_min_rx = inputdict['bfd_min_rx']
+    bfd_multiplier = inputdict['bfd_multiplier']
+
     if interface_type == "Sub-Interface" or interface_type == "SVI":
         if '.' not in interface_name:
             vlan_id = inputdict['vlan_id']
@@ -461,6 +467,14 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
             intf_obj.nat_name = 'outside'
         if wan_bandwidth is not None or util.isNotEmpty(wan_bandwidth):
             intf_obj.bandwidth = wan_bandwidth
+        if bfd_enabled == "true":
+            intf_obj.bfd_options = "interval"
+            if util.isNotEmpty(bfd_interval):
+                intf_obj.interval = bfd_interval
+            if util.isNotEmpty(bfd_min_rx):
+                intf_obj.min_rx = bfd_min_rx
+            if util.isNotEmpty(bfd_multiplier):
+                intf_obj.multiplier = bfd_multiplier
         if mode == "sub-interface":
             if not device.isInterfaceInDeviceExists(interface_name):
                 intf_obj.mode = "sub-interface"
@@ -481,7 +495,7 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
                 url = '/'.join(uri_list[0:4])
                 xml_output = yang.Sdk.getData(url+"/vrfs/vrf="+str(vrf), '', sdata.getTaskId())
                 obj_local = util.parseXmlString(xml_output)
-                util.log_debug("obj_local: ", obj_local)
+                #util.log_debug("obj_local: ", obj_local)
                 #Safety Check to avoid configuring VRF on WAN interface if not already configured
                 interface_url_vrf = yang.Sdk.getData(device.url+'/interface:interfaces/interface='+str(interface_name).replace('/', '%2F'), '', sdata.getTaskId())
                 obj_interface_vrf = util.parseXmlString(interface_url_vrf) 
@@ -795,7 +809,7 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
         if util.isNotEmpty(dmvpn_profile):
             xml_output = yang.Sdk.getData(url+"/dmvpn-tunnel-profiles/dmvpn-tunnel-profile="+str(dmvpn_profile), '', sdata.getTaskId())
             obj = util.parseXmlString(xml_output)
-            util.log_debug( "obj: ", obj)
+            #util.log_debug( "obj: ", obj)
             #if util.isNotEmpty(dmvpn_profile):
             yang.Sdk.createData(device.url, '<dmvpntunnels/>', sdata.getSession(), False)
             dmvpn_obj = dmvpntunnels.dmvpntunnel.dmvpntunnel()
@@ -945,7 +959,7 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
             url = '/'.join(uri_list[0:4])
             xml_output = yang.Sdk.getData(url+"/vrfs/vrf="+str(ivrf), '', sdata.getTaskId())
             obj_local = util.parseXmlString(xml_output)
-            util.log_debug("obj_local: ", obj_local)
+            #util.log_debug("obj_local: ", obj_local)
             dmvpn_obj.vrf_definition_mode = obj_local.vrf.vrf_definition_mode
             dmvpn_obj.vrf_name = ivrf
         if p2p == 'true':
@@ -1196,7 +1210,7 @@ def hierarchical_policy_class(entity, hierarchical_policy, device, sdata, shapin
 
     xml_output = yang.Sdk.getData(url+"/qos-service/hierarchical-policy/policy="+str(hierarchical_policy), '',sdata.getTaskId())
     obj = util.parseXmlString(xml_output)
-    util.log_debug( "obj: ",obj)
+    #util.log_debug( "obj: ",obj)
     device.addQosPolicyMapsContainer(sdata.getSession())
 
     map_obj = policy_maps.policy_map.policy_map()
@@ -1229,7 +1243,7 @@ def qos_child(entity, qos_policy, dev, sdata, shaping_rate=None):
 
     xml_output = yang.Sdk.getData(url+"/qos-service/policies/policy="+str(qos_policy), '',sdata.getTaskId())
     obj = util.parseXmlString(xml_output)
-    util.log_debug( "obj: ",obj)
+    #util.log_debug( "obj: ",obj)
     dev.addQosPolicyMapsContainer(sdata.getSession())
     policy_name = obj.policy.name
     map_obj = policy_maps.policy_map.policy_map()
@@ -1334,7 +1348,7 @@ def qos_child(entity, qos_policy, dev, sdata, shaping_rate=None):
 def class_map(entity, url, cls_name, dev, sdata):
     xml_output = yang.Sdk.getData(url+"/qos-service/class-maps/class-map="+str(cls_name), '',sdata.getTaskId())
     obj_class = util.parseXmlString(xml_output)
-    util.log_debug("obj: ",obj_class)
+    #util.log_debug("obj: ",obj_class)
     description = obj_class.class_map.get_field_value("description")
     match_type = obj_class.class_map.get_field_value("match_type")
 
@@ -1475,13 +1489,13 @@ def object_group_def(source_object_group, dev, sdata):
         if util.isNotEmpty(obj.object_group.description):
             objectgroup_obj.description = obj.object_group.description
     objectgroup_url = dev.url + '/acl:object-groups-acl'
-    yang.Sdk.createData(dev.url, '<object-groups-acl/>', sdata.getSession())
+    #yang.Sdk.createData(dev.url, '<object-groups-acl/>', sdata.getSession())
     yang.Sdk.createData(objectgroup_url, objectgroup_obj.getxml(filter=True), sdata.getSession())
     if hasattr(obj.object_group, 'networks'):
         if hasattr(obj.object_group.networks, 'network'):
             for objectgroup in util.convert_to_list(obj.object_group.networks.network):
                 net_url = dev.url + '/acl:object-groups-acl/object-group=%s' %(obj.object_group.name)
-                yang.Sdk.createData(net_url, '<networks/>', sdata.getSession())
+                #yang.Sdk.createData(net_url, '<networks/>', sdata.getSession())
 
                 if hasattr(objectgroup, 'group_object'):
                     if util.isNotEmpty(objectgroup.group_object):
@@ -1521,11 +1535,99 @@ def object_group_def(source_object_group, dev, sdata):
                         network_url = dev.url + '/acl:object-groups-acl/object-group=%s/networks' %(obj.object_group.name)
                         yang.Sdk.createData(network_url, network_obj2.getxml(filter=True), sdata.getSession())
 
+    if hasattr(obj.object_group, 'services'):
+        if hasattr(obj.object_group.services, 'service'):
+
+            port_dict = { '179': 'bgp', '19': 'chargen', '514': 'cmd', '13': 'daytime', '9': 'discard', '53': 'domain',
+                          '3949': 'drip', '7': 'echo', '512': 'exec', '79': 'finger', '21': 'ftp', '20': 'ftp-data',
+                          '70': 'gopher', '101': 'hostname', '113': 'ident', '194': 'irc', '543': 'klogin', '544': 'kshell',
+                          '513': 'login', '515': 'lpd', '119': 'nntp', '15001': 'onep-plain', '15002': 'onep-tls', '496': 'pim-auto-rp',
+                          '109': 'pop2', '110': 'pop3', '25': 'smtp', '111': 'sunrpc', '49': 'tacacs', '517': 'talk', '23': 'telnet',
+                          '37': 'time', '540': 'uucp', '43': 'whois', '80': 'www', '135': 'msrpc'
+                          }
+            udp_port_dict = { '512': 'biff', '68': 'bootpc', '67': 'bootps', '9': 'discard', '195': 'dnsix',
+                          '53': 'domain', '7': 'echo', '500': 'isakmp', '434': 'mobile-ip', '42': 'nameserver', '138': 'netbios-dgm',
+                          '137': 'netbios-ns', '139': 'netbios-ss', '4500': 'non500-isakmp', '123': 'ntp', '496': 'pim-auto-rp',
+                          '520': 'rip', '161': 'snmp', '162': 'snmptrap', '111': 'sunrpc', '514': 'syslog', '49': 'tacacs',
+                          '517': 'talk', '69': 'tftp', '37': 'time', '513': 'who', '177': 'xdmcp', '135': 'msrpc'
+                          }
+            ip_prot_dict = { '47': 'gre', '1': 'icmp', '6': 'tcp', '17': 'udp', '51': 'ahp', '50': 'esp', '89': 'ospf',
+                             '4': 'ipinip', '88': 'eigrp', '2': 'igmp', '94': 'nos', '103': 'pim'
+                            }
+
+            service_url = dev.url + '/acl:object-groups-acl/object-group=%s/services' %(obj.object_group.name)
+
+            for objectgroup in util.convert_to_list(obj.object_group.services.service):
+                if hasattr(objectgroup, 'group_object'):
+                    if util.isNotEmpty(objectgroup.group_object):
+                        service_obj = object_groups_acl.object_group.services.service.service()
+                        service_obj.group_object = objectgroup.group_object
+                        service_obj.name = "group-object" + " " + objectgroup.group_object
+                        yang.Sdk.createData(service_url, service_obj.getxml(filter=True), sdata.getSession())
+
+                if hasattr(objectgroup, 'protocol_type'):
+                    if util.isNotEmpty(objectgroup.protocol_type):
+                        if objectgroup.protocol_type == "IP-Protocol-Number":
+                            service_obj1 = object_groups_acl.object_group.services.service.service()
+                            if util.isNotEmpty(objectgroup.ip_protocol):
+                                
+                                ip_prot_num = objectgroup.ip_protocol
+                                if ip_prot_num in ip_prot_dict:
+                                    ip_prot_num = ip_prot_dict[ip_prot_num]
+                                    service_obj1.protocol = ip_prot_num
+                                    service_obj1.name = ip_prot_num
+                                else:
+                                    service_obj1.ip_protocol = ip_prot_num
+                                    service_obj1.name = ip_prot_num
+
+                                yang.Sdk.createData(service_url, service_obj1.getxml(filter=True), sdata.getSession())
+
+                        if  objectgroup.protocol_type == "Protocol-Name":
+                            service_obj_name_list = []
+                            service_obj2 = object_groups_acl.object_group.services.service.service()
+                            if util.isNotEmpty(objectgroup.protocol_name):
+                                service_obj2.protocol = objectgroup.protocol_name
+                                service_obj_name_list.append(objectgroup.protocol_name)
+
+                            if hasattr(objectgroup, 'port_operation'):
+                                if util.isNotEmpty(objectgroup.port_operation):
+                                    service_obj2.operation = objectgroup.port_operation
+                                    service_obj_name_list.append(objectgroup.port_operation)
+
+                            if hasattr(objectgroup, 'operator'):
+                                if util.isNotEmpty(objectgroup.operator):
+                                    service_obj2.compare = objectgroup.operator
+                                    service_obj_name_list.append(objectgroup.operator)
+
+                            if hasattr(objectgroup, 'port_number'):
+                                if util.isNotEmpty(objectgroup.port_number):
+                                    port_num = objectgroup.port_number
+                                    if objectgroup.protocol_name == "tcp":
+                                        if port_num in port_dict:
+                                            port_num = port_dict[port_num]
+                                    elif objectgroup.protocol_name == "udp":
+                                        if port_num in udp_port_dict:
+                                            port_num = udp_port_dict[port_num]
+
+                                service_obj2.port = objectgroup.port_num
+                                service_obj_name_list.append(port_num)
+
+                            if hasattr(objectgroup, 'end_port'):
+                                if util.isNotEmpty(objectgroup.end_port):
+                                    service_obj2.end_port = objectgroup.end_port
+                                    service_obj_name_list.append(objectgroup.end_port)
+
+                            service_obj_name = ' '.join(service_obj_name_list)
+
+                            service_obj2.name = service_obj_name
+
+                            yang.Sdk.createData(service_url, service_obj2.getxml(filter=True), sdata.getSession())
+
 
 def access_group_def(url, access_group, dev, sdata):
     xml_output = yang.Sdk.getData(url+"/access-lists/access-list="+str(access_group), '', sdata.getTaskId())
     obj = util.parseXmlString(xml_output)
-    util.log_debug("obj: ", obj)
+    #util.log_debug("obj: ", obj)
     name = obj.access_list.name
     access_list_entry = obj.access_list.access_list_entry
     access_obj = access_lists.access_list.access_list()
@@ -1537,7 +1639,7 @@ def access_group_def(url, access_group, dev, sdata):
         access_obj.acl_type = access_list_entry
         if name is not None:
             access_obj.name = name
-    yang.Sdk.createData(dev.url, '<access-lists/>', sdata.getSession(), False)
+    #yang.Sdk.createData(dev.url, '<access-lists/>', sdata.getSession(), False)
 
     access_obj_url = dev.url + '/acl:access-lists'
     yang.Sdk.createData(access_obj_url, access_obj.getxml(filter=True), sdata.getSession())
@@ -1810,7 +1912,7 @@ class IpamPoolID(yang.ServiceModelContext):
         #         print "ipam_pool_obj", str(self.ipam_pool_obj)
         if self.ipaddresspool.name == self.cidr:
             self.ipam_pool_obj = self.ipaddresspool
-            util.log_debug( "ipam_pool_obj", str(self.ipam_pool_obj))
+            #util.log_debug( "ipam_pool_obj", str(self.ipam_pool_obj))
 
     def load_service_object(self, cidr):
         cidr_name_local = cidr
@@ -2173,6 +2275,10 @@ def delete_physical_interface(entity, smodelctx, sdata, device, **kwarg):
             intf_obj_phy.in_queue_length._empty_tag = True
             #if out_queue_length is not None:
             intf_obj_phy.out_queue_length._empty_tag = True
+            intf_obj_phy.bfd_options = None
+            intf_obj_phy.min_rx._empty_tag = True
+            intf_obj_phy.interval._empty_tag = True
+            intf_obj_phy.multiplier._empty_tag = True
             uri = device.url + '/interface:interfaces/interface=%s' % (str(interface_name).replace('/', '%2F'))
             payload = intf_obj_phy.getxml(filter=True)
             if device.isInterfaceInDeviceExists(interface_name):
@@ -2219,6 +2325,10 @@ def delete_physical_interface(entity, smodelctx, sdata, device, **kwarg):
             #if out_queue_length is not None:
             intf_obj.out_queue_length._empty_tag = True
             intf_obj.delay._empty_tag = True
+            intf_obj.bfd_options = None
+            intf_obj.min_rx._empty_tag = True
+            intf_obj.interval._empty_tag = True
+            intf_obj.multiplier._empty_tag = True
             uri = device.url + '/interface:interfaces/interface=%s' % (str(interface_name).replace('/', '%2F'))
             payload = intf_obj.getxml(filter=True)
             print 'delete Interface: %s, payload = %s' % (uri, payload)
@@ -2249,6 +2359,10 @@ def delete_physical_interface(entity, smodelctx, sdata, device, **kwarg):
             intf_obj.maximum_segment_size._empty_tag = True
             intf_obj.bandwidth._empty_tag = True
             intf_obj.delay._empty_tag = True
+            intf_obj.bfd_options = None
+            intf_obj.min_rx._empty_tag = True
+            intf_obj.interval._empty_tag = True
+            intf_obj.multiplier._empty_tag = True
             #if ((vrf is not None and vrf != 'GLOBAL') or (ivrf is not None and ivrf != 'GLOBAL')) and inet_mpls == 'MPLS':
             #intf_obj.vrf._empty_tag = True
             uri = device.url + '/interface:interfaces/interface=%s' % (str(interface_name1).replace('/', '%2F'))
@@ -2274,6 +2388,10 @@ def delete_physical_interface(entity, smodelctx, sdata, device, **kwarg):
             intf_obj_phy.in_queue_length._empty_tag = True
             #if out_queue_length is not None:
             intf_obj_phy.out_queue_length._empty_tag = True
+            intf_obj_phy.bfd_options = None
+            intf_obj_phy.min_rx._empty_tag = True
+            intf_obj_phy.interval._empty_tag = True
+            intf_obj_phy.multiplier._empty_tag = True
             uri = device.url + '/interface:interfaces/interface=%s' % (str(interface_name).replace('/', '%2F'))
             payload = intf_obj_phy.getxml(filter=True)
             print 'delete Interface: %s, payload = %s' % (uri, payload)
@@ -2320,6 +2438,10 @@ def delete_physical_interface(entity, smodelctx, sdata, device, **kwarg):
             intf_obj.in_queue_length._empty_tag = True
             #if out_queue_length is not None:
             intf_obj.out_queue_length._empty_tag = True
+            intf_obj.bfd_options = None
+            intf_obj.min_rx._empty_tag = True
+            intf_obj.interval._empty_tag = True
+            intf_obj.multiplier._empty_tag = True
             uri = device.url + '/interface:interfaces/interface=%s' % (str(interface_name).replace('/', '%2F'))
             payload = intf_obj.getxml(filter=True)
             print 'delete Interface: %s, payload = %s' % (uri, payload)
@@ -2365,8 +2487,13 @@ def back_endpoint(entity, smodelctx, sdata, device, **kwargs):
     if entity != "cpe_primary_cpe_secondary_ic":
         nat_inside = inputdict['nat_inside']
         nat_outside = inputdict['nat_outside']
+        bfd_enabled = inputdict['bfd']
+        bfd_interval = inputdict['bfd_interval']
+        bfd_min_rx = inputdict['bfd_min_rx']
+        bfd_multiplier = inputdict['bfd_multiplier']
     #vlan_id = None
     vlan_id = inputdict['vlan_id']
+    
     if util.isNotEmpty(interface_name):
         if '.' not in interface_name and interface_type == "Sub-Interface":
             if util.isEmpty(vlan_id):
@@ -2693,7 +2820,7 @@ def back_endpoint(entity, smodelctx, sdata, device, **kwargs):
         if vrf is not None and vrf != 'GLOBAL':
             xml_output = yang.Sdk.getData(url+"/vrfs/vrf="+str(vrf), '', sdata.getTaskId())
             obj_local = util.parseXmlString(xml_output)
-            util.log_debug("obj_local: ", obj_local)
+            #util.log_debug("obj_local: ", obj_local)
 
             intf_obj.vrf_definition_mode = obj_local.vrf.vrf_definition_mode
             intf_obj.vrf = vrf
@@ -2741,6 +2868,14 @@ def back_endpoint(entity, smodelctx, sdata, device, **kwargs):
                 intf_obj.maximum_segment_size = tcp_mss
         if util.isNotEmpty(bandwidth) or bandwidth is not None:
                 intf_obj.bandwidth = bandwidth
+        if bfd_enabled == "true":
+            intf_obj.bfd_options = "interval"
+            if util.isNotEmpty(bfd_interval):
+                intf_obj.interval = bfd_interval
+            if util.isNotEmpty(bfd_min_rx):
+                intf_obj.min_rx = bfd_min_rx
+            if util.isNotEmpty(bfd_multiplier):
+                intf_obj.multiplier = bfd_multiplier
     if interface_type == "Physical":
         if link_negotiation is not None:
             intf_obj.link_negotiation = link_negotiation
@@ -2876,9 +3011,9 @@ def back_endpoint(entity, smodelctx, sdata, device, **kwargs):
     # creating entities for update services
     if entity == "customer_lan_ic":
         uri = sdata.getRcPath()
-        util.log_debug('URI:', uri)
+        #util.log_debug('URI:', uri)
         parent_uri = uri[:uri.find(uri.split('/')[-2])]
-        util.log_debug('PARENT_URI:', parent_uri)
+        #util.log_debug('PARENT_URI:', parent_uri)
         yang.Sdk.createData('%s' % parent_uri, '<policy-update-services/>', sdata.getSession(), False)
         yang.Sdk.createData('%spolicy-update-services' % parent_uri, '<hsrp-update-service/>', sdata.getSession(), False)
         '''
@@ -2903,12 +3038,24 @@ def new_back_endpoint(entity, smodelctx, sdata, device, **kwargs):
     if entity == "customer_lan_ic_dual":
         tcp_mss = inputdict["tcp_mss"]
         bandwidth = inputdict["bandwidth"]
+        bfd_enabled = inputdict['bfd']
+        bfd_interval = inputdict['bfd_interval']
+        bfd_min_rx = inputdict['bfd_min_rx']
+        bfd_multiplier = inputdict['bfd_multiplier']
     elif entity == "customer_lan_ic":
         tcp_mss = inputdict["tcp_mss"]
         bandwidth = inputdict["bandwidth"]
+        bfd_enabled = inputdict['bfd']
+        bfd_interval = inputdict['bfd_interval']
+        bfd_min_rx = inputdict['bfd_min_rx']
+        bfd_multiplier = inputdict['bfd_multiplier']
     elif entity == "customer_lan_ic_triple":
         tcp_mss = inputdict["tcp_mss"]
         bandwidth = inputdict["bandwidth"]
+        bfd_enabled = inputdict['bfd']
+        bfd_interval = inputdict['bfd_interval']
+        bfd_min_rx = inputdict['bfd_min_rx']
+        bfd_multiplier = inputdict['bfd_multiplier']
     mace_enable = inputdict['mace_enable']
     if interface_type == "Physical" or interface_type == "Sub-Interface":
         if util.isEmpty(interface_name):
@@ -3413,7 +3560,7 @@ def new_back_endpoint(entity, smodelctx, sdata, device, **kwargs):
         if vrf is not None and vrf != 'GLOBAL':
             xml_output = yang.Sdk.getData(url+"/vrfs/vrf="+str(vrf), '', sdata.getTaskId())
             obj_local = util.parseXmlString(xml_output)
-            util.log_debug("obj_local: ", obj_local)
+            #util.log_debug("obj_local: ", obj_local)
             
             intf_obj.vrf_definition_mode = obj_local.vrf.vrf_definition_mode
             intf_obj.vrf = vrf
@@ -3461,16 +3608,40 @@ def new_back_endpoint(entity, smodelctx, sdata, device, **kwargs):
                 intf_obj.maximum_segment_size = tcp_mss
             if util.isNotEmpty(bandwidth) or bandwidth is not None:
                 intf_obj.bandwidth = bandwidth
+            if bfd_enabled == "true":
+                intf_obj.bfd_options = "interval"
+                if util.isNotEmpty(bfd_interval):
+                    intf_obj.interval = bfd_interval
+                if util.isNotEmpty(bfd_min_rx):
+                    intf_obj.min_rx = bfd_min_rx
+                if util.isNotEmpty(bfd_multiplier):
+                    intf_obj.multiplier = bfd_multiplier
         elif entity == "customer_lan_ic":
             if util.isNotEmpty(tcp_mss) or tcp_mss is not None:
                 intf_obj.maximum_segment_size = tcp_mss
             if util.isNotEmpty(bandwidth) or bandwidth is not None:
                 intf_obj.bandwidth = bandwidth
+            if bfd_enabled == "true":
+                intf_obj.bfd_options = "interval"
+                if util.isNotEmpty(bfd_interval):
+                    intf_obj.interval = bfd_interval
+                if util.isNotEmpty(bfd_min_rx):
+                    intf_obj.min_rx = bfd_min_rx
+                if util.isNotEmpty(bfd_multiplier):
+                    intf_obj.multiplier = bfd_multiplier
         elif entity == "customer_lan_ic_triple":
             if util.isNotEmpty(tcp_mss) or tcp_mss is not None:
                 intf_obj.maximum_segment_size = tcp_mss
             if util.isNotEmpty(bandwidth) or bandwidth is not None:
                 intf_obj.bandwidth = bandwidth
+            if bfd_enabled == "true":
+                intf_obj.bfd_options = "interval"
+                if util.isNotEmpty(bfd_interval):
+                    intf_obj.interval = bfd_interval
+                if util.isNotEmpty(bfd_min_rx):
+                    intf_obj.min_rx = bfd_min_rx
+                if util.isNotEmpty(bfd_multiplier):
+                    intf_obj.multiplier = bfd_multiplier
 
     if interface_type == "Physical":
         if link_negotiation is not None:
@@ -3492,6 +3663,7 @@ def new_back_endpoint(entity, smodelctx, sdata, device, **kwargs):
         yang.Sdk.createData(device.url+'/interface:interfaces', intf_obj.getxml(filter=True), sdata.getSession(), False)
     else:
         yang.Sdk.createData(device.url+'/interface:interfaces', intf_obj.getxml(filter=True), sdata.getSession(), False)
+
 
     if mode == "sub-interface":
         intf_obj_phy = interfaces.interface.interface()
@@ -3607,9 +3779,9 @@ def new_back_endpoint(entity, smodelctx, sdata, device, **kwargs):
     if entity == "customer_lan_ic_dual" or entity == "customer_lan_ic_triple":
         
         uri = sdata.getRcPath()
-        util.log_debug('URI:', uri)
+        #util.log_debug('URI:', uri)
         parent_uri = uri[:uri.find(uri.split('/')[-2])]
-        util.log_debug('PARENT_URI:', parent_uri)
+        #util.log_debug('PARENT_URI:', parent_uri)
         yang.Sdk.createData('%s' % parent_uri, '<policy-update-services/>', sdata.getSession(), False)
         yang.Sdk.createData('%spolicy-update-services' % parent_uri, '<hsrp-update-service/>', sdata.getSession(), False)
         
@@ -3702,9 +3874,9 @@ def get_device_by_id(sdata, dev_id):
     key = 'deviceid.%s' % (dev_id)
     dev = sdata.getSessionItem(key)
     if dev != None:
-        util.log_debug('get_device_by_id:cache-hit key=%s' % (key))
+        #util.log_debug('get_device_by_id:cache-hit key=%s' % (key))
         return dev
-    util.log_debug('get_device_by_id:cache-miss key=%s' % (key))
+    #util.log_debug('get_device_by_id:cache-miss key=%s' % (key))
     dev = devicemgr.getDeviceById(dev_id)
     if dev != None:
         sdata.setSessionItem(key, dev, True)
@@ -3714,7 +3886,7 @@ def update_shape_avg(sdata, entity):
     device = None
     config = util.parseXmlString(sdata.getPayload())
     prevconfig = util.parseXmlString(sdata.getPreviousPayload())
-    util.log_debug( "prevconfig is:", prevconfig)
+    #util.log_debug( "prevconfig is:", prevconfig)
     if entity == 'cpe':
         config = config.cpe_wan
         prevconfig = prevconfig.cpe_wan
@@ -4630,6 +4802,36 @@ def update_lan_profile(sdata, **kwargs):
 def update_ic_profile(sdata, **kwargs):
     pass
 
+def dhcp_helper_address(sdata, device, **kwargs):
+    from servicemodel.controller.devices.device.interfaces.interface import helper_address
+    from servicemodel.controller.devices.device.interfaces.interface.helper_address import helper
+    inputdict = kwargs['inputdict']
+    helper_ip = inputdict['helper_address']
+    vrf = inputdict['vrf']
+
+    #Handle DHCP Helper IPv4 Provisoining
+    uri_dhcp_helper = sdata.getRcPath()
+    lan_uri = uri_dhcp_helper.split('/')
+    lan_if_obj = '/'.join(lan_uri[:-1])
+    xml_helper_output = yang.Sdk.getData(lan_if_obj, '', sdata.getTaskId())
+    obj_helper = util.parseXmlString(xml_helper_output)
+    #util.log_debug( "HelperObj: ",obj_helper)
+
+    #Compute Interface Name
+    if obj_helper.end_points.interface_type == "Physical":
+        interface_name = obj_helper.end_points.interface_name
+    elif obj_helper.end_points.interface_type == "Sub-Interface":
+        interface_name = obj_helper.end_points.interface_name + "." + str(obj_helper.end_points.vlan_id)
+    elif obj_helper.end_points.interface_type == "SVI":
+        interface_name = "Vlan" + str(obj_helper.end_points.vlan_id)
+    #util.log_debug( "HelperInterface: ",interface_name)
+
+    intf_helper_obj = helper_address.helper.helper()
+    intf_helper_obj.dest_address = helper_ip
+    if util.isNotEmpty(vrf):
+        intf_helper_obj.vrf = vrf
+
+    yang.Sdk.createData(device.url+'/interface:interfaces/interface=%s/helper-address' % util.make_interfacename(interface_name), intf_helper_obj.getxml(filter=True), sdata.getSession(), True)
 
 def loopback(smodelctx, sdata, dev, **kwargs):
     inputdict = kwargs["inputdict"]
@@ -4704,7 +4906,7 @@ def loopback(smodelctx, sdata, dev, **kwargs):
         vrf_url = url + '/vrfs/vrf=%s' % (vrf)
         xml_output = yang.Sdk.getData(vrf_url, '',sdata.getTaskId())
         obj = util.parseXmlString(xml_output)
-        util.log_debug( "obj: ",obj)
+        #util.log_debug( "obj: ",obj)
         intf_obj.vrf = vrf
         if util.isNotEmpty(obj.vrf.vrf_definition_mode):
             intf_obj.vrf_definition_mode = obj.vrf.vrf_definition_mode

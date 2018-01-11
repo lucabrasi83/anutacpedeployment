@@ -511,7 +511,14 @@ def eigrp(entity, smodelctx, sdata, dev, **kwargs):
     distance_internal_routes = inputdict['distance_internal_routes']
     distance_external_routes = inputdict['distance_external_routes']
     nsf = inputdict['nsf']
+    default_metric = inputdict['default_metric']
+    bandwidth_metric = inputdict['bandwidth_metric']
+    delay_metric = inputdict['delay_metric']
+    reliability_metric = inputdict['reliability_metric']
+    load_metric = inputdict['load_metric']
+    mtu_metric = inputdict['mtu_metric']
 
+    '''
     if util.isEmpty(vrf):
         if entity == 'cpe':
             obj = getLocalObject(sdata, 'single-cpe-site-services')
@@ -529,7 +536,15 @@ def eigrp(entity, smodelctx, sdata, dev, **kwargs):
             obj = getLocalObject(sdata, 'dual-cpe-site-services')
             if hasattr(obj.dual_cpe_site_services.cpe_secondary, 'vrf_name'):
                 vrf = obj.dual_cpe_site_services.cpe_secondary.vrf_name
-
+        elif entity == 'cpe_primary_dual':
+            obj = getLocalObject(sdata, 'dual-cpe-dual-wan-site-services')
+            if hasattr(obj.dual_cpe_dual_wan_site_services.cpe_primary, 'vrf_name'):
+                vrf = obj.dual_cpe_dual_wan_site_services.cpe_primary.vrf_name
+        elif entity == 'cpe_secondary_dual':
+            obj = getLocalObject(sdata, 'dual-cpe-dual-wan-site-services')
+            if hasattr(obj.dual_cpe_dual_wan_site_services.cpe_secondary, 'vrf_name'):
+                vrf = obj.dual_cpe_dual_wan_site_services.cpe_secondary.vrf_name
+    '''
     if util.isEmpty(vrf):
         vrf = 'GLOBAL'
 
@@ -549,6 +564,19 @@ def eigrp(entity, smodelctx, sdata, dev, **kwargs):
     eigrp_url = dev.url + '/l3features:vrfs/vrf=%s/router-eigrp' % (vrf)
     yang.Sdk.createData(eigrp_url, eigrp_obj.getxml(filter=True), sdata.getSession())
 
+    if default_metric == "true":
+        from servicemodel.controller.devices.device.vrfs.vrf.router_eigrp.eigrp.default_metric import default_metric
+
+        eigrp_metric_obj = default_metric()
+        eigrp_metric_obj.bandwidth_metric = bandwidth_metric
+        eigrp_metric_obj.delay_metric = delay_metric
+        eigrp_metric_obj.reliability_metric = reliability_metric
+        eigrp_metric_obj.load_metric = load_metric
+        eigrp_metric_obj.mtu = mtu_metric
+
+        eigrp_proc_url = eigrp_url + '/eigrp=%s' % (process_id)
+
+        yang.Sdk.createData(eigrp_proc_url, eigrp_metric_obj.getxml(filter=True), sdata.getSession())
 
 def eigrp_network(entity, smodelctx, sdata, dev, **kwargs):
     inputdict = kwargs['inputdict']
@@ -1084,13 +1112,13 @@ def object_group_def(source_object_group, dev, sdata):
         if util.isNotEmpty(obj.object_group.description):
             objectgroup_obj.description = obj.object_group.description
     objectgroup_url = dev.url + '/acl:object-groups-acl'
-    yang.Sdk.createData(dev.url, '<object-groups-acl/>', sdata.getSession())
+    #yang.Sdk.createData(dev.url, '<object-groups-acl/>', sdata.getSession())
     yang.Sdk.createData(objectgroup_url, objectgroup_obj.getxml(filter=True), sdata.getSession())
     if hasattr(obj.object_group, 'networks'):
         if hasattr(obj.object_group.networks, 'network'):
             for objectgroup in util.convert_to_list(obj.object_group.networks.network):
                 net_url = dev.url + '/acl:object-groups-acl/object-group=%s' %(obj.object_group.name)
-                yang.Sdk.createData(net_url, '<networks/>', sdata.getSession())
+                #yang.Sdk.createData(net_url, '<networks/>', sdata.getSession())
 
                 if hasattr(objectgroup, 'group_object'):
                     if util.isNotEmpty(objectgroup.group_object):
@@ -1130,6 +1158,94 @@ def object_group_def(source_object_group, dev, sdata):
                         network_url = dev.url + '/acl:object-groups-acl/object-group=%s/networks' %(obj.object_group.name)
                         yang.Sdk.createData(network_url, network_obj2.getxml(filter=True), sdata.getSession())
 
+    if hasattr(obj.object_group, 'services'):
+        if hasattr(obj.object_group.services, 'service'):
+
+            port_dict = { '179': 'bgp', '19': 'chargen', '514': 'cmd', '13': 'daytime', '9': 'discard', '53': 'domain',
+                          '3949': 'drip', '7': 'echo', '512': 'exec', '79': 'finger', '21': 'ftp', '20': 'ftp-data',
+                          '70': 'gopher', '101': 'hostname', '113': 'ident', '194': 'irc', '543': 'klogin', '544': 'kshell',
+                          '513': 'login', '515': 'lpd', '119': 'nntp', '15001': 'onep-plain', '15002': 'onep-tls', '496': 'pim-auto-rp',
+                          '109': 'pop2', '110': 'pop3', '25': 'smtp', '111': 'sunrpc', '49': 'tacacs', '517': 'talk', '23': 'telnet',
+                          '37': 'time', '540': 'uucp', '43': 'whois', '80': 'www', '135': 'msrpc'
+                          }
+            udp_port_dict = { '512': 'biff', '68': 'bootpc', '67': 'bootps', '9': 'discard', '195': 'dnsix',
+                          '53': 'domain', '7': 'echo', '500': 'isakmp', '434': 'mobile-ip', '42': 'nameserver', '138': 'netbios-dgm',
+                          '137': 'netbios-ns', '139': 'netbios-ss', '4500': 'non500-isakmp', '123': 'ntp', '496': 'pim-auto-rp',
+                          '520': 'rip', '161': 'snmp', '162': 'snmptrap', '111': 'sunrpc', '514': 'syslog', '49': 'tacacs',
+                          '517': 'talk', '69': 'tftp', '37': 'time', '513': 'who', '177': 'xdmcp', '135': 'msrpc'
+                          }
+            ip_prot_dict = { '47': 'gre', '1': 'icmp', '6': 'tcp', '17': 'udp', '51': 'ahp', '50': 'esp', '89': 'ospf',
+                             '4': 'ipinip', '88': 'eigrp', '2': 'igmp', '94': 'nos', '103': 'pim'
+                            }
+
+            service_url = dev.url + '/acl:object-groups-acl/object-group=%s/services' %(obj.object_group.name)
+
+            for objectgroup in util.convert_to_list(obj.object_group.services.service):
+                if hasattr(objectgroup, 'group_object'):
+                    if util.isNotEmpty(objectgroup.group_object):
+                        service_obj = object_groups_acl.object_group.services.service.service()
+                        service_obj.group_object = objectgroup.group_object
+                        service_obj.name = "group-object" + " " + objectgroup.group_object
+                        
+                        yang.Sdk.createData(service_url, service_obj.getxml(filter=True), sdata.getSession())
+
+                if hasattr(objectgroup, 'protocol_type'):
+                    if util.isNotEmpty(objectgroup.protocol_type):
+                        if objectgroup.protocol_type == "IP-Protocol-Number":
+                            service_obj1 = object_groups_acl.object_group.services.service.service()
+                            if util.isNotEmpty(objectgroup.ip_protocol):
+                                
+                                ip_prot_num = objectgroup.ip_protocol
+                                if ip_prot_num in ip_prot_dict:
+                                    ip_prot_num = ip_prot_dict[ip_prot_num]
+                                    service_obj1.protocol = ip_prot_num
+                                    service_obj1.name = ip_prot_num
+                                else:
+                                    service_obj1.ip_protocol = ip_prot_num
+                                    service_obj1.name = ip_prot_num
+
+                                yang.Sdk.createData(service_url, service_obj1.getxml(filter=True), sdata.getSession())
+                        
+                        if  objectgroup.protocol_type == "Protocol-Name":
+                            service_obj_name_list = []
+                            service_obj2 = object_groups_acl.object_group.services.service.service()
+                            if util.isNotEmpty(objectgroup.protocol_name):
+                                service_obj2.protocol = objectgroup.protocol_name
+                                service_obj_name_list.append(objectgroup.protocol_name)
+
+                            if hasattr(objectgroup, 'port_operation'):
+                                if util.isNotEmpty(objectgroup.port_operation):
+                                    service_obj2.operation = objectgroup.port_operation
+                                    service_obj_name_list.append(objectgroup.port_operation)
+
+                            if hasattr(objectgroup, 'operator'):
+                                if util.isNotEmpty(objectgroup.operator):
+                                    service_obj2.compare = objectgroup.operator
+                                    service_obj_name_list.append(objectgroup.operator)
+
+                            if hasattr(objectgroup, 'port_number'):
+                                if util.isNotEmpty(objectgroup.port_number):
+                                    port_num = objectgroup.port_number
+                                    if objectgroup.protocol_name == "tcp":
+                                        if port_num in port_dict:
+                                            port_num = port_dict[port_num]
+                                    elif objectgroup.protocol_name == "udp":
+                                        if port_num in udp_port_dict:
+                                            port_num = udp_port_dict[port_num]
+
+                                service_obj2.port = objectgroup.port_num
+                                service_obj_name_list.append(port_num)
+
+                            if hasattr(objectgroup, 'end_port'):
+                                if util.isNotEmpty(objectgroup.end_port):
+                                    service_obj2.end_port = objectgroup.end_port
+                                    service_obj_name_list.append(objectgroup.end_port)
+
+                            service_obj_name = ' '.join(service_obj_name_list)
+
+                            service_obj2.name = service_obj_name
+
+                            yang.Sdk.createData(service_url, service_obj2.getxml(filter=True), sdata.getSession())
 
 def access_list_rule(smodelctx, sdata, dev, access_list_name, **kwargs):
     inputdict = kwargs['inputdict']
@@ -1337,11 +1453,11 @@ def route_maps(redistroutepolicy, device, sdata, int_name=None, entity=None):
     log("route map obj is: %s" % (obj.customer.route_maps))
     if hasattr(obj.customer.route_maps, 'route_map'):
         obj.customer.route_maps.route_map = util.convert_to_list(obj.customer.route_maps.route_map)
-        util.log_debug( "route map obj is:",obj.customer.route_maps.route_map)
+        #util.log_debug( "route map obj is:",obj.customer.route_maps.route_map)
         for route_map_obj in obj.customer.route_maps.route_map:
             route_map_name = route_map_obj.get_field_value('route_map_name')
             if redistroutepolicy == route_map_name :
-                util.log_debug( "route_map_name is:",route_map_name)
+                #util.log_debug( "route_map_name is:",route_map_name)
                 route_maps_url = device.url + '/l3features:route-maps'
                 from servicemodel.controller.devices.device import route_maps
                 routemap_obj = route_maps.route_map.route_map()
@@ -1645,7 +1761,7 @@ def as_path_acl(condition_value, device, sdata):
 
     xml_output = yang.Sdk.getData(url+"/as-path-acls", '',sdata.getTaskId())
     obj = util.parseXmlString(xml_output)
-    util.log_debug( "obj: ",obj)
+    #util.log_debug( "obj: ",obj)
     yang.Sdk.createData(device.url, '<as-path-acls/>', sdata.getSession())
 
     if hasattr(obj.as_path_acls, 'as_path_acl'):
@@ -1865,7 +1981,7 @@ def staticroute(smodelctx, sdata, dev, **kwarg):
                     is_vrf_exists = False
                     is_vrf = yang.Sdk.getData(dev.url, '', sdata.getTaskId())
                     is_vrf_exists_obj = util.parseXmlString(is_vrf)
-                    util.log_debug( "is_vrf_obj is:", is_vrf_exists_obj)
+                    #util.log_debug( "is_vrf_obj is:", is_vrf_exists_obj)
                     if hasattr(is_vrf_exists_obj.device, 'vrfs'):
                         if hasattr(is_vrf_exists_obj.device.vrfs, 'vrf'):
                             vrf_check_all = util.convert_to_list(is_vrf_exists_obj.device.vrfs.vrf)
@@ -1880,7 +1996,7 @@ def staticroute(smodelctx, sdata, dev, **kwarg):
             raise Exception('VRF is not part of customer')
         is_vrf_xml_output = yang.Sdk.getData(dev.url, '', sdata.getTaskId())
         is_vrf_obj = util.parseXmlString(is_vrf_xml_output)
-        util.log_debug( "is_vrf_obj is:", is_vrf_obj)
+        #util.log_debug( "is_vrf_obj is:", is_vrf_obj)
         if not hasattr(is_vrf_obj.device, 'vrfs'):
             yang.Sdk.createData(dev.url, '<vrfs/>', sdata.getSession(), False)
 
@@ -1892,7 +2008,7 @@ def staticroute(smodelctx, sdata, dev, **kwarg):
 
     yang.Sdk.createData(static_routes_url, '<routes/>', sdata.getSession(), False)
     obj_local = getLocalObject(sdata, 'static-route=')
-    util.log_debug("static route obj is:",obj_local.static_route)
+    #util.log_debug("static route obj is:",obj_local.static_route)
 
     static_obj1.dest_ip_address = obj_local.static_route.dest_ip_address
     static_obj1.dest_mask = obj_local.static_route.dest_mask
@@ -2000,11 +2116,11 @@ def staticroute(smodelctx, sdata, dev, **kwarg):
 def community_lists(community_list_name_given, device, sdata, **kwargs):
     #yang.Sdk.createData(device.url, '<community-lists/>', sdata.getSession(), False)
     obj = getLocalObject(sdata, 'customer')
-    util.log_debug( "obj of communitylist is: ",obj)
-    util.log_debug( "communitylist obj is:",obj.customer.community_lists)
+    #util.log_debug( "obj of communitylist is: ",obj)
+    #util.log_debug( "communitylist obj is:",obj.customer.community_lists)
     if hasattr(obj.customer.community_lists, 'community_list'):
         obj.customer.community_lists.community_list = util.convert_to_list(obj.customer.community_lists.community_list)
-        util.log_debug( "communitylist obj is:",obj.customer.community_lists.community_list)
+        #util.log_debug( "communitylist obj is:",obj.customer.community_lists.community_list)
         for community_list_obj in obj.customer.community_lists.community_list:
             community_list_name = community_list_obj.get_field_value('community_list_name')
             if community_list_name_given == community_list_name:
@@ -2042,10 +2158,10 @@ def community_list(sdata, device, community_list_obj_given):
 def extcommunity_lists(extcommunity_list_name_given, dev, sdata, **kwargs):
     #yang.Sdk.createData(dev.url, '<extcommunity-lists/>', sdata.getSession(), False)
     obj = getLocalObject(sdata, 'customer')
-    util.log_debug( "extcommunitylist obj is:",obj.customer.extcommunity_lists)
+    #util.log_debug( "extcommunitylist obj is:",obj.customer.extcommunity_lists)
     if hasattr(obj.customer.extcommunity_lists, 'extcommunity_list'):
         obj.customer.extcommunity_lists.extcommunity_list = util.convert_to_list(obj.customer.extcommunity_lists.extcommunity_list)
-        util.log_debug( "extcommunitylist obj is:",obj.customer.extcommunity_lists.extcommunity_list)
+        #util.log_debug( "extcommunitylist obj is:",obj.customer.extcommunity_lists.extcommunity_list)
         for extcommunity_list_obj in obj.customer.extcommunity_lists.extcommunity_list:
             extcommunity_list_name = extcommunity_list_obj.get_field_value('extcommunity_list_name')
             if extcommunity_list_name_given == extcommunity_list_name :
@@ -2144,7 +2260,7 @@ def interface(entity, dev, sdata, **kwarg):
         match_condition_rpc = '/controller:devices/device=%s/l3features:route-maps/route-map=%s/route-map-entries=%s/match-condition=interface,%s' % (dev.device.id,redistconnected,seq_num,value)
         output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+match_condition_rpc+'</rc-path></input>')
         ref = util.parseXmlString(output)
-        util.log_debug("xml_op:%s" %(ref))
+        #util.log_debug("xml_op:%s" %(ref))
         if hasattr(ref.output, 'references'):
             if hasattr(ref.output.references, 'reference'):
                 if hasattr(ref.output.references.reference, 'src_node'):
@@ -2200,7 +2316,7 @@ def interface_eigrp(entity, dev, sdata, **kwarg):
                             match_condition_rpc = '/controller:devices/device=%s/l3features:route-maps/route-map=%s/route-map-entries=%s/match-condition=interface,%s' % (dev.device.id,redistconnected,seq_num,value)
                             output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+match_condition_rpc+'</rc-path></input>')
                             ref = util.parseXmlString(output)
-                            util.log_debug("xml_op:%s" %(ref))
+                            #util.log_debug("xml_op:%s" %(ref))
                             if hasattr(ref.output, 'references'):
                                if hasattr(ref.output.references, 'reference'):
                                    if hasattr(ref.output.references.reference, 'src_node'):
@@ -2256,7 +2372,7 @@ def interface_ospf(entity, dev, sdata, **kwarg):
                             match_condition_rpc = '/controller:devices/device=%s/l3features:route-maps/route-map=%s/route-map-entries=%s/match-condition=interface,%s' % (dev.device.id,redistconnected,seq_num,value)
                             output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+match_condition_rpc+'</rc-path></input>')
                             ref = util.parseXmlString(output)
-                            util.log_debug("xml_op:%s" %(ref))
+                            #util.log_debug("xml_op:%s" %(ref))
                             if hasattr(ref.output, 'references'):
                                if hasattr(ref.output.references, 'reference'):
                                    if hasattr(ref.output.references.reference, 'src_node'):
@@ -2270,9 +2386,9 @@ def get_device_by_id(sdata, dev_id):
     key = 'deviceid.%s' % (dev_id)
     dev = sdata.getSessionItem(key)
     if dev != None:
-        util.log_debug('get_device_by_id:cache-hit key=%s' % (key))
+        #util.log_debug('get_device_by_id:cache-hit key=%s' % (key))
         return dev
-    util.log_debug('get_device_by_id:cache-miss key=%s' % (key))
+    #util.log_debug('get_device_by_id:cache-miss key=%s' % (key))
     dev = devicemgr.getDeviceById(dev_id)
     if dev != None:
         sdata.setSessionItem(key, dev, True)
@@ -2282,7 +2398,7 @@ def update_ip_sla(sdata, entity):
     device = None
     config = util.parseXmlString(sdata.getPayload())
     prevconfig = util.parseXmlString(sdata.getPreviousPayload())
-    util.log_debug( "prevconfig is:", prevconfig)
+    #util.log_debug( "prevconfig is:", prevconfig)
     if entity == 'cpe':
         config = config.sla
         prevconfig = prevconfig.sla
@@ -2532,6 +2648,68 @@ def update_ip_sla(sdata, entity):
         tracks_url = device.url + '/l3features:tracks'
         yang.Sdk.createData(tracks_url, tracks_obj.getxml(filter=True), sdata.getSession())
 
+def crypto_isakmp_peer(sdata, device, **kwargs):
+    from servicemodel.controller.devices.device import crypto_peers
+    
+    
+    inputdict = kwargs['inputdict']
+    attr_name = inputdict['name']
+    attr_type = inputdict['attribute_type']
+    attr_password = inputdict['password']
+    attr_ep_type = inputdict['endpoint_type']
+    attr_fqdn = inputdict['fqdn']
+    attr_ipv4 = inputdict['ipv4_address']
+    attr_user_fqdn = inputdict['user_fqdn']
+
+    #Create ISAKMP Peer
+    obj_peer = getLocalObject(sdata, 'peers')
+    if hasattr(obj_peer.peers, 'peer_address'):
+        peer_address = obj_peer.peers.peer_address
+    if hasattr(obj_peer.peers, 'vrf'):
+        vrf = obj_peer.peers.vrf
+
+    crypto_peer_obj = crypto_peers.crypto_peer.crypto_peer()
+    crypto_peer_id = "crypto isakmp peer address %s" % (peer_address)
+
+    crypto_peer_obj.id = crypto_peer_id
+    crypto_peer_obj.ike_version = "IKEV1"
+    crypto_peer_obj.address = peer_address
+
+    if util.isNotEmpty(vrf):
+        crypto_peer_id += " vrf %s" % (vrf)
+        crypto_peer_obj.id = crypto_peer_id
+        crypto_peer_obj.vrf_name = vrf
+
+    yang.Sdk.createData(device.url, '<crypto-peers/>', sdata.getSession(), False)
+
+    yang.Sdk.createData(device.url + '/dmvpn:crypto-peers', crypto_peer_obj.getxml(filter=True), sdata.getSession(), True)
+
+    #Create ISAKMP Peer Attributes
+    crypto_peer_obj_attr = crypto_peers.crypto_peer.set_attributes.set_attributes()
+    crypto_isakmp_peer_attr_url = device.url + '/dmvpn:crypto-peers/crypto-peer=%s' % (crypto_peer_id.replace(' ', '%20'))
+    if util.isNotEmpty(attr_type):
+        if attr_type == "password":
+            if util.isNotEmpty(attr_password):
+                crypto_peer_obj_attr.attribute = "password"
+                crypto_peer_obj_attr.password = attr_password
+
+                yang.Sdk.createData(crypto_isakmp_peer_attr_url, crypto_peer_obj_attr.getxml(filter=True), sdata.getSession(), True)                
+
+        elif attr_type == "client-endpoint":
+            crypto_peer_obj_attr.attribute = "client-endpoint"
+            if util.isNotEmpty(attr_ep_type):
+                if attr_ep_type == "fqdn":
+                    crypto_peer_obj_attr.endpoint = "fqdn"
+                    crypto_peer_obj_attr.fqdn = attr_fqdn
+                elif attr_ep_type == "ipv4-address":
+                    crypto_peer_obj_attr.endpoint = "ipv4-address"
+                    crypto_peer_obj_attr.fqdn = attr_ipv4
+                elif attr_ep_type == "user-fqdn":
+                    crypto_peer_obj_attr.endpoint = "user-fqdn"
+                    crypto_peer_obj_attr.fqdn = attr_user_fqdn
+    
+                yang.Sdk.createData(crypto_isakmp_peer_attr_url, crypto_peer_obj_attr.getxml(filter=True), sdata.getSession(), True)
+
 def vrf(entity, dev, sdata, **kwarg):
 
     print "Entering into vrf creation"
@@ -2539,10 +2717,15 @@ def vrf(entity, dev, sdata, **kwarg):
     vrf_name = kwarg['inputdict']['vrf_name']
     if util.isEmpty(vrf_name):
         vrf_name = "GLOBAL"
-    is_vrf_xml_output = yang.Sdk.getData(dev.url, '', sdata.getTaskId())
-    is_vrf_obj = util.parseXmlString(is_vrf_xml_output)
-    if not hasattr(is_vrf_obj.device, 'vrfs'):
+    #is_vrf_xml_output = yang.Sdk.getData(dev.url, '', sdata.getTaskId())
+    #is_vrf_obj = util.parseXmlString(is_vrf_xml_output)
+    #if not hasattr(is_vrf_obj.device, 'vrfs'):
+    dev_url = dev.url
+    #util.log_debug("dev_url:", dev_url)
+    dev_url = dev_url.split("data/")[1]
+    if not yang.Sdk.dataExists(dev_url + "/l3features:vrfs"):
         yang.Sdk.createData(dev.url, '<vrfs/>', sdata.getSession(), False)
+        
 
     uri = sdata.getRcPath()
     uri_list = uri.split('/',5)
@@ -2551,7 +2734,7 @@ def vrf(entity, dev, sdata, **kwarg):
     if vrf_name != 'GLOBAL':
         xml_output = yang.Sdk.getData(url+"/vrfs", '',sdata.getTaskId())
         obj = util.parseXmlString(xml_output)
-        util.log_debug( "obj: ",obj)
+        #util.log_debug( "obj: ",obj)
 
         if hasattr(obj.vrfs, 'vrf'):
             obj.vrfs.vrf = util.convert_to_list(obj.vrfs.vrf)
@@ -2568,15 +2751,17 @@ def vrf(entity, dev, sdata, **kwarg):
                     if util.isNotEmpty(vrf.vrf_definition_mode):
                         vrfobj.vrf_definition_mode = vrf.vrf_definition_mode
                     is_vrf_exists = False
-                    is_vrf = yang.Sdk.getData(dev.url, '', sdata.getTaskId())
-                    is_vrf_exists_obj = util.parseXmlString(is_vrf)
-                    util.log_debug( "is_vrf_obj is:", is_vrf_exists_obj)
-                    if hasattr(is_vrf_exists_obj.device, 'vrfs'):
-                        if hasattr(is_vrf_exists_obj.device.vrfs, 'vrf'):
-                            vrf_check_all = util.convert_to_list(is_vrf_exists_obj.device.vrfs.vrf)
-                            for vrf_check in vrf_check_all:
-                                if vrf_check.name == vrf_name:
-                                    is_vrf_exists = True
+                    #is_vrf = yang.Sdk.getData(dev.url, '', sdata.getTaskId())
+                    #is_vrf_exists_obj = util.parseXmlString(is_vrf)
+                    #util.log_debug( "is_vrf_obj is:", is_vrf_exists_obj)
+                    #if hasattr(is_vrf_exists_obj.device, 'vrfs'):
+                        #if hasattr(is_vrf_exists_obj.device.vrfs, 'vrf'):
+                            #vrf_check_all = util.convert_to_list(is_vrf_exists_obj.device.vrfs.vrf)
+                            #for vrf_check in vrf_check_all:
+                                #if vrf_check.name == vrf_name:
+                                    #is_vrf_exists = True
+                    if yang.Sdk.dataExists(dev_url + "/vrfs/vrf=%s" % (vrf_name)):
+                        is_vrf_exists = True
                     if not is_vrf_exists:
                         yang.Sdk.createData(dev.url + '/l3features:vrfs', vrfobj.getxml(filter=True), sdata.getSession())
                     if hasattr(vrf, 'rt_import'):
@@ -2716,47 +2901,47 @@ def vrf(entity, dev, sdata, **kwarg):
         yang.Sdk.createData(router_bgp_url, bgpobj.getxml(filter=True), sdata.getSession())
 
     if util.isNotEmpty(peer_group):
-        xml_output = yang.Sdk.getData(url+"/bgp-peer-groups", '',sdata.getTaskId())
-        obj = util.parseXmlString(xml_output)
-        util.log_debug( "obj: ",obj)
         remote_as = peer_description = next_hop_self = send_community = import_route_map = None
         export_route_map = soft_reconfiguration = password = default_originate = None
         default_originate_route_map = timers = keepalive_interval = holdtime = None
         advertisement_interval = time_in_sec = None
-        if hasattr(obj.bgp_peer_groups, 'bgp_peer_group'):
-            obj.bgp_peer_groups.bgp_peer_group = util.convert_to_list(obj.bgp_peer_groups.bgp_peer_group)
-            for peergroup in obj.bgp_peer_groups.bgp_peer_group:
-                if peergroup.peer_group == peer_group:
-                    if hasattr(peergroup, 'remote_as'):
-                        remote_as = peergroup.remote_as
-                    if hasattr(peergroup, 'peer_description'):
-                        peer_description = peergroup.peer_description
-                    if hasattr(peergroup, 'next_hop_self'):
-                        next_hop_self = peergroup.next_hop_self
-                    if hasattr(peergroup, 'send_community'):
-                        send_community = peergroup.send_community
-                    if hasattr(peergroup, 'import_route_map'):
-                        import_route_map = peergroup.import_route_map
-                    if hasattr(peergroup, 'export_route_map'):
-                        export_route_map = peergroup.export_route_map
-                    if hasattr(peergroup, 'soft_reconfiguration'):
-                        soft_reconfiguration = peergroup.soft_reconfiguration
-                    if hasattr(peergroup, 'password'):
-                        password = peergroup.password
-                    if hasattr(peergroup, 'default_originate'):
-                        default_originate = peergroup.default_originate
-                    if hasattr(peergroup, 'default_originate_route_map'):
-                        default_originate_route_map = peergroup.default_originate_route_map
-                    if hasattr(peergroup, 'timers'):
-                        timers = peergroup.timers
-                    if hasattr(peergroup, 'keepalive_interval'):
-                        keepalive_interval = peergroup.keepalive_interval
-                    if hasattr(peergroup, 'holdtime'):
-                        holdtime = peergroup.holdtime
-                    if hasattr(peergroup, 'advertisement_interval'):
-                        advertisement_interval = peergroup.advertisement_interval
-                    if hasattr(peergroup, 'time_in_sec'):
-                        time_in_sec = peergroup.time_in_sec
+
+        get_bgp_url = url + "/bgp-peer-groups/bgp-peer-group=%s" %(peer_group)
+        if yang.Sdk.dataExists(get_bgp_url):
+            xml_output = yang.Sdk.getData(get_bgp_url, '',sdata.getTaskId())
+            peergroup = util.parseXmlString(xml_output)
+            #util.log_debug( "obj: ",peergroup)
+            peergroup = peergroup.bgp_peer_group
+            if hasattr(peergroup, 'remote_as'):
+                remote_as = peergroup.remote_as
+            if hasattr(peergroup, 'peer_description'):
+                peer_description = peergroup.peer_description
+            if hasattr(peergroup, 'next_hop_self'):
+                next_hop_self = peergroup.next_hop_self
+            if hasattr(peergroup, 'send_community'):
+                send_community = peergroup.send_community
+            if hasattr(peergroup, 'import_route_map'):
+                import_route_map = peergroup.import_route_map
+            if hasattr(peergroup, 'export_route_map'):
+                export_route_map = peergroup.export_route_map
+            if hasattr(peergroup, 'soft_reconfiguration'):
+                soft_reconfiguration = peergroup.soft_reconfiguration
+            if hasattr(peergroup, 'password'):
+                password = peergroup.password
+            if hasattr(peergroup, 'default_originate'):
+                default_originate = peergroup.default_originate
+            if hasattr(peergroup, 'default_originate_route_map'):
+                default_originate_route_map = peergroup.default_originate_route_map
+            if hasattr(peergroup, 'timers'):
+                timers = peergroup.timers
+            if hasattr(peergroup, 'keepalive_interval'):
+                keepalive_interval = peergroup.keepalive_interval
+            if hasattr(peergroup, 'holdtime'):
+                holdtime = peergroup.holdtime
+            if hasattr(peergroup, 'advertisement_interval'):
+                advertisement_interval = peergroup.advertisement_interval
+            if hasattr(peergroup, 'time_in_sec'):
+                time_in_sec = peergroup.time_in_sec
 
         bgp_neighbor_obj = vrfs.vrf.router_bgp.peer_group.peer_group()
         bgp_neighbor_obj.name = peer_group
