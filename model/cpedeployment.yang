@@ -225,6 +225,15 @@ module cpedeployment {
     type enumeration {
       enum "precedence";
       enum "dscp";
+      enum "echo";
+      enum "echo-reply";
+      enum "established";
+      enum "fragments";
+      enum "ttl-exceeded";
+      enum "ttl";
+      enum "tos";
+      enum "port-unreachable";
+      enum "log-input";
     }
   }
 
@@ -760,6 +769,7 @@ module cpedeployment {
       enum "stun-nat";
       enum "rdp";
       enum "icmp";
+      enum "mgcp";
     }
   }
 
@@ -3347,7 +3357,7 @@ module cpedeployment {
         path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../../name]/vrfs/vrf/vrf-name";
       }
       //n-ext:maps-to "/ac:devices/device[id=current()/../../../device-ip]/l3:vrfs/vrf/name";
-      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:ip-sla/sla/vrf-name";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:ip-sla/sla[entry-number=current()/../entry-number]/vrf-name";
     }
     leaf operation-type {
       type enumeration {
@@ -3653,7 +3663,7 @@ module cpedeployment {
       }
       description
         "interface-name";
-      n-ext:maps-to "/ac:devices/ac:device/if:interfaces/interface/name";
+      //n-ext:maps-to "/ac:devices/ac:device/if:interfaces/interface/name";
       when " ../redistribute-connected = 'true' ";
       config false;
     }
@@ -3684,7 +3694,7 @@ module cpedeployment {
       description
         "string";
       when " ../aggregate-summary-networks = 'true' ";
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/aggregate-summary-network/network";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/aggregate-summary-network/network";
       config false;
     }
   }
@@ -5232,7 +5242,7 @@ module cpedeployment {
       type string;
       description
         "string";
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/description";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/description";
     }
     leaf remote-as {
       type inet:as-number;
@@ -5240,14 +5250,14 @@ module cpedeployment {
       description
         "string";
       //n-ext:maps-to "/ac:devices/device/l3:vrfs/vrf/router-bgp/neighbor/as-number";
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/remote-as";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/remote-as";
     }
     leaf password {
       type string-no-space;
       description
         "string";
       //n-ext:maps-to "/ac:devices/device/l3:vrfs/vrf/router-bgp/neighbor/password";
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/password";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/password";
     }
     leaf import-route-map {
       type leafref {
@@ -5257,7 +5267,7 @@ module cpedeployment {
       description
         "import-route-map";
       //n-ext:maps-to "/ac:devices/device/l3:vrfs/vrf/router-bgp/neighbor/inbound-routepolicy";
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/in-route-map";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/in-route-map";
     }
     leaf export-route-map {
       type leafref {
@@ -5267,28 +5277,28 @@ module cpedeployment {
       description
         "export-route-map";
       //n-ext:maps-to "/ac:devices/device/l3:vrfs/vrf/router-bgp/neighbor/outbound-routepolicy";
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/out-route-map";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/out-route-map";
     }
     leaf next-hop-self {
       type boolean;
       description
         "next-hop-self: True/False";
       //n-ext:maps-to "/ac:devices/device/l3:vrfs/vrf/router-bgp/neighbor/next-hop-self";
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/next-hop-self";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/next-hop-self";
     }
     leaf soft-reconfiguration {
       type boolean;
       description
         "soft-reconfiguration: True/False";
       //n-ext:maps-to "/ac:devices/device/l3:vrfs/vrf/router-bgp/neighbor/soft-reconfiguration";
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/soft-reconfiguration";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/soft-reconfiguration";
     }
     leaf default-originate {
       type boolean;
       description
         "default-originate: True/False";
       //n-ext:maps-to "/ac:devices/device/l3:vrfs/vrf/router-bgp/neighbor/default-originate";
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/default-originate";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/default-originate";
     }
     leaf default-originate-route-map {
       type leafref {
@@ -5299,28 +5309,28 @@ module cpedeployment {
         "default-originate-route-map";
       when "../default-originate = 'true'";
       //n-ext:maps-to "/ac:devices/device/l3:vrfs/vrf/router-bgp/neighbor/def-originate-route-map";
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/def-originate-route-map";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/def-originate-route-map";
     }
     leaf send-community {
       type boolean;
       description
         "send-community: True/False";
       //n-ext:maps-to "/ac:devices/device/l3:vrfs/vrf/router-bgp/neighbor/send-community";
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/send-community";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/send-community";
     }
     leaf encrypted-password {
       type boolean;
       description
         "encrypted-password: True/False";
       //n-ext:maps-to "/ac:devices/device/l3:vrfs/vrf/router-bgp/neighbor/encryption";
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/encryption";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/encryption";
       config false;
     }
     leaf advertisement-interval {
       type boolean;
       description
         "advertisement-interval: True/False";
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/advertisement-interval";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/advertisement-interval";
     }
     leaf time-in-sec {
       type uint16 {
@@ -5340,7 +5350,7 @@ module cpedeployment {
       type uint16 {
         range "0..65535";
       }
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/keepalive-interval";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/keepalive-interval";
       description
         "0..65535";
       default "10";
@@ -5350,7 +5360,7 @@ module cpedeployment {
       type uint16 {
         range "0..65535";
       }
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/holdtime";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/holdtime";
       description
         "0..65535";
       default "30";
@@ -7962,7 +7972,8 @@ module cpedeployment {
             "Enter Site BGP AS Number";
           mandatory true;
           //n-ext:maps-to "/ac:devices/device/l3:vrfs/vrf/router-bgp/as-number";
-          n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf[name=GLOBAL]/router-bgp/as-number";
+          //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf[name=GLOBAL]/router-bgp/as-number";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../cpe-primary/device-ip]/l3:vrfs/vrf[name=GLOBAL]/router-bgp/as-number";
         }
         leaf zero-touch-prov {
           type boolean;
@@ -8015,7 +8026,8 @@ module cpedeployment {
           description
             "Enter Site BGP AS Number";
           mandatory true;
-          n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/as-number";
+          //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/as-number";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../cpe-primary/device-ip]/l3:vrfs/vrf[name=GLOBAL]/router-bgp/as-number";
         }
         leaf zero-touch-prov {
           type boolean;
@@ -10972,7 +10984,8 @@ module cpedeployment {
           description
             "Enter BGP AS Number";
           mandatory true;
-          n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/as-number";
+          //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/as-number";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../cpe-primary/device-ip]/l3:vrfs/vrf[name=GLOBAL]/router-bgp/as-number";
         }
         leaf zero-touch-prov {
           type boolean;
@@ -14029,7 +14042,7 @@ module cpedeployment {
       description
         "Check if EIGRP Split-Horizon should be enabled on the interface";
       //n-ext:maps-to "/ac:devices/device[id=current()/../../../device-ip]/l3features:eigrp/router-eigrp[eigrp-name=current()/../name]/address-family[as-number=current()/../as-number]/af-interface/split-horizon";
-      n-ext:maps-to "/ac:devices/ac:device/if:interfaces/interface[long-name=current()/../../interface-name]/eigrp/as-number[as-number=current()/../as-number]/split-horizon";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../device-ip]/if:interfaces/interface[long-name=current()/../../interface-name]/eigrp/as-number[as-number=current()/../as-number]/split-horizon";
     }
     list summary-network {
       key "prefix";
@@ -14946,7 +14959,8 @@ module cpedeployment {
           description
             "Enter Site BGP AS Number";
           mandatory true;
-          n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/as-number";
+          //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/as-number";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../cpe/device-ip]/l3:vrfs/vrf[name=GLOBAL]/router-bgp/as-number";
         }
         leaf zero-touch-prov {
           type boolean;
@@ -15147,7 +15161,8 @@ module cpedeployment {
           description
             "Enter Site BGP AS Number";
           mandatory true;
-          n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf[name=GLOBAL]/router-bgp/as-number";
+          //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf[name=GLOBAL]/router-bgp/as-number";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../cpe/device-ip]/l3:vrfs/vrf[name=GLOBAL]/router-bgp/as-number";
         }
         leaf zero-touch-prov {
           type boolean;
@@ -17036,7 +17051,7 @@ module cpedeployment {
           "string";
         when "../destination-condition =  'cidr' or ../destination-condition =  'host'";
         n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/acl:access-lists/access-list[name=current()/../../name]/acl-rules/acl-rule[name=current()/../name]/dest-ip";
-        n-ext:maps-to "/ac:devices/ac:device/acl:access-lists/access-list[name=current()/../../name]/acl-rules/acl-rule[name=current()/../name]";
+        n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/acl:access-lists/access-list[name=current()/../../name]/acl-rules/acl-rule[name=current()/../name]";
         n-ext:prefix-maps-to "dest-ip,dest-mask";
       }
       leaf destination-object-group {

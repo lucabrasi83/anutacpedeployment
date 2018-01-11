@@ -970,7 +970,7 @@ def access_list(smodelctx, sdata, dev, **kwargs):
     '''
     get_access_list_obj = dev.url+"/acl:access-lists/access-list=%s"%(inputdict['name'])
     if not yang.Sdk.dataExists(get_access_list_obj):
-        yang.Sdk.createData(dev.url, '<access-lists/>', sdata.getSession(), False)
+        #yang.Sdk.createData(dev.url, '<access-lists/>', sdata.getSession(), False)
         access_obj_url = dev.url + '/access-lists'
         yang.Sdk.createData(access_obj_url, access_obj.getxml(filter=True), sdata.getSession())
 

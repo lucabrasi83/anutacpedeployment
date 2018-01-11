@@ -1537,7 +1537,7 @@ def access_group_def(url, access_group, dev, sdata):
         access_obj.acl_type = access_list_entry
         if name is not None:
             access_obj.name = name
-    yang.Sdk.createData(dev.url, '<access-lists/>', sdata.getSession(), False)
+    #yang.Sdk.createData(dev.url, '<access-lists/>', sdata.getSession(), False)
 
     access_obj_url = dev.url + '/acl:access-lists'
     yang.Sdk.createData(access_obj_url, access_obj.getxml(filter=True), sdata.getSession())
