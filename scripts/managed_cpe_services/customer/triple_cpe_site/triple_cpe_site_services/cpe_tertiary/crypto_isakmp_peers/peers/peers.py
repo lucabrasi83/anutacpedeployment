@@ -83,8 +83,8 @@ class Peers(yang.AbstractYangServiceHandler):
         inputdict['vrf'] = config.get_field_value('vrf')
         # END OF FETCHING THE LEAF PARAMETERS
 
-        _Gen_obj = getLocalObject(sdata, 'cpe-primary')
-        device_mgmt_ip_address = _Gen_obj.cpe.device_ip
+        _Gen_obj = getLocalObject(sdata, 'cpe-tertiary')
+        device_mgmt_ip_address = _Gen_obj.cpe_tertiary.device_ip
 
         #Fetch Device Object
         dev = getDeviceObject(device_mgmt_ip_address, sdata)
@@ -124,8 +124,8 @@ class Peers(yang.AbstractYangServiceHandler):
         inputdict['vrf'] = config.get_field_value('vrf')
         # END OF FETCHING THE LEAF PARAMETERS
 
-        _Gen_obj = getLocalObject(sdata, 'cpe-primary')
-        device_mgmt_ip_address = _Gen_obj.cpe.device_ip
+        _Gen_obj = getLocalObject(sdata, 'cpe-tertiary')
+        device_mgmt_ip_address = _Gen_obj.cpe_tertiary.device_ip
 
         #Fetch Device Object
         dev = getDeviceObject(device_mgmt_ip_address, sdata)
@@ -157,8 +157,8 @@ class Peers(yang.AbstractYangServiceHandler):
         inputdict['vrf'] = config.get_field_value('vrf')
         # END OF FETCHING THE LEAF PARAMETERS
 
-        _Gen_obj = getLocalObject(sdata, 'cpe-primary')
-        device_mgmt_ip_address = _Gen_obj.cpe.device_ip
+        _Gen_obj = getLocalObject(sdata, 'cpe-tertiary')
+        device_mgmt_ip_address = _Gen_obj.cpe_tertiary.device_ip
 
         #Fetch Device Object
         dev = getDeviceObject(device_mgmt_ip_address, sdata)

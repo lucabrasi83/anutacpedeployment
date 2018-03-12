@@ -93,8 +93,8 @@ class Attribute(yang.AbstractYangServiceHandler):
         inputdict['user_fqdn'] = config.get_field_value('user_fqdn')
         # END OF FETCHING THE LEAF PARAMETERS
 
-        _Gen_obj = getLocalObject(sdata, 'cpe-primary')
-        device_mgmt_ip_address = _Gen_obj.cpe.device_ip
+        _Gen_obj = getLocalObject(sdata, 'cpe-tertiary')
+        device_mgmt_ip_address = _Gen_obj.cpe_tertiary.device_ip
 
         #Fetch Device Object
         dev = getDeviceObject(device_mgmt_ip_address, sdata)
@@ -149,8 +149,8 @@ class Attribute(yang.AbstractYangServiceHandler):
         pinputdict['ipv4_address'] = pconfig.get_field_value('ipv4_address')
         pinputdict['user_fqdn'] = pconfig.get_field_value('user_fqdn')
 
-        _Gen_obj = getLocalObject(sdata, 'cpe-primary')
-        device_mgmt_ip_address = _Gen_obj.cpe.device_ip
+        _Gen_obj = getLocalObject(sdata, 'cpe-tertiary')
+        device_mgmt_ip_address = _Gen_obj.cpe_tertiary.device_ip
 
         #Fetch Device Object
         dev = getDeviceObject(device_mgmt_ip_address, sdata)
@@ -187,8 +187,8 @@ class Attribute(yang.AbstractYangServiceHandler):
         inputdict['user_fqdn'] = config.get_field_value('user_fqdn')
         # END OF FETCHING THE LEAF PARAMETERS
 
-        _Gen_obj = getLocalObject(sdata, 'cpe-primary')
-        device_mgmt_ip_address = _Gen_obj.cpe.device_ip
+        _Gen_obj = getLocalObject(sdata, 'cpe-tertiary')
+        device_mgmt_ip_address = _Gen_obj.cpe_tertiary.device_ip
 
         #Fetch Device Object
         dev = getDeviceObject(device_mgmt_ip_address, sdata)

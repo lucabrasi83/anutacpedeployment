@@ -84,7 +84,7 @@ class Peers(yang.AbstractYangServiceHandler):
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'cpe-secondary')
-        device_mgmt_ip_address = _Gen_obj.cpe.device_ip
+        device_mgmt_ip_address = _Gen_obj.cpe_secondary.device_ip
 
         #Fetch Device Object
         dev = getDeviceObject(device_mgmt_ip_address, sdata)
@@ -125,7 +125,7 @@ class Peers(yang.AbstractYangServiceHandler):
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'cpe-secondary')
-        device_mgmt_ip_address = _Gen_obj.cpe.device_ip
+        device_mgmt_ip_address = _Gen_obj.cpe_secondary.device_ip
 
         #Fetch Device Object
         dev = getDeviceObject(device_mgmt_ip_address, sdata)
@@ -158,7 +158,7 @@ class Peers(yang.AbstractYangServiceHandler):
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'cpe-secondary')
-        device_mgmt_ip_address = _Gen_obj.cpe.device_ip
+        device_mgmt_ip_address = _Gen_obj.cpe_secondary.device_ip
 
         #Fetch Device Object
         dev = getDeviceObject(device_mgmt_ip_address, sdata)

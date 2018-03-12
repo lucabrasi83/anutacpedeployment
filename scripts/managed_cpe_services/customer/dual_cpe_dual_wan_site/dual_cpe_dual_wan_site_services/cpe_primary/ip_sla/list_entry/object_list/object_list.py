@@ -82,6 +82,7 @@ class ObjectList(yang.AbstractYangServiceHandler):
 
         # START OF FETCHING THE LEAF PARAMETERS
         inputdict['object_number'] = config.get_field_value('object_number')
+        inputdict['not'] = config.get_field_value('not')
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'cpe-primary')
@@ -123,12 +124,14 @@ class ObjectList(yang.AbstractYangServiceHandler):
 
         # START OF FETCHING THE LEAF PARAMETERS
         inputdict['object_number'] = config.get_field_value('object_number')
+        inputdict['not'] = config.get_field_value('not')
         # END OF FETCHING THE LEAF PARAMETERS
 
         pinputdict = {}
 
         # START OF FETCHING THE PREVIOUS LEAF PARAMETERS
         pinputdict['object_number'] = pconfig.get_field_value('object_number')
+        pinputdict['not'] = pconfig.get_field_value('not')
         _Gen_obj = getLocalObject(sdata, 'cpe-primary')
         device_mgmt_ip_address = _Gen_obj.cpe_primary.device_ip
 
@@ -159,6 +162,7 @@ class ObjectList(yang.AbstractYangServiceHandler):
 
         # START OF FETCHING THE LEAF PARAMETERS
         inputdict['object_number'] = config.get_field_value('object_number')
+        inputdict['not'] = config.get_field_value('not')
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'cpe-primary')

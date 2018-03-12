@@ -6,7 +6,7 @@
             <group>com.anuta.ncx.packages</group>
             <name>servicemodel</name>
             <order>0</order>
-            <version>6.0.3</version>
+            <version>6.0.3.4</version>
         </dependency>
         <dependency>
             <group>com.anuta.ncx.packages</group>
@@ -52,5 +52,5 @@
     <ncx-version>[6.0.3,)</ncx-version>
     <order>-1</order>
     <type>SERVICE_MODEL</type>
-    <version>6.0.3.3</version>
+    <version>6.0.7.7</version>
 </package>

@@ -225,6 +225,16 @@ module cpedeployment {
     type enumeration {
       enum "precedence";
       enum "dscp";
+      enum "echo";
+      enum "log";
+      enum "echo-reply";
+      enum "established";
+      enum "fragments";
+      enum "ttl-exceeded";
+      enum "ttl";
+      enum "tos";
+      enum "port-unreachable";
+      enum "log-input";
     }
   }
 
@@ -263,8 +273,8 @@ module cpedeployment {
 
   typedef string-no-lead-trail-space {
     type string {
-      pattern "^(\\S?)(?!\\s)(.*)(\\S+)$";
-      //pattern "^(\\S?)(.*)(\\S+)$";
+      //pattern "^(\\S?)(?!\\s)(.*)(\\S+)$";
+      pattern "^(\\S?)(.*)(\\S+)$";
     }
   }
 
@@ -2590,11 +2600,11 @@ module cpedeployment {
       //n-ext:ignore-for-brownfield;
       list route-map {
         key "route-map-name";
-        leaf ncx-unique-name {
+        /*leaf ncx-unique-name {
           type string;
           description
             "string";
-        }
+        }*/
         leaf route-map-name {
           type string-no-space;
           description
@@ -3332,6 +3342,47 @@ module cpedeployment {
     }
   }
 
+  grouping sla-responder-def {
+    leaf option-name {
+      type string;
+      default "responder";
+      description
+        "option-name";
+    }
+    leaf enable-responder {
+      type boolean;
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:ip-sla/responder/is-responder";
+      description
+        "Check to enable IP SLA Responder";
+    }
+    leaf sla-logging-traps {
+      type boolean;
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:ip-sla/responder/is-logging-traps";
+      description
+        "Check to enable IP SLA Logging Traps";
+    }
+    leaf server-twamp {
+      type boolean;
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:ip-sla/responder/is-server-twamp";
+      description
+        "Check to enable IP SLA Server TWAMP";
+    }
+    leaf server-twamp-port {
+      type uint16 {
+        range "0..65535";
+      }
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:ip-sla/responder/port";
+      description
+        "Specify IP SLA Server TWAMP Port";
+      when "../server-twamp = 'true'";
+    }
+    leaf responder-twamp {
+      type boolean;
+      description
+        "Enable IP SLA Responder TWAMP";
+    }
+  }
+
   grouping sla-def {
     leaf entry-number {
       type uint32 {
@@ -3625,6 +3676,12 @@ module cpedeployment {
           "Track List Object Number";
         n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:tracks/track[track-number=current()/../../list-track-number]/object-list/object-number";
       }
+      leaf not {
+        type boolean;
+        description
+          "Deletes a previously configured track based on whether an interface object is not up or down";
+        n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:tracks/track[track-number=current()/../../list-track-number]/object-list[object-number=current()/../object-number]/not";
+      }
     }
   }
 
@@ -3655,7 +3712,7 @@ module cpedeployment {
       }
       description
         "interface-name";
-      n-ext:maps-to "/ac:devices/ac:device/if:interfaces/interface/name";
+      //n-ext:maps-to "/ac:devices/ac:device/if:interfaces/interface/name";
       when " ../redistribute-connected = 'true' ";
       config false;
     }
@@ -3686,7 +3743,7 @@ module cpedeployment {
       description
         "string";
       when " ../aggregate-summary-networks = 'true' ";
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/aggregate-summary-network/network";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/aggregate-summary-network/network";
       config false;
     }
   }
@@ -3818,6 +3875,10 @@ module cpedeployment {
         key "list-track-number";
         uses list-def;
       }
+      list responder-options {
+        key "option-name";
+        uses sla-responder-def;
+      }
     }
     container access-lists {
       leaf sequence-number {
@@ -3885,6 +3946,19 @@ module cpedeployment {
       list peers {
         key "peer-address";
         uses crypto-isakmp-peer-def;
+      }
+    }
+    container acl-template {
+      list acl {
+        key "acl-name";
+        leaf acl-name {
+          type leafref {
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../../name]/access-lists/access-list/name";
+          }
+          description
+            "acl-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/acl:access-lists/acl:access-list/acl:name";
+        }
       }
     }
     container bridge {
@@ -5530,7 +5604,7 @@ module cpedeployment {
     leaf ospf {
       type boolean;
       description
-        "ospf: True/False";
+        "Check to enable OSPF. The LAN interface IP address/Mask will be added in OSPF process network statement";
       when "../interface-type =  'Physical' or ../interface-type =  'Sub-Interface' or ../interface-type =  'SVI'";
     }
     leaf priority {
@@ -5538,7 +5612,7 @@ module cpedeployment {
         range "0..255";
       }
       description
-        "OSPF Interface Priority";
+        "Enter OSPF Interface Priority";
       n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/ospf/priority";
       when "../ospf = 'true'";
     }
@@ -5547,14 +5621,14 @@ module cpedeployment {
         range "1..65535";
       }
       description
-        "1..65535";
+        "Enter OSPF Interface Cost";
       n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/ospf/cost";
       when "../ospf = 'true'";
     }
     leaf fast-hello {
       type boolean;
       description
-        "fast-hello: True/False";
+        "Check to enable OSPF Fast Hello";
       when "../ospf = 'true'";
     }
     leaf hello-multiplier {
@@ -5562,7 +5636,7 @@ module cpedeployment {
         range "3..20";
       }
       description
-        "3..20";
+        "Enter OSPF Fast Hello Multiplier";
       n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/ospf/hello-multiplier";
       when "../ospf = 'true' and ../fast-hello = 'true'";
     }
@@ -5571,7 +5645,7 @@ module cpedeployment {
         range "1..65535";
       }
       description
-        "1..65535";
+        "Enter OSPF Adjacency Hello Interval Timer";
       n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/ospf/hello-interval";
       when "../ospf = 'true' and ../fast-hello = 'false'";
     }
@@ -5580,22 +5654,26 @@ module cpedeployment {
         range "1..65535";
       }
       description
-        "1..65535";
+        "Enter OSPF Adjacency Dead Interval Timer";
       n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/ospf/dead-interval";
       when "../ospf = 'true' and ../fast-hello = 'false'";
     }
     leaf ospf-id {
       type uint16;
       description
-        "0..65535";
-      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/ospf/ospf-id";
+        "Enter OSPF Process ID";
+      //n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/ospf/ospf-id";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/l3:vrfs/l3:vrf[name=GLOBAL]/router-ospf/process-id";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/l3:vrfs/l3:vrf[name=current()/../vrf]/router-ospf/process-id";
       when "../ospf = 'true'";
     }
     leaf area {
-      type uint8;
+      type uint32;
       description
-        "0..255";
-      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/ospf/area";
+        "Enter OSPF Area ID";
+      //n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/ospf/area";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/l3:vrfs/l3:vrf[name=GLOBAL]/router-ospf[process-id=current()/../ospf-id]/network/area";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/l3:vrfs/l3:vrf[name=current()/../vrf]/router-ospf[process-id=current()/../ospf-id]/network/area";
       when "../ospf = 'true'";
     }
     leaf inbound-acl {
@@ -5700,6 +5778,13 @@ module cpedeployment {
     }
     list dhcp-helper-addresses {
       key "helper-address";
+      leaf sequence-number {
+        type string;
+        description
+          "string";
+        default "200";
+        config false;
+      }
       leaf helper-address {
         type inet:ipv4-address;
         description
@@ -6057,7 +6142,8 @@ module cpedeployment {
       type leafref {
         path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/route-maps/route-map/route-map-name";
       }
-      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/pbr-policy";
+      //n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/pbr-policy";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/l3features:route-maps/route-map/name";
       description
         "Select PBR Policy to apply on interface";
       when "../interface-type =  'Tunnel'";
@@ -6385,7 +6471,7 @@ module cpedeployment {
       }
       description
         "inbound-policy";
-      n-ext:maps-to "/ac:devices/ac:device/interface:interfaces/interface/inbound-qos";
+      //n-ext:maps-to "/ac:devices/ac:device/interface:interfaces/interface/inbound-qos";
       when "../hierarchical-inbound-policy = 'false'";
     }
     leaf outbound-lan-policy {
@@ -6394,7 +6480,7 @@ module cpedeployment {
       }
       description
         "Select QoS Outbound Policy";
-      n-ext:maps-to "/ac:devices/ac:device/interface:interfaces/interface/outbound-qos";
+      //n-ext:maps-to "/ac:devices/ac:device/interface:interfaces/interface/outbound-qos";
       when "../hierarchical-lan-outbound-policy = 'false'";
     }
     leaf hierarchical-inbound-policy {
@@ -6408,7 +6494,7 @@ module cpedeployment {
       }
       description
         "hierarchical-policy";
-      n-ext:maps-to "/ac:devices/ac:device/interface:interfaces/interface/inbound-qos";
+      //n-ext:maps-to "/ac:devices/ac:device/interface:interfaces/interface/inbound-qos";
       when "../hierarchical-inbound-policy = 'true'";
     }
     leaf hierarchical-lan-outbound-policy {
@@ -6431,7 +6517,14 @@ module cpedeployment {
       description
         "Enter Shape Average Rate for Outbound QoS Policy";
       //when "../hierarchical-lan-outbound-policy = 'true' ";
-      n-ext:maps-to "/ac:devices/ac:device/qos:policy-maps/policy-map[name=current()/../name]/class-entry/shape-average";
+      //n-ext:maps-to "/ac:devices/ac:device/qos:policy-maps/policy-map[name=current()/../name]/class-entry/shape-average";
+    }
+    leaf police-cir-rate {
+      type uint64 {
+        range "8000..10000000000";
+      }
+      description
+        "Enter Police Rate for Inbound QoS Policy";
     }
     leaf auto-negotiation {
       type boolean;
@@ -6637,18 +6730,26 @@ module cpedeployment {
         refine "static-routes/static-route/dest-ip-address" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:routes/route/dest-ip-address";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route/dest-ip-address";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route/dest-ip-address";
         }
         refine "static-routes/static-route/dest-mask" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../dest-ip-address]/dest-mask";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../dest-ip-address]/dest-mask";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../dest-ip-address]/dest-mask";
         }
         refine "static-routes/static-route/options/id" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options/id";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options/id";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options/id";
         }
         refine "static-routes/static-route/options/next-hop-ip" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/next-hop-ip";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/next-hop-ip";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/next-hop-ip";
         }
         //refine "static-routes/static-route/options/global-address" {
         //config false;
@@ -6657,34 +6758,54 @@ module cpedeployment {
         refine "static-routes/static-route/options/metric" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/metric";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/metric";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/metric";
         }
         refine "static-routes/static-route/options/interface-name" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/interface-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/interface-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/interface-name";
         }
         refine "static-routes/static-route/options/name" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/name";
         }
         refine "static-routes/static-route/options/vrf" {
           //config false;
-          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/vrf-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/vrf-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/vrf-name";
         }
         refine "static-routes/static-route/options/tag" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/tag";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/tag";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/tag";
         }
         refine "static-routes/static-route/options/permanent" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/permanent";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/permanent";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/permanent";
+        }
+        refine "static-routes/static-route/options/global-address" {
+          //config false;
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/global-address";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/global-address";
         }
         refine "static-routes/static-route/options/track" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/track";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/track";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/track";
         }
         refine "static-routes/static-route/options/description" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/description";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/description";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/description";
         }
         //refine "static-routes/static-route/options/seq-num" {
         //config false;
@@ -6739,18 +6860,26 @@ module cpedeployment {
         refine "static-routes/static-route/dest-ip-address" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:routes/route/dest-ip-address";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route/dest-ip-address";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route/dest-ip-address";
         }
         refine "static-routes/static-route/dest-mask" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../dest-ip-address]/dest-mask";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../dest-ip-address]/dest-mask";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../dest-ip-address]/dest-mask";
         }
         refine "static-routes/static-route/options/id" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options/id";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options/id";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options/id";
         }
         refine "static-routes/static-route/options/next-hop-ip" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/next-hop-ip";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/next-hop-ip";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/next-hop-ip";
         }
         //refine "static-routes/static-route/options/global-address" {
         //config false;
@@ -6759,34 +6888,54 @@ module cpedeployment {
         refine "static-routes/static-route/options/metric" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/metric";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/metric";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/metric";
         }
         refine "static-routes/static-route/options/interface-name" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/interface-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/interface-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/interface-name";
         }
         refine "static-routes/static-route/options/name" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/name";
         }
         refine "static-routes/static-route/options/vrf" {
           //config false;
-          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/vrf-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/vrf-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/vrf-name";
         }
         refine "static-routes/static-route/options/tag" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/tag";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/tag";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/tag";
         }
         refine "static-routes/static-route/options/permanent" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/permanent";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/permanent";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/permanent";
+        }
+        refine "static-routes/static-route/options/global-address" {
+          //config false;
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/global-address";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/global-address";
         }
         refine "static-routes/static-route/options/track" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/track";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/track";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/track";
         }
         refine "static-routes/static-route/options/description" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/description";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/description";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/description";
         }
         //refine "static-routes/static-route/options/seq-num" {
         //config false;
@@ -7065,6 +7214,62 @@ module cpedeployment {
         }
         key "endpoint-name";
         uses end-point-props1;
+        leaf endpoint-level-qos {
+          type boolean;
+          description
+            "Check this option if you want to overwrite QoS policy specified in cpe-wan parent container";
+          when "../interface-type = 'Physical' or ../interface-type = 'SVI' or ../interface-type = 'Sub-Interface'";
+          default "false";
+        }
+        leaf hierarchical-outbound-qos {
+          type boolean;
+          description
+            "Check to configure a HQoS Outbound Policy";
+          when "../endpoint-level-qos = 'true'";
+        }
+        leaf hierarchical-qos-policy-name {
+          type string-no-lead-trail-space;
+          description
+            "Select the HQoS Outbound Policy Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/outbound-qos";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+        }
+        leaf child-qos-policy-name {
+          type leafref {
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/qos-service/policies/policy/name";
+          }
+          description
+            "Select Child QoS Policy-Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/service-policy";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+        }
+        leaf shape-average {
+          type uint64 {
+            range "8000..10000000000";
+          }
+          description
+            "Enter Shaping Average Bandwidth";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/shape-average";
+        }
+        leaf bits-sustained {
+          type uint64 {
+            range "32..800000000";
+          }
+          description
+            "Enter Shaper Bc Value";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/bits-sustained";
+        }
+        leaf bits-excess {
+          type uint64 {
+            range "0..154400000";
+          }
+          description
+            "Enter Shaper Be Value";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/bits-excess";
+        }
         leaf dmvpn-profile {
           type leafref {
             //path "../../../../../dmvpn-tunnel-profiles/dmvpn-tunnel-profile/name";
@@ -7307,6 +7512,62 @@ module cpedeployment {
         }
         key "endpoint-name";
         uses end-point-props1;
+        leaf endpoint-level-qos {
+          type boolean;
+          description
+            "Check this option if you want to overwrite QoS policy specified in cpe-wan parent container";
+          when "../interface-type = 'Physical' or ../interface-type = 'SVI' or ../interface-type = 'Sub-Interface'";
+          default "false";
+        }
+        leaf hierarchical-outbound-qos {
+          type boolean;
+          description
+            "Check to configure a HQoS Outbound Policy";
+          when "../endpoint-level-qos = 'true'";
+        }
+        leaf hierarchical-qos-policy-name {
+          type string-no-lead-trail-space;
+          description
+            "Select the HQoS Outbound Policy Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/outbound-qos";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+        }
+        leaf child-qos-policy-name {
+          type leafref {
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/qos-service/policies/policy/name";
+          }
+          description
+            "Select Child QoS Policy-Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/service-policy";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+        }
+        leaf shape-average {
+          type uint64 {
+            range "8000..10000000000";
+          }
+          description
+            "Enter Shaping Average Bandwidth";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/shape-average";
+        }
+        leaf bits-sustained {
+          type uint64 {
+            range "32..800000000";
+          }
+          description
+            "Enter Shaper Bc Value";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/bits-sustained";
+        }
+        leaf bits-excess {
+          type uint64 {
+            range "0..154400000";
+          }
+          description
+            "Enter Shaper Be Value";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/bits-excess";
+        }
         leaf dmvpn-profile {
           type leafref {
             //path "../../../../../dmvpn-tunnel-profiles/dmvpn-tunnel-profile/name";
@@ -7616,7 +7877,7 @@ module cpedeployment {
       }
       leaf auth-password {
         type string {
-          length "1..8";
+          length "1..50";
         }
         description
           "string";
@@ -7779,7 +8040,7 @@ module cpedeployment {
         }
         leaf auth-password {
           type string {
-            length "1..8";
+            length "1..50";
           }
           description
             "string";
@@ -7922,19 +8183,13 @@ module cpedeployment {
             "Enter Transaction Name
              This is an internal field for Anuta NCX";
         }
-        leaf device {
-          type leafref {
-            path "/rp:resource-pools/rp:resource-pool[rp:name=current()/../../../resource-pool]/rp:device/rp:id";
-          }
-          description
-            "Select Device Name";
-        }
         leaf cpe-primary-wan-ebgp-neighbor {
           type leafref {
             path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/dual-cpe-site/dual-cpe-site-services[site-name=current()/../../../site-name]/cpe-primary-wan/end-points/bgp-peers/peer-ip";
           }
           description
             "Select WAN eBGP peer under container cpe-primary-wan on which to perform failover/fallback operation";
+          mandatory true;
         }
         leaf cpe-secondary-wan-ebgp-neighbor {
           type leafref {
@@ -7942,73 +8197,13 @@ module cpedeployment {
           }
           description
             "Select WAN eBGP peer under container cpe-secondary-wan on which to perform failover/fallback operation";
+          mandatory true;
         }
-        leaf dps-tunnel-id {
-          type leafref {
-            path "/ac:devices/ac:device[ac:id=current()/../device]/dmvpn:dmvpntunnels/dmvpn:dmvpntunnel/dmvpn:name";
-          }
-          description
-            "Select DPS DMVPN Tunnel ID on which to perform failover/fallback operation";
-        }
-        leaf failover {
+        leaf swap-bgp-route-maps {
           type boolean;
           description
-            "Check if you want to perform a Failover Operation";
-          when "../fallback = 'false' ";
-        }
-        leaf fallback {
-          type boolean;
-          description
-            "Check if you want to perform a Fallback Operation";
-          when "../failover = 'false' ";
-        }
-        leaf failover-wan {
-          type boolean;
-          description
-            "If Checked, this will shutdown the WAN eBGP peer(s) specified";
-          when " ../failover = 'true' ";
-        }
-        leaf fallback-wan {
-          type boolean;
-          description
-            "If Checked, this will restore the WAN eBGP peer(s) specified";
-          when " ../fallback = 'true' ";
-        }
-        leaf failover-b2b {
-          type boolean;
-          description
-            "If Checked, this will shutdown all B2B Physical/Subinterfaces on the specified device";
-          when " ../failover = 'true' ";
-        }
-        leaf fallback-b2b {
-          type boolean;
-          description
-            "If Checked, this will restore all B2B Physical/Subinterfaces on the specified device";
-          when " ../fallback = 'true' ";
-        }
-        leaf failover-lan {
-          type boolean;
-          description
-            "If Checked, this will shutdown all LAN Physical/Subinterfaces on the specified device";
-          when " ../failover = 'true' ";
-        }
-        leaf fallback-lan {
-          type boolean;
-          description
-            "If Checked, this will restore all LAN Physical/Subinterfaces on the specified device";
-          when " ../fallback = 'true' ";
-        }
-        leaf failover-dps {
-          type boolean;
-          description
-            "If Checked, this will shutdown the DPS Tunnel Interface on the specified device";
-          when " ../failover = 'true' ";
-        }
-        leaf fallback-dps {
-          type boolean;
-          description
-            "If Checked, this will shutdown the DPS Tunnel Interface on the specified device";
-          when " ../fallback = 'true' ";
+            "Check to Switch eBGP Peer Route-Maps between primary/secondary peers";
+          default "true";
         }
       }
     }
@@ -8144,6 +8339,12 @@ module cpedeployment {
             "string";
           config false;
         }
+        leaf created-by {
+          type string;
+          description
+            "string";
+          config false;
+        }
         uses cpe-deployment-policy-def;
         uses associated-service-def;
       }
@@ -8192,6 +8393,12 @@ module cpedeployment {
             "brownfield-site: True/False";
         }
         leaf created-on {
+          type string;
+          description
+            "string";
+          config false;
+        }
+        leaf created-by {
           type string;
           description
             "string";
@@ -8399,18 +8606,26 @@ module cpedeployment {
         refine "static-routes/static-route/dest-ip-address" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:routes/route/dest-ip-address";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route/dest-ip-address";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route/dest-ip-address";
         }
         refine "static-routes/static-route/dest-mask" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../dest-ip-address]/dest-mask";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../dest-ip-address]/dest-mask";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../dest-ip-address]/dest-mask";
         }
         refine "static-routes/static-route/options/id" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options/id";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options/id";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options/id";
         }
         refine "static-routes/static-route/options/next-hop-ip" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/next-hop-ip";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/next-hop-ip";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/next-hop-ip";
         }
         //refine "static-routes/static-route/options/global-address" {
         //config false;
@@ -8419,34 +8634,55 @@ module cpedeployment {
         refine "static-routes/static-route/options/metric" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/metric";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/metric";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/metric";
         }
         refine "static-routes/static-route/options/interface-name" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/interface-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/interface-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/interface-name";
         }
         refine "static-routes/static-route/options/name" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/name";
         }
         refine "static-routes/static-route/options/vrf" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/vrf-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/vrf-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/vrf-name";
         }
         refine "static-routes/static-route/options/tag" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/tag";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/tag";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/tag";
         }
         refine "static-routes/static-route/options/permanent" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/permanent";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/permanent";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/permanent";
         }
         refine "static-routes/static-route/options/track" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/track";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/track";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/track";
         }
         refine "static-routes/static-route/options/description" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/description";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/description";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/description";
+        }
+        refine "static-routes/static-route/options/global-address" {
+          //config false;
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/global-address";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/global-address";
         }
         //refine "static-routes/static-route/options/seq-num" {
         //config false;
@@ -8501,18 +8737,26 @@ module cpedeployment {
         refine "static-routes/static-route/dest-ip-address" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:routes/route/dest-ip-address";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route/dest-ip-address";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route/dest-ip-address";
         }
         refine "static-routes/static-route/dest-mask" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../dest-ip-address]/dest-mask";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../dest-ip-address]/dest-mask";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../dest-ip-address]/dest-mask";
         }
         refine "static-routes/static-route/options/id" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options/id";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options/id";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options/id";
         }
         refine "static-routes/static-route/options/next-hop-ip" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/next-hop-ip";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/next-hop-ip";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/next-hop-ip";
         }
         //refine "static-routes/static-route/options/global-address" {
         //config false;
@@ -8521,34 +8765,55 @@ module cpedeployment {
         refine "static-routes/static-route/options/metric" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/metric";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/metric";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/metric";
         }
         refine "static-routes/static-route/options/interface-name" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/interface-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/interface-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/interface-name";
         }
         refine "static-routes/static-route/options/name" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/name";
         }
         refine "static-routes/static-route/options/vrf" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/vrf-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/vrf-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/vrf-name";
         }
         refine "static-routes/static-route/options/tag" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/tag";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/tag";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/tag";
         }
         refine "static-routes/static-route/options/permanent" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/permanent";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/permanent";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/permanent";
         }
         refine "static-routes/static-route/options/track" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/track";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/track";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/track";
         }
         refine "static-routes/static-route/options/description" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/description";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/description";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/description";
+        }
+        refine "static-routes/static-route/options/global-address" {
+          //config false;
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/global-address";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/global-address";
         }
         //refine "static-routes/static-route/options/seq-num" {
         //config false;
@@ -8603,18 +8868,26 @@ module cpedeployment {
         refine "static-routes/static-route/dest-ip-address" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:routes/route/dest-ip-address";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route/dest-ip-address";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route/dest-ip-address";
         }
         refine "static-routes/static-route/dest-mask" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../dest-ip-address]/dest-mask";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../dest-ip-address]/dest-mask";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../dest-ip-address]/dest-mask";
         }
         refine "static-routes/static-route/options/id" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options/id";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options/id";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options/id";
         }
         refine "static-routes/static-route/options/next-hop-ip" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/next-hop-ip";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/next-hop-ip";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/next-hop-ip";
         }
         //refine "static-routes/static-route/options/global-address" {
         //config false;
@@ -8623,34 +8896,55 @@ module cpedeployment {
         refine "static-routes/static-route/options/metric" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/metric";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/metric";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/metric";
         }
         refine "static-routes/static-route/options/interface-name" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/interface-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/interface-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/interface-name";
         }
         refine "static-routes/static-route/options/name" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/name";
         }
         refine "static-routes/static-route/options/vrf" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/vrf-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/vrf-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/vrf-name";
         }
         refine "static-routes/static-route/options/tag" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/tag";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/tag";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/tag";
         }
         refine "static-routes/static-route/options/permanent" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/permanent";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/permanent";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/permanent";
         }
         refine "static-routes/static-route/options/track" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/track";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/track";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/track";
         }
         refine "static-routes/static-route/options/description" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/description";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/description";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/description";
+        }
+        refine "static-routes/static-route/options/global-address" {
+          //config false;
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/global-address";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/global-address";
         }
         //refine "static-routes/static-route/options/seq-num" {
         //config false;
@@ -9145,6 +9439,62 @@ module cpedeployment {
         }
         key "endpoint-name";
         uses end-point-props1;
+        leaf endpoint-level-qos {
+          type boolean;
+          description
+            "Check this option if you want to overwrite QoS policy specified in cpe-wan parent container";
+          when "../interface-type = 'Physical' or ../interface-type = 'SVI' or ../interface-type = 'Sub-Interface'";
+          default "false";
+        }
+        leaf hierarchical-outbound-qos {
+          type boolean;
+          description
+            "Check to configure a HQoS Outbound Policy";
+          when "../endpoint-level-qos = 'true'";
+        }
+        leaf hierarchical-qos-policy-name {
+          type string-no-lead-trail-space;
+          description
+            "Select the HQoS Outbound Policy Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/outbound-qos";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+        }
+        leaf child-qos-policy-name {
+          type leafref {
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/qos-service/policies/policy/name";
+          }
+          description
+            "Select Child QoS Policy-Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/service-policy";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+        }
+        leaf shape-average {
+          type uint64 {
+            range "8000..10000000000";
+          }
+          description
+            "Enter Shaping Average Bandwidth";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/shape-average";
+        }
+        leaf bits-sustained {
+          type uint64 {
+            range "32..800000000";
+          }
+          description
+            "Enter Shaper Bc Value";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/bits-sustained";
+        }
+        leaf bits-excess {
+          type uint64 {
+            range "0..154400000";
+          }
+          description
+            "Enter Shaper Be Value";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/bits-excess";
+        }
         leaf dmvpn-profile {
           type leafref {
             //path "../../../../../dmvpn-tunnel-profiles/dmvpn-tunnel-profile/name";
@@ -9387,6 +9737,62 @@ module cpedeployment {
         }
         key "endpoint-name";
         uses end-point-props1;
+        leaf endpoint-level-qos {
+          type boolean;
+          description
+            "Check this option if you want to overwrite QoS policy specified in cpe-wan parent container";
+          when "../interface-type = 'Physical' or ../interface-type = 'SVI' or ../interface-type = 'Sub-Interface'";
+          default "false";
+        }
+        leaf hierarchical-outbound-qos {
+          type boolean;
+          description
+            "Check to configure a HQoS Outbound Policy";
+          when "../endpoint-level-qos = 'true'";
+        }
+        leaf hierarchical-qos-policy-name {
+          type string-no-lead-trail-space;
+          description
+            "Select the HQoS Outbound Policy Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/outbound-qos";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+        }
+        leaf child-qos-policy-name {
+          type leafref {
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/qos-service/policies/policy/name";
+          }
+          description
+            "Select Child QoS Policy-Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/service-policy";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+        }
+        leaf shape-average {
+          type uint64 {
+            range "8000..10000000000";
+          }
+          description
+            "Enter Shaping Average Bandwidth";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/shape-average";
+        }
+        leaf bits-sustained {
+          type uint64 {
+            range "32..800000000";
+          }
+          description
+            "Enter Shaper Bc Value";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/bits-sustained";
+        }
+        leaf bits-excess {
+          type uint64 {
+            range "0..154400000";
+          }
+          description
+            "Enter Shaper Be Value";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/bits-excess";
+        }
         leaf dmvpn-profile {
           type leafref {
             //path "../../../../../dmvpn-tunnel-profiles/dmvpn-tunnel-profile/name";
@@ -9625,6 +10031,62 @@ module cpedeployment {
         }
         key "endpoint-name";
         uses end-point-props1;
+        leaf endpoint-level-qos {
+          type boolean;
+          description
+            "Check this option if you want to overwrite QoS policy specified in cpe-wan parent container";
+          when "../interface-type = 'Physical' or ../interface-type = 'SVI' or ../interface-type = 'Sub-Interface'";
+          default "false";
+        }
+        leaf hierarchical-outbound-qos {
+          type boolean;
+          description
+            "Check to configure a HQoS Outbound Policy";
+          when "../endpoint-level-qos = 'true'";
+        }
+        leaf hierarchical-qos-policy-name {
+          type string-no-lead-trail-space;
+          description
+            "Select the HQoS Outbound Policy Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/outbound-qos";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+        }
+        leaf child-qos-policy-name {
+          type leafref {
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/qos-service/policies/policy/name";
+          }
+          description
+            "Select Child QoS Policy-Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/service-policy";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+        }
+        leaf shape-average {
+          type uint64 {
+            range "8000..10000000000";
+          }
+          description
+            "Enter Shaping Average Bandwidth";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/shape-average";
+        }
+        leaf bits-sustained {
+          type uint64 {
+            range "32..800000000";
+          }
+          description
+            "Enter Shaper Bc Value";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/bits-sustained";
+        }
+        leaf bits-excess {
+          type uint64 {
+            range "0..154400000";
+          }
+          description
+            "Enter Shaper Be Value";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/bits-excess";
+        }
         leaf dmvpn-profile {
           type leafref {
             //path "../../../../../dmvpn-tunnel-profiles/dmvpn-tunnel-profile/name";
@@ -9867,6 +10329,62 @@ module cpedeployment {
         }
         key "endpoint-name";
         uses end-point-props1;
+        leaf endpoint-level-qos {
+          type boolean;
+          description
+            "Check this option if you want to overwrite QoS policy specified in cpe-wan parent container";
+          when "../interface-type = 'Physical' or ../interface-type = 'SVI' or ../interface-type = 'Sub-Interface'";
+          default "false";
+        }
+        leaf hierarchical-outbound-qos {
+          type boolean;
+          description
+            "Check to configure a HQoS Outbound Policy";
+          when "../endpoint-level-qos = 'true'";
+        }
+        leaf hierarchical-qos-policy-name {
+          type string-no-lead-trail-space;
+          description
+            "Select the HQoS Outbound Policy Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/outbound-qos";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+        }
+        leaf child-qos-policy-name {
+          type leafref {
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/qos-service/policies/policy/name";
+          }
+          description
+            "Select Child QoS Policy-Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/service-policy";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+        }
+        leaf shape-average {
+          type uint64 {
+            range "8000..10000000000";
+          }
+          description
+            "Enter Shaping Average Bandwidth";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/shape-average";
+        }
+        leaf bits-sustained {
+          type uint64 {
+            range "32..800000000";
+          }
+          description
+            "Enter Shaper Bc Value";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/bits-sustained";
+        }
+        leaf bits-excess {
+          type uint64 {
+            range "0..154400000";
+          }
+          description
+            "Enter Shaper Be Value";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/bits-excess";
+        }
         leaf dmvpn-profile {
           type leafref {
             //path "../../../../../dmvpn-tunnel-profiles/dmvpn-tunnel-profile/name";
@@ -10108,6 +10626,62 @@ module cpedeployment {
         }
         key "endpoint-name";
         uses end-point-props1;
+        leaf endpoint-level-qos {
+          type boolean;
+          description
+            "Check this option if you want to overwrite QoS policy specified in cpe-wan parent container";
+          when "../interface-type = 'Physical' or ../interface-type = 'SVI' or ../interface-type = 'Sub-Interface'";
+          default "false";
+        }
+        leaf hierarchical-outbound-qos {
+          type boolean;
+          description
+            "Check to configure a HQoS Outbound Policy";
+          when "../endpoint-level-qos = 'true'";
+        }
+        leaf hierarchical-qos-policy-name {
+          type string-no-lead-trail-space;
+          description
+            "Select the HQoS Outbound Policy Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/outbound-qos";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+        }
+        leaf child-qos-policy-name {
+          type leafref {
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/qos-service/policies/policy/name";
+          }
+          description
+            "Select Child QoS Policy-Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/service-policy";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+        }
+        leaf shape-average {
+          type uint64 {
+            range "8000..10000000000";
+          }
+          description
+            "Enter Shaping Average Bandwidth";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/shape-average";
+        }
+        leaf bits-sustained {
+          type uint64 {
+            range "32..800000000";
+          }
+          description
+            "Enter Shaper Bc Value";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/bits-sustained";
+        }
+        leaf bits-excess {
+          type uint64 {
+            range "0..154400000";
+          }
+          description
+            "Enter Shaper Be Value";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/bits-excess";
+        }
         leaf dmvpn-profile {
           type leafref {
             //path "../../../../../dmvpn-tunnel-profiles/dmvpn-tunnel-profile/name";
@@ -10350,6 +10924,62 @@ module cpedeployment {
         }
         key "endpoint-name";
         uses end-point-props1;
+        leaf endpoint-level-qos {
+          type boolean;
+          description
+            "Check this option if you want to overwrite QoS policy specified in cpe-wan parent container";
+          when "../interface-type = 'Physical' or ../interface-type = 'SVI' or ../interface-type = 'Sub-Interface'";
+          default "false";
+        }
+        leaf hierarchical-outbound-qos {
+          type boolean;
+          description
+            "Check to configure a HQoS Outbound Policy";
+          when "../endpoint-level-qos = 'true'";
+        }
+        leaf hierarchical-qos-policy-name {
+          type string-no-lead-trail-space;
+          description
+            "Select the HQoS Outbound Policy Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/outbound-qos";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+        }
+        leaf child-qos-policy-name {
+          type leafref {
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/qos-service/policies/policy/name";
+          }
+          description
+            "Select Child QoS Policy-Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/service-policy";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+        }
+        leaf shape-average {
+          type uint64 {
+            range "8000..10000000000";
+          }
+          description
+            "Enter Shaping Average Bandwidth";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/shape-average";
+        }
+        leaf bits-sustained {
+          type uint64 {
+            range "32..800000000";
+          }
+          description
+            "Enter Shaper Bc Value";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/bits-sustained";
+        }
+        leaf bits-excess {
+          type uint64 {
+            range "0..154400000";
+          }
+          description
+            "Enter Shaper Be Value";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/bits-excess";
+        }
         leaf dmvpn-profile {
           type leafref {
             //path "../../../../../dmvpn-tunnel-profiles/dmvpn-tunnel-profile/name";
@@ -10669,7 +11299,7 @@ module cpedeployment {
       }
       leaf auth-password {
         type string {
-          length "1..8";
+          length "1..50";
         }
         description
           "string";
@@ -10842,7 +11472,7 @@ module cpedeployment {
         }
         leaf auth-password {
           type string {
-            length "1..8";
+            length "1..50";
           }
           description
             "Enter HSRP Authentication Password";
@@ -11154,6 +11784,12 @@ module cpedeployment {
             "string";
           config false;
         }
+        leaf created-by {
+          type string;
+          description
+            "string";
+          config false;
+        }
         uses cpe-deployment-policy-dual-def;
         uses associated-service-dual-wan-def;
       }
@@ -11313,18 +11949,26 @@ module cpedeployment {
         refine "static-routes/static-route/dest-ip-address" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:routes/route/dest-ip-address";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route/dest-ip-address";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route/dest-ip-address";
         }
         refine "static-routes/static-route/dest-mask" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../dest-ip-address]/dest-mask";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../dest-ip-address]/dest-mask";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../dest-ip-address]/dest-mask";
         }
         refine "static-routes/static-route/options/id" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options/id";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options/id";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options/id";
         }
         refine "static-routes/static-route/options/next-hop-ip" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/next-hop-ip";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/next-hop-ip";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/next-hop-ip";
         }
         //refine "static-routes/static-route/options/global-address" {
         //config false;
@@ -11333,34 +11977,55 @@ module cpedeployment {
         refine "static-routes/static-route/options/metric" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/metric";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/metric";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/metric";
         }
         refine "static-routes/static-route/options/interface-name" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/interface-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/interface-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/interface-name";
         }
         refine "static-routes/static-route/options/name" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/name";
         }
         refine "static-routes/static-route/options/vrf" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/vrf-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/vrf-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/vrf-name";
         }
         refine "static-routes/static-route/options/tag" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/tag";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/tag";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/tag";
         }
         refine "static-routes/static-route/options/permanent" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/permanent";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/permanent";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/permanent";
         }
         refine "static-routes/static-route/options/track" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/track";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/track";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/track";
         }
         refine "static-routes/static-route/options/description" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/description";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/description";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/description";
+        }
+        refine "static-routes/static-route/options/global-address" {
+          //config false;
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/global-address";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/global-address";
         }
         //refine "static-routes/static-route/options/seq-num" {
         //config false;
@@ -11415,18 +12080,26 @@ module cpedeployment {
         refine "static-routes/static-route/dest-ip-address" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:routes/route/dest-ip-address";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route/dest-ip-address";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route/dest-ip-address";
         }
         refine "static-routes/static-route/dest-mask" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../dest-ip-address]/dest-mask";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../dest-ip-address]/dest-mask";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../dest-ip-address]/dest-mask";
         }
         refine "static-routes/static-route/options/id" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options/id";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options/id";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options/id";
         }
         refine "static-routes/static-route/options/next-hop-ip" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/next-hop-ip";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/next-hop-ip";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/next-hop-ip";
         }
         //refine "static-routes/static-route/options/global-address" {
         //config false;
@@ -11435,34 +12108,55 @@ module cpedeployment {
         refine "static-routes/static-route/options/metric" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/metric";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/metric";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/metric";
         }
         refine "static-routes/static-route/options/interface-name" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/interface-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/interface-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/interface-name";
         }
         refine "static-routes/static-route/options/name" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/name";
         }
         refine "static-routes/static-route/options/vrf" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/vrf-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/vrf-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/vrf-name";
         }
         refine "static-routes/static-route/options/tag" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/tag";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/tag";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/tag";
         }
         refine "static-routes/static-route/options/permanent" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/permanent";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/permanent";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/permanent";
         }
         refine "static-routes/static-route/options/track" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/track";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/track";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/track";
         }
         refine "static-routes/static-route/options/description" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/description";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/description";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/description";
+        }
+        refine "static-routes/static-route/options/global-address" {
+          //config false;
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/global-address";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/global-address";
         }
         //refine "static-routes/static-route/options/seq-num" {
         //config false;
@@ -11741,6 +12435,62 @@ module cpedeployment {
         }
         key "endpoint-name";
         uses end-point-props1;
+        leaf endpoint-level-qos {
+          type boolean;
+          description
+            "Check this option if you want to overwrite QoS policy specified in cpe-wan parent container";
+          when "../interface-type = 'Physical' or ../interface-type = 'SVI' or ../interface-type = 'Sub-Interface'";
+          default "false";
+        }
+        leaf hierarchical-outbound-qos {
+          type boolean;
+          description
+            "Check to configure a HQoS Outbound Policy";
+          when "../endpoint-level-qos = 'true'";
+        }
+        leaf hierarchical-qos-policy-name {
+          type string-no-lead-trail-space;
+          description
+            "Select the HQoS Outbound Policy Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/outbound-qos";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+        }
+        leaf child-qos-policy-name {
+          type leafref {
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/qos-service/policies/policy/name";
+          }
+          description
+            "Select Child QoS Policy-Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/service-policy";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+        }
+        leaf shape-average {
+          type uint64 {
+            range "8000..10000000000";
+          }
+          description
+            "Enter Shaping Average Bandwidth";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/shape-average";
+        }
+        leaf bits-sustained {
+          type uint64 {
+            range "32..800000000";
+          }
+          description
+            "Enter Shaper Bc Value";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/bits-sustained";
+        }
+        leaf bits-excess {
+          type uint64 {
+            range "0..154400000";
+          }
+          description
+            "Enter Shaper Be Value";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/bits-excess";
+        }
         leaf dmvpn-profile {
           type leafref {
             //path "../../../../../dmvpn-tunnel-profiles/dmvpn-tunnel-profile/name";
@@ -12225,6 +12975,62 @@ module cpedeployment {
         }
         key "endpoint-name";
         uses end-point-props1;
+        leaf endpoint-level-qos {
+          type boolean;
+          description
+            "Check this option if you want to overwrite QoS policy specified in cpe-wan parent container";
+          when "../interface-type = 'Physical' or ../interface-type = 'SVI' or ../interface-type = 'Sub-Interface'";
+          default "false";
+        }
+        leaf hierarchical-outbound-qos {
+          type boolean;
+          description
+            "Check to configure a HQoS Outbound Policy";
+          when "../endpoint-level-qos = 'true'";
+        }
+        leaf hierarchical-qos-policy-name {
+          type string-no-lead-trail-space;
+          description
+            "Select the HQoS Outbound Policy Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/outbound-qos";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+        }
+        leaf child-qos-policy-name {
+          type leafref {
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/qos-service/policies/policy/name";
+          }
+          description
+            "Select Child QoS Policy-Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/service-policy";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+        }
+        leaf shape-average {
+          type uint64 {
+            range "8000..10000000000";
+          }
+          description
+            "Enter Shaping Average Bandwidth";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/shape-average";
+        }
+        leaf bits-sustained {
+          type uint64 {
+            range "32..800000000";
+          }
+          description
+            "Enter Shaper Bc Value";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/bits-sustained";
+        }
+        leaf bits-excess {
+          type uint64 {
+            range "0..154400000";
+          }
+          description
+            "Enter Shaper Be Value";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/bits-excess";
+        }
         leaf dmvpn-profile {
           type leafref {
             //path "../../../../../dmvpn-tunnel-profiles/dmvpn-tunnel-profile/name";
@@ -12467,6 +13273,62 @@ module cpedeployment {
         }
         key "endpoint-name";
         uses end-point-props1;
+        leaf endpoint-level-qos {
+          type boolean;
+          description
+            "Check this option if you want to overwrite QoS policy specified in cpe-wan parent container";
+          when "../interface-type = 'Physical' or ../interface-type = 'SVI' or ../interface-type = 'Sub-Interface'";
+          default "false";
+        }
+        leaf hierarchical-outbound-qos {
+          type boolean;
+          description
+            "Check to configure a HQoS Outbound Policy";
+          when "../endpoint-level-qos = 'true'";
+        }
+        leaf hierarchical-qos-policy-name {
+          type string-no-lead-trail-space;
+          description
+            "Select the HQoS Outbound Policy Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/outbound-qos";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+        }
+        leaf child-qos-policy-name {
+          type leafref {
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/qos-service/policies/policy/name";
+          }
+          description
+            "Select Child QoS Policy-Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/service-policy";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+        }
+        leaf shape-average {
+          type uint64 {
+            range "8000..10000000000";
+          }
+          description
+            "Enter Shaping Average Bandwidth";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/shape-average";
+        }
+        leaf bits-sustained {
+          type uint64 {
+            range "32..800000000";
+          }
+          description
+            "Enter Shaper Bc Value";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/bits-sustained";
+        }
+        leaf bits-excess {
+          type uint64 {
+            range "0..154400000";
+          }
+          description
+            "Enter Shaper Be Value";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/bits-excess";
+        }
         leaf dmvpn-profile {
           type leafref {
             //path "../../../../../dmvpn-tunnel-profiles/dmvpn-tunnel-profile/name";
@@ -12776,7 +13638,7 @@ module cpedeployment {
       }
       leaf auth-password {
         type string {
-          length "1..8";
+          length "1..50";
         }
         description
           "string";
@@ -12939,7 +13801,7 @@ module cpedeployment {
         }
         leaf auth-password {
           type string {
-            length "1..8";
+            length "1..50";
           }
           description
             "string";
@@ -13079,13 +13941,6 @@ module cpedeployment {
             "Enter Transaction Name
              This is an internal field used by Anuta NCX";
         }
-        leaf device {
-          type leafref {
-            path "/rp:resource-pools/rp:resource-pool[rp:name=current()/../../../resource-pool]/rp:device/rp:id";
-          }
-          description
-            "Select the Device Name";
-        }
         leaf cpe-primary-mpls-wan-ebgp-neighbor {
           type leafref {
             path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services[site-name=current()/../../../site-name]/cpe-primary-mpls-wan/end-points/bgp-peers/peer-ip";
@@ -13114,72 +13969,11 @@ module cpedeployment {
           description
             "Select WAN eBGP peer under container cpe-secondary-inet on which to perform failover/fallback operation";
         }
-        leaf dps-tunnel-id {
-          type leafref {
-            path "/ac:devices/ac:device[ac:id=current()/../device]/dmvpn:dmvpntunnels/dmvpn:dmvpntunnel/dmvpn:name";
-          }
-          description
-            "Select DPS DMVPN Tunnel ID on which to perform failover/fallback operation";
-        }
-        leaf failover {
+        leaf swap-bgp-route-maps {
           type boolean;
           description
-            "Check if you want to perform a Failover Operation";
-          when "../fallback = 'false' ";
-        }
-        leaf fallback {
-          type boolean;
-          description
-            "Check if you want to perform a Fallback Operation";
-          when "../failover = 'false' ";
-        }
-        leaf failover-wan {
-          type boolean;
-          description
-            "If Checked, this will shutdown the WAN eBGP peer(s) specified";
-          when " ../failover = 'true' ";
-        }
-        leaf fallback-wan {
-          type boolean;
-          description
-            "If Checked, this will restore the WAN eBGP peer(s) specified";
-          when " ../fallback = 'true' ";
-        }
-        leaf failover-b2b {
-          type boolean;
-          description
-            "If Checked, this will shutdown all B2B Physical/Subinterfaces on the specified device";
-          when " ../failover = 'true' ";
-        }
-        leaf fallback-b2b {
-          type boolean;
-          description
-            "If Checked, this will restore all B2B Physical/Subinterfaces on the specified device";
-          when " ../fallback = 'true' ";
-        }
-        leaf failover-lan {
-          type boolean;
-          description
-            "If Checked, this will shutdown all LAN Physical/Subinterfaces on the specified device";
-          when " ../failover = 'true' ";
-        }
-        leaf fallback-lan {
-          type boolean;
-          description
-            "If Checked, this will restore all LAN Physical/Subinterfaces on the specified device";
-          when " ../fallback = 'true' ";
-        }
-        leaf failover-dps {
-          type boolean;
-          description
-            "If Checked, this will shutdown the DPS Tunnel Interface on the specified device";
-          when " ../failover = 'true' ";
-        }
-        leaf fallback-dps {
-          type boolean;
-          description
-            "If Checked, this will shutdown the DPS Tunnel Interface on the specified device";
-          when " ../fallback = 'true' ";
+            "Check to Switch eBGP Peer Route-Maps between primary/secondary peers";
+          default "true";
         }
       }
     }
@@ -13223,18 +14017,26 @@ module cpedeployment {
         refine "static-routes/static-route/dest-ip-address" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:routes/route/dest-ip-address";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route/dest-ip-address";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route/dest-ip-address";
         }
         refine "static-routes/static-route/dest-mask" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../dest-ip-address]/dest-mask";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../dest-ip-address]/dest-mask";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../dest-ip-address]/dest-mask";
         }
         refine "static-routes/static-route/options/id" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options/id";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options/id";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options/id";
         }
         refine "static-routes/static-route/options/next-hop-ip" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/next-hop-ip";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/next-hop-ip";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/next-hop-ip";
         }
         //refine "static-routes/static-route/options/global-address" {
         //config false;
@@ -13243,34 +14045,55 @@ module cpedeployment {
         refine "static-routes/static-route/options/metric" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/metric";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/metric";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/metric";
         }
         refine "static-routes/static-route/options/interface-name" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/interface-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/interface-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/interface-name";
         }
         refine "static-routes/static-route/options/name" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/name";
         }
         refine "static-routes/static-route/options/vrf" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/vrf-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/vrf-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/vrf-name";
         }
         refine "static-routes/static-route/options/tag" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/tag";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/tag";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/tag";
         }
         refine "static-routes/static-route/options/permanent" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/permanent";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/permanent";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/permanent";
         }
         refine "static-routes/static-route/options/track" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/track";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/track";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/track";
         }
         refine "static-routes/static-route/options/description" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/description";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/description";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/description";
+        }
+        refine "static-routes/static-route/options/global-address" {
+          //config false;
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/global-address";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/global-address";
         }
         //refine "static-routes/static-route/options/seq-num" {
         //config false;
@@ -13429,6 +14252,62 @@ module cpedeployment {
         }
         key "endpoint-name";
         uses end-point-props1;
+        leaf endpoint-level-qos {
+          type boolean;
+          description
+            "Check this option if you want to overwrite QoS policy specified in cpe-wan parent container";
+          when "../interface-type = 'Physical' or ../interface-type = 'SVI' or ../interface-type = 'Sub-Interface'";
+          default "false";
+        }
+        leaf hierarchical-outbound-qos {
+          type boolean;
+          description
+            "Check to configure a HQoS Outbound Policy";
+          when "../endpoint-level-qos = 'true'";
+        }
+        leaf hierarchical-qos-policy-name {
+          type string-no-lead-trail-space;
+          description
+            "Select the HQoS Outbound Policy Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/outbound-qos";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+        }
+        leaf child-qos-policy-name {
+          type leafref {
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/qos-service/policies/policy/name";
+          }
+          description
+            "Select Child QoS Policy-Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/service-policy";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+        }
+        leaf shape-average {
+          type uint64 {
+            range "8000..10000000000";
+          }
+          description
+            "Enter Shaping Average Bandwidth";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/shape-average";
+        }
+        leaf bits-sustained {
+          type uint64 {
+            range "32..800000000";
+          }
+          description
+            "Enter Shaper Bc Value";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/bits-sustained";
+        }
+        leaf bits-excess {
+          type uint64 {
+            range "0..154400000";
+          }
+          description
+            "Enter Shaper Be Value";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/bits-excess";
+        }
         leaf dmvpn-profile {
           type leafref {
             //path "../../../../../dmvpn-tunnel-profiles/dmvpn-tunnel-profile/name";
@@ -13774,74 +14653,28 @@ module cpedeployment {
             "Enter Transaction Name
              This is an internal field used by Anuta NCX";
         }
-        leaf device {
-          type leafref {
-            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/single-cpe-site/single-cpe-site-services[site-name=current()/../../../site-name]/cpe/device-ip";
-          }
-          description
-            "Select Device Name";
-          mandatory true;
-        }
-        leaf cpe-wan-ebgp-neighbor {
+        leaf cpe-primary-wan-ebgp-neighbor {
           type leafref {
             path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/single-cpe-site/single-cpe-site-services[site-name=current()/../../../site-name]/cpe-wan/end-points/bgp-peers/peer-ip";
           }
           description
             "Select WAN eBGP peer under container cpe-wan on which to perform failover/fallback operation";
+          mandatory true;
         }
-        leaf dps-tunnel-id {
+        leaf cpe-secondary-wan-ebgp-neighbor {
           type leafref {
-            path "/ac:devices/ac:device[ac:id=current()/../device]/dmvpn:dmvpntunnels/dmvpn:dmvpntunnel/dmvpn:name";
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/single-cpe-site/single-cpe-site-services[site-name=current()/../../../site-name]/cpe-wan/end-points/bgp-peers/peer-ip";
           }
           description
-            "Select DPS DMVPN Tunnel ID on which to perform failover/fallback operation";
+            "Select WAN eBGP peer under container cpe-wan on which to perform failover/fallback operation";
+          mandatory true;
         }
-        leaf failover {
+        leaf swap-bgp-route-maps {
           type boolean;
           description
-            "Check if you want to perform a Failover Operation";
-          when "../fallback = 'false' ";
+            "Check to Switch eBGP Peer Route-Maps between primary/secondary peers";
+          default "true";
         }
-        leaf fallback {
-          type boolean;
-          description
-            "Check if you want to perform a Fallback Operation";
-          when "../failover = 'false' ";
-        }
-        leaf failover-wan {
-          type boolean;
-          description
-            "If Checked, this will shutdown the WAN eBGP peer(s) specified";
-          when " ../failover = 'true' ";
-        }
-        leaf fallback-wan {
-          type boolean;
-          description
-            "If Checked, this will restore the WAN eBGP peer(s) specified";
-          when " ../fallback = 'true' ";
-        }
-        leaf failover-dps {
-          type boolean;
-          description
-            "If Checked, this will shutdown the DPS Tunnel Interface on the specified device";
-          when " ../failover = 'true' ";
-        }
-        leaf fallback-dps {
-          type boolean;
-          description
-            "If Checked, this will shutdown the DPS Tunnel Interface on the specified device";
-          when " ../fallback = 'true' ";
-        }
-        //leaf failover-lan {
-        //type boolean;
-        //description
-        //"If Checked, this will shutdown all LAN Physical/Subinterfaces on the specified device";
-        //}
-        //leaf fallback-lan {
-        //type boolean;
-        //description
-        //"If Checked, this will shutdown all LAN Physical/Subinterfaces on the specified device";
-        //}
       }
     }
   }
@@ -14179,7 +15012,7 @@ module cpedeployment {
       description
         "Check if EIGRP Split-Horizon should be enabled on the interface";
       //n-ext:maps-to "/ac:devices/device[id=current()/../../../device-ip]/l3features:eigrp/router-eigrp[eigrp-name=current()/../name]/address-family[as-number=current()/../as-number]/af-interface/split-horizon";
-      n-ext:maps-to "/ac:devices/ac:device/if:interfaces/interface[long-name=current()/../../interface-name]/eigrp/as-number[as-number=current()/../as-number]/split-horizon";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../device-ip]/if:interfaces/interface[long-name=current()/../../interface-name]/eigrp/as-number[as-number=current()/../as-number]/split-horizon";
     }
     list summary-network {
       key "prefix";
@@ -14305,18 +15138,26 @@ module cpedeployment {
         refine "static-routes/static-route/dest-ip-address" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:routes/route/dest-ip-address";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route/dest-ip-address";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route/dest-ip-address";
         }
         refine "static-routes/static-route/dest-mask" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../dest-ip-address]/dest-mask";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../dest-ip-address]/dest-mask";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../dest-ip-address]/dest-mask";
         }
         refine "static-routes/static-route/options/id" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options/id";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options/id";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options/id";
         }
         refine "static-routes/static-route/options/next-hop-ip" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/next-hop-ip";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/next-hop-ip";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/next-hop-ip";
         }
         //refine "static-routes/static-route/options/global-address" {
         //config false;
@@ -14325,34 +15166,55 @@ module cpedeployment {
         refine "static-routes/static-route/options/metric" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/metric";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/metric";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/metric";
         }
         refine "static-routes/static-route/options/interface-name" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/interface-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/interface-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/interface-name";
         }
         refine "static-routes/static-route/options/name" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/name";
         }
         refine "static-routes/static-route/options/vrf" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/vrf-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/vrf-name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/vrf-name";
         }
         refine "static-routes/static-route/options/tag" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/tag";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/tag";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/tag";
         }
         refine "static-routes/static-route/options/permanent" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/permanent";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/permanent";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/permanent";
         }
         refine "static-routes/static-route/options/track" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/track";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/track";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/track";
         }
         refine "static-routes/static-route/options/description" {
           //config false;
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/description";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/description";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/description";
+        }
+        refine "static-routes/static-route/options/global-address" {
+          //config false;
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DATA]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/global-address";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=DPS]/l3features:routes/route[dest-ip-address=current()/../../dest-ip-address]/options[id=current()/../id]/global-address";
         }
         //refine "static-routes/static-route/options/seq-num" {
         //config false;
@@ -14511,6 +15373,62 @@ module cpedeployment {
         }
         key "endpoint-name";
         uses end-point-props1;
+        leaf endpoint-level-qos {
+          type boolean;
+          description
+            "Check this option if you want to overwrite QoS policy specified in cpe-wan parent container";
+          when "../interface-type = 'Physical' or ../interface-type = 'SVI' or ../interface-type = 'Sub-Interface'";
+          default "false";
+        }
+        leaf hierarchical-outbound-qos {
+          type boolean;
+          description
+            "Check to configure a HQoS Outbound Policy";
+          when "../endpoint-level-qos = 'true'";
+        }
+        leaf hierarchical-qos-policy-name {
+          type string-no-lead-trail-space;
+          description
+            "Select the HQoS Outbound Policy Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/outbound-qos";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+        }
+        leaf child-qos-policy-name {
+          type leafref {
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/qos-service/policies/policy/name";
+          }
+          description
+            "Select Child QoS Policy-Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/service-policy";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+        }
+        leaf shape-average {
+          type uint64 {
+            range "8000..10000000000";
+          }
+          description
+            "Enter Shaping Average Bandwidth";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/shape-average";
+        }
+        leaf bits-sustained {
+          type uint64 {
+            range "32..800000000";
+          }
+          description
+            "Enter Shaper Bc Value";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/bits-sustained";
+        }
+        leaf bits-excess {
+          type uint64 {
+            range "0..154400000";
+          }
+          description
+            "Enter Shaper Be Value";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/bits-excess";
+        }
         leaf dmvpn-profile {
           type leafref {
             //path "../../../../../dmvpn-tunnel-profiles/dmvpn-tunnel-profile/name";
@@ -14753,6 +15671,62 @@ module cpedeployment {
         }
         key "endpoint-name";
         uses end-point-props1;
+        leaf endpoint-level-qos {
+          type boolean;
+          description
+            "Check this option if you want to overwrite QoS policy specified in cpe-wan parent container";
+          when "../interface-type = 'Physical' or ../interface-type = 'SVI' or ../interface-type = 'Sub-Interface'";
+          default "false";
+        }
+        leaf hierarchical-outbound-qos {
+          type boolean;
+          description
+            "Check to configure a HQoS Outbound Policy";
+          when "../endpoint-level-qos = 'true'";
+        }
+        leaf hierarchical-qos-policy-name {
+          type string-no-lead-trail-space;
+          description
+            "Select the HQoS Outbound Policy Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/outbound-qos";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+        }
+        leaf child-qos-policy-name {
+          type leafref {
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/qos-service/policies/policy/name";
+          }
+          description
+            "Select Child QoS Policy-Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/service-policy";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+        }
+        leaf shape-average {
+          type uint64 {
+            range "8000..10000000000";
+          }
+          description
+            "Enter Shaping Average Bandwidth";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/shape-average";
+        }
+        leaf bits-sustained {
+          type uint64 {
+            range "32..800000000";
+          }
+          description
+            "Enter Shaper Bc Value";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/bits-sustained";
+        }
+        leaf bits-excess {
+          type uint64 {
+            range "0..154400000";
+          }
+          description
+            "Enter Shaper Be Value";
+          when "../endpoint-level-qos = 'true' and ../hierarchical-outbound-qos = 'true'";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/qos:policy-maps/policy-map[name=current()/../hierarchical-qos-policy-name]/class-entry/bits-excess";
+        }
         leaf dmvpn-profile {
           type leafref {
             //path "../../../../../dmvpn-tunnel-profiles/dmvpn-tunnel-profile/name";
@@ -15121,6 +16095,12 @@ module cpedeployment {
             "string";
           config false;
         }
+        leaf created-by {
+          type string;
+          description
+            "string";
+          config false;
+        }
         leaf show-topology {
           type boolean;
           description
@@ -15202,20 +16182,13 @@ module cpedeployment {
             "Enter Transaction Name
              This is an internal field for Anuta NCX";
         }
-        leaf device {
-          type leafref {
-            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services[site-name=current()/../../../site-name]/cpe/device-ip";
-          }
-          description
-            "Select Device Name";
-          mandatory true;
-        }
         leaf cpe-primary-wan-ebgp-neighbor {
           type leafref {
             path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services[site-name=current()/../../../site-name]/cpe-primary-wan/end-points/bgp-peers/peer-ip";
           }
           description
             "Select WAN eBGP peer under container cpe-primary-wan on which to perform failover/fallback operation";
+          mandatory true;
         }
         leaf cpe-secondary-wan-ebgp-neighbor {
           type leafref {
@@ -15223,61 +16196,14 @@ module cpedeployment {
           }
           description
             "Select WAN eBGP peer under container cpe-secondary-wan on which to perform failover/fallback operation";
+          mandatory true;
         }
-        leaf dps-tunnel-id {
-          type leafref {
-            path "/ac:devices/ac:device[ac:id=current()/../device]/dmvpn:dmvpntunnels/dmvpn:dmvpntunnel/dmvpn:name";
-          }
-          description
-            "Select DPS DMVPN Tunnel ID on which to perform failover/fallback operation";
-        }
-        leaf failover {
+        leaf swap-bgp-route-maps {
           type boolean;
           description
-            "Check if you want to perform a Failover Operation";
-          when "../fallback = 'false' ";
+            "Check to Switch eBGP Peer Route-Maps between primary/secondary peers";
+          default "true";
         }
-        leaf fallback {
-          type boolean;
-          description
-            "Check if you want to perform a Fallback Operation";
-          when "../failover = 'false' ";
-        }
-        leaf failover-wan {
-          type boolean;
-          description
-            "If Checked, this will shutdown the WAN eBGP peer(s) specified";
-          when " ../failover = 'true' ";
-        }
-        leaf fallback-wan {
-          type boolean;
-          description
-            "If Checked, this will restore the WAN eBGP peer(s) specified";
-          when " ../fallback = 'true' ";
-        }
-        leaf failover-dps {
-          type boolean;
-          description
-            "If Checked, this will shutdown the DPS Tunnel Interface on the specified device";
-          when " ../failover = 'true' ";
-        }
-        leaf fallback-dps {
-          type boolean;
-          description
-            "If Checked, this will shutdown the DPS Tunnel Interface on the specified device";
-          when " ../fallback = 'true' ";
-        }
-        //leaf failover-lan {
-        //type boolean;
-        //description
-        //"If Checked, this will shutdown all LAN Physical/Subinterfaces on the specified device";
-        //when " ../fallback-lan = 'false' ";
-        //}
-        //leaf fallback-lan {
-        //type boolean;
-        //description
-        //"If Checked, this will restore all LAN Physical/Subinterfaces on the specified device";
-        //}
       }
     }
   }
@@ -15317,6 +16243,12 @@ module cpedeployment {
             "brownfield-site: True/False";
         }
         leaf created-on {
+          type string;
+          description
+            "string";
+          config false;
+        }
+        leaf created-by {
           type string;
           description
             "string";
@@ -15408,9 +16340,10 @@ module cpedeployment {
             "string";
         }
         leaf tunnel-id {
-          type leafref {
-            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../name]/dmvpn-tunnel-profiles/dmvpn-tunnel-profile/tunnel-id";
-          }
+          //type leafref {
+          //path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../name]/dmvpn-tunnel-profiles/dmvpn-tunnel-profile/tunnel-id";
+          //}
+          type uint32;
           description
             "tunnel-id";
           mandatory true;
@@ -15436,6 +16369,14 @@ module cpedeployment {
           when " ../operation = 'CREATE' ";
           //n-ext:maps-to "/ac:devices/device/dmvpn:dmvpntunnels/dmvpntunnel/tunnel-key";
         }
+        leaf nhrp-holdtime {
+          type uint32 {
+            range "1..65535";
+          }
+          description
+            "NHRP Holdtime";
+          when " ../operation = 'CREATE' ";
+        }
         leaf nhrp-authentication-key {
           type string-no-space {
             length "1..8";
@@ -15448,13 +16389,13 @@ module cpedeployment {
         leaf wan-tunnel-ip {
           type inet:ip-address;
           description
-            "DC router tunnel IP address from tunnel prefix range";
+            "NHRP Map Tunnel IP Address";
           //n-ext:maps-to "/ac:devices/device/dmvpn:dmvpntunnels/dmvpntunnel/nhrp-maps/sourceip";
         }
         leaf wan-public-ip {
           type inet:ip-address;
           description
-            "DC router tunnel source interface IP address";
+            "NHRP Map NBMA Address";
           //n-ext:maps-to "/ac:devices/device/dmvpn:dmvpntunnels/dmvpntunnel/nhrp-maps/destip";
         }
         leaf mtu {
@@ -16518,7 +17459,7 @@ module cpedeployment {
     leaf id {
       type string-no-space;
       description
-        "string";
+        "Enter Transaction ID. This is an internal field for Anuta NCX";
     }
     leaf access-list-name {
       type leafref {
@@ -16599,7 +17540,7 @@ module cpedeployment {
          tcp
          udp
         ";
-      mandatory true;
+      //mandatory true;
       //n-ext:maps-to "/ac:devices/device/acl:access-lists/access-list[name=current()/../../name]/acl-rules/acl-rule[name=current()/../name]/layer4protocol";
     }
     leaf service-obj-name {
@@ -16627,7 +17568,7 @@ module cpedeployment {
       //n-ext:maps-to "/ac:devices/device/acl:access-lists/access-list[name=current()/../../name]/acl-rules/acl-rule[name=current()/../name]/source-condition-type";
     }
     leaf source-object {
-      type string;
+      type string-no-space;
       description
         "string";
       when "../source-condition =  'cidr' or ../source-condition =  'host'";
@@ -16714,7 +17655,7 @@ module cpedeployment {
     leaf port-number {
       type string-no-lead-trail-space;
       description
-        "0..65535";
+        "Enter Desintation Port Number";
       when "../protocol =  'tcp' or ../protocol =  'udp'";
     }
     leaf match-packets {
@@ -16821,6 +17762,215 @@ module cpedeployment {
       description
         "single-sites";
       when " ../triple-cpe-site = 'true' ";
+    }
+    list additional-acl-entry {
+      key "id";
+      leaf id {
+        type string-no-space;
+        description
+          "Enter Unique ID. This is an internal field for Anuta NCX";
+      }
+      leaf acl-sequence-num {
+        type uint32 {
+          range "1..2147483647";
+        }
+        description
+          "1..2147483647";
+        //n-ext:maps-to "/ac:devices/device/acl:access-lists/access-list[name=current()/../../name]/acl-rules/acl-rule[name=current()/../name]/linenumber";
+      }
+      leaf action {
+        type enumeration {
+          enum "permit";
+          enum "deny";
+        }
+        description
+          "permit
+           deny
+          ";
+        mandatory true;
+        //n-ext:maps-to "/ac:devices/device/acl:access-lists/access-list[name=current()/../../name]/acl-rules/acl-rule[name=current()/../name]/action";
+      }
+      leaf protocol {
+        type enumeration {
+          enum "ahp";
+          enum "eigrp";
+          enum "esp";
+          enum "gre";
+          enum "icmp";
+          enum "igmp";
+          enum "ip";
+          enum "ipinip";
+          enum "object-group";
+          enum "ospf";
+          enum "pcp";
+          enum "pim";
+          enum "tcp";
+          enum "udp";
+        }
+        description
+          "ahp
+           eigrp
+           esp
+           gre
+           icmp
+           igmp
+           ip
+           ipinip
+           object-group
+           ospf
+           pcp
+           pim
+           tcp
+           udp
+          ";
+        //mandatory true;
+        //n-ext:maps-to "/ac:devices/device/acl:access-lists/access-list[name=current()/../../name]/acl-rules/acl-rule[name=current()/../name]/layer4protocol";
+      }
+      leaf service-obj-name {
+        type leafref {
+          path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../name]/object-groups/object-group/name";
+        }
+        description
+          "string";
+        when "../protocol =  'object-group'";
+        //n-ext:maps-to "/ac:devices/device/acl:access-lists/access-list/acl-rules/acl-rule/service-obj-name";
+      }
+      leaf source-condition {
+        type enumeration {
+          enum "cidr";
+          enum "host";
+          enum "any";
+          enum "objectgroup";
+        }
+        description
+          "cidr
+           host
+           any
+           objectgroup
+          ";
+        //n-ext:maps-to "/ac:devices/device/acl:access-lists/access-list[name=current()/../../name]/acl-rules/acl-rule[name=current()/../name]/source-condition-type";
+      }
+      leaf source-object {
+        type string-no-space;
+        description
+          "string";
+        when "../source-condition =  'cidr' or ../source-condition =  'host'";
+        //n-ext:maps-to "/ac:devices/device/acl:access-lists/access-list[name=current()/../../name]/acl-rules/acl-rule[name=current()/../name]/source-ip";
+        //n-ext:maps-to "/ac:devices/device/acl:access-lists/access-list[name=current()/../../name]/acl-rules/acl-rule[name=current()/../name]";
+        //n-ext:prefix-maps-to "source-ip,source-mask";
+      }
+      leaf source-object-group {
+        type leafref {
+          path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../name]/object-groups/object-group/name";
+        }
+        description
+          "source-object-group";
+        when "../source-condition =  'objectgroup'";
+        //n-ext:maps-to "/ac:devices/device/acl:object-groups-acl/object-group/name";
+        //n-ext:maps-to "/ac:devices/device/acl:access-lists/access-list[name=current()/../../name]/acl-rules/acl-rule[name=current()/../name]/source-obj-name";
+      }
+      leaf source-port-operator {
+        type enumeration {
+          enum "eq";
+          enum "range";
+          enum "lt";
+          enum "gt";
+        }
+        description
+          "eq
+           range
+          ";
+        when "../protocol =  'tcp' or ../protocol =  'udp'";
+      }
+      leaf source-port {
+        type string-no-lead-trail-space;
+        description
+          "0..65535";
+        when "../protocol =  'tcp' or ../protocol =  'udp'";
+      }
+      leaf destination-condition {
+        type enumeration {
+          enum "cidr";
+          enum "host";
+          enum "any";
+          enum "objectgroup";
+        }
+        description
+          "cidr
+           host
+           any
+           objectgroup
+          ";
+        //n-ext:maps-to "/ac:devices/device/acl:access-lists/access-list[name=current()/../../name]/acl-rules/acl-rule[name=current()/../name]/dest-condition-type";
+      }
+      leaf destination-object {
+        type string-no-space;
+        description
+          "string";
+        when "../destination-condition =  'cidr' or ../destination-condition =  'host'";
+        //n-ext:maps-to "/ac:devices/device/acl:access-lists/access-list[name=current()/../../name]/acl-rules/acl-rule[name=current()/../name]/dest-ip";
+        //n-ext:maps-to "/ac:devices/device[id=current()/../../../../device-ip]/acl:access-lists/access-list[name=current()/../../name]/acl-rules/acl-rule[name=current()/../name]";
+        //n-ext:prefix-maps-to "dest-ip,dest-mask";
+      }
+      leaf destination-object-group {
+        type leafref {
+          path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../name]/object-groups/object-group/name";
+        }
+        description
+          "destination-object-group";
+        when "../destination-condition =  'objectgroup'";
+        //n-ext:maps-to "/ac:devices/device/acl:object-groups-acl/object-group/name";
+        //n-ext:maps-to "/ac:devices/device/acl:access-lists/access-list[name=current()/../../name]/acl-rules/acl-rule[name=current()/../name]/dest-obj-name";
+      }
+      leaf dest-port-operator {
+        type enumeration {
+          enum "eq";
+          enum "range";
+          enum "lt";
+          enum "gt";
+        }
+        description
+          "eq
+           range
+          ";
+        when "../protocol =  'tcp' or ../protocol =  'udp'";
+      }
+      leaf port-number {
+        type string-no-lead-trail-space;
+        description
+          "Enter Destination Port Number";
+        when "../protocol =  'tcp' or ../protocol =  'udp'";
+      }
+      leaf match-packets {
+        type match-packets-type;
+        description
+          "precedence\n";
+        //n-ext:maps-to "/ac:devices/device/acl:access-lists/access-list[name=current()/../../name]/acl-rules/acl-rule[name=current()/../name]/match-packets";
+      }
+      leaf precedence {
+        type precedence-type;
+        description
+          "routine
+           priority
+           immediate
+           flash
+           flash-override
+           critical
+           internet
+           network
+          ";
+        when " ../match-packets = 'precedence' ";
+        //n-ext:maps-to "/ac:devices/device/acl:access-lists/access-list[name=current()/../../name]/acl-rules/acl-rule[name=current()/../name]/precedence";
+      }
+      leaf dscp {
+        type dscp-values-type;
+        description
+          "Union Input types:
+           enumeration
+          ";
+        when " ../match-packets = 'dscp' ";
+        //n-ext:maps-to "/ac:devices/device/acl:access-lists/access-list[name=current()/../../name]/acl-rules/acl-rule[name=current()/../name]/precedence";
+      }
     }
   }
 
@@ -17186,7 +18336,7 @@ module cpedeployment {
           "string";
         when "../destination-condition =  'cidr' or ../destination-condition =  'host'";
         n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/acl:access-lists/access-list[name=current()/../../name]/acl-rules/acl-rule[name=current()/../name]/dest-ip";
-        n-ext:maps-to "/ac:devices/ac:device/acl:access-lists/access-list[name=current()/../../name]/acl-rules/acl-rule[name=current()/../name]";
+        n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/acl:access-lists/access-list[name=current()/../../name]/acl-rules/acl-rule[name=current()/../name]";
         n-ext:prefix-maps-to "dest-ip,dest-mask";
       }
       leaf destination-object-group {
@@ -17215,7 +18365,7 @@ module cpedeployment {
       leaf port-number {
         type string-no-lead-trail-space;
         description
-          "0..65535";
+          "Enter Destination Port Number";
         n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/acl:access-lists/access-list[name=current()/../../name]/acl-rules/acl-rule[name=current()/../name]/dest-port";
         when "../protocol =  'tcp' or ../protocol =  'udp'";
       }
@@ -17262,6 +18412,18 @@ module cpedeployment {
           type string-no-space;
           description
             "DPS Service Name";
+        }
+        leaf created-on {
+          type string;
+          description
+            "string";
+          config false;
+        }
+        leaf created-by {
+          type string;
+          description
+            "string";
+          config false;
         }
         leaf single-cpe-site {
           type boolean;
@@ -18448,7 +19610,7 @@ module cpedeployment {
       mandatory true;
     }
     leaf area {
-      type uint8;
+      type uint32;
       description
         "Enter OSPF area";
     }

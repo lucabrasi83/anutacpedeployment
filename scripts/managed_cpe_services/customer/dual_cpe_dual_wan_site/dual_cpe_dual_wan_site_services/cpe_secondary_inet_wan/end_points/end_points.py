@@ -113,6 +113,13 @@ class EndPoints(yang.AbstractYangServiceHandler):
         inputdict['bfd_interval'] = config.get_field_value('bfd_interval')
         inputdict['bfd_min_rx'] = config.get_field_value('bfd_min_rx')
         inputdict['bfd_multiplier'] = config.get_field_value('bfd_multiplier')
+        inputdict['endpoint_level_qos'] = config.get_field_value('endpoint_level_qos')
+        inputdict['hierarchical_outbound_qos'] = config.get_field_value('hierarchical_outbound_qos')
+        inputdict['hierarchical_qos_policy_name'] = config.get_field_value('hierarchical_qos_policy_name')
+        inputdict['child_qos_policy_name'] = config.get_field_value('child_qos_policy_name')
+        inputdict['shape_average'] = config.get_field_value('shape_average')
+        inputdict['bits_sustained'] = config.get_field_value('bits_sustained')
+        inputdict['bits_excess'] = config.get_field_value('bits_excess')
         # END OF FETCHING THE LEAF PARAMETERS
 
         #Fetch Device Object
@@ -187,6 +194,13 @@ class EndPoints(yang.AbstractYangServiceHandler):
         inputdict['bfd_interval'] = config.get_field_value('bfd_interval')
         inputdict['bfd_min_rx'] = config.get_field_value('bfd_min_rx')
         inputdict['bfd_multiplier'] = config.get_field_value('bfd_multiplier')
+        inputdict['endpoint_level_qos'] = config.get_field_value('endpoint_level_qos')
+        inputdict['hierarchical_outbound_qos'] = config.get_field_value('hierarchical_outbound_qos')
+        inputdict['hierarchical_qos_policy_name'] = config.get_field_value('hierarchical_qos_policy_name')
+        inputdict['child_qos_policy_name'] = config.get_field_value('child_qos_policy_name')
+        inputdict['shape_average'] = config.get_field_value('shape_average')
+        inputdict['bits_sustained'] = config.get_field_value('bits_sustained')
+        inputdict['bits_excess'] = config.get_field_value('bits_excess')
         # END OF FETCHING THE LEAF PARAMETERS
 
         # START OF FETCHING THE PREVIOUS LEAF PARAMETERS
@@ -225,6 +239,13 @@ class EndPoints(yang.AbstractYangServiceHandler):
         pinputdict['bfd_interval'] = pconfig.get_field_value('bfd_interval')
         pinputdict['bfd_min_rx'] = pconfig.get_field_value('bfd_min_rx')
         pinputdict['bfd_multiplier'] = pconfig.get_field_value('bfd_multiplier')
+        pinputdict['endpoint_level_qos'] = pconfig.get_field_value('endpoint_level_qos')
+        pinputdict['hierarchical_outbound_qos'] = pconfig.get_field_value('hierarchical_outbound_qos')
+        pinputdict['hierarchical_qos_policy_name'] = pconfig.get_field_value('hierarchical_qos_policy_name')
+        pinputdict['child_qos_policy_name'] = pconfig.get_field_value('child_qos_policy_name')
+        pinputdict['shape_average'] = pconfig.get_field_value('shape_average')
+        pinputdict['bits_sustained'] = pconfig.get_field_value('bits_sustained')
+        pinputdict['bits_excess'] = pconfig.get_field_value('bits_excess')
         # END OF FETCHING THE LEAF PARAMETERS
 
         #Fetch Device Object
@@ -289,6 +310,13 @@ class EndPoints(yang.AbstractYangServiceHandler):
         inputdict['bfd_interval'] = config.get_field_value('bfd_interval')
         inputdict['bfd_min_rx'] = config.get_field_value('bfd_min_rx')
         inputdict['bfd_multiplier'] = config.get_field_value('bfd_multiplier')
+        inputdict['endpoint_level_qos'] = config.get_field_value('endpoint_level_qos')
+        inputdict['hierarchical_outbound_qos'] = config.get_field_value('hierarchical_outbound_qos')
+        inputdict['hierarchical_qos_policy_name'] = config.get_field_value('hierarchical_qos_policy_name')
+        inputdict['child_qos_policy_name'] = config.get_field_value('child_qos_policy_name')
+        inputdict['shape_average'] = config.get_field_value('shape_average')
+        inputdict['bits_sustained'] = config.get_field_value('bits_sustained')
+        inputdict['bits_excess'] = config.get_field_value('bits_excess')
         # END OF FETCHING THE LEAF PARAMETERS
 
         #Fetch Device Object

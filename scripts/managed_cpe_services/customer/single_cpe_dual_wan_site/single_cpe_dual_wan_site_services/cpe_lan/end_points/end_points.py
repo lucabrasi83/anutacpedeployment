@@ -42,6 +42,7 @@ from servicemodel import devicemgr
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject
 from cpedeployment.cpedeployment_lib import getCurrentObjectConfig
+from cpedeployment.cpedeployment_lib import getPreviousObjectConfig
 from cpedeployment.cpedeployment_lib import ServiceModelContext
 from cpedeployment.cpedeployment_lib import getParentObject
 from cpedeployment.cpedeployment_lib import log
@@ -129,6 +130,7 @@ class EndPoints(yang.AbstractYangServiceHandler):
     def update(self, id, sdata):
         #Fetch Local Config Object
         config = getCurrentObjectConfig(id, sdata, 'end_points')
+        pconfig = getPreviousObjectConfig(id, sdata, 'end_points')
 
         #Fetch Service Model Context Object
         smodelctx = None
@@ -142,6 +144,7 @@ class EndPoints(yang.AbstractYangServiceHandler):
         dev = getDeviceObject(prevconfig.get_field_value('device_ip'), sdata)
 
         inputdict = {}
+        pinputdict = {}
 
         # START OF FETCHING THE LEAF PARAMETERS
         inputdict['profile_name'] = config.get_field_value('profile_name')
@@ -182,8 +185,47 @@ class EndPoints(yang.AbstractYangServiceHandler):
         inputdict['bfd_multiplier'] = config.get_field_value('bfd_multiplier')
         # END OF FETCHING THE LEAF PARAMETERS
 
+         # START OF FETCHING THE PREVIOUS LEAF PARAMETERS
+        pinputdict['profile_name'] = pconfig.get_field_value('profile_name')
+        pinputdict['endpoint_name'] = pconfig.get_field_value('endpoint_name')
+        pinputdict['device_ip'] = pconfig.get_field_value('device_ip')
+        pinputdict['vrf'] = pconfig.get_field_value('vrf')
+        pinputdict['interface_type'] = pconfig.get_field_value('interface_type')
+        pinputdict['interface_name'] = pconfig.get_field_value('interface_name')
+        pinputdict['vlan_id'] = pconfig.get_field_value('vlan_id')
+        pinputdict['interface_ip'] = pconfig.get_field_value('interface_ip')
+        pinputdict['interface_description'] = pconfig.get_field_value('interface_description')
+        pinputdict['pbr_policy'] = pconfig.get_field_value('pbr_policy')
+        pinputdict['dps'] = pconfig.get_field_value('dps')
+        pinputdict['ospf'] = pconfig.get_field_value('ospf')
+        pinputdict['priority'] = pconfig.get_field_value('priority')
+        pinputdict['cost'] = pconfig.get_field_value('cost')
+        pinputdict['fast_hello'] = pconfig.get_field_value('fast_hello')
+        pinputdict['hello_multiplier'] = pconfig.get_field_value('hello_multiplier')
+        pinputdict['hello_interval'] = pconfig.get_field_value('hello_interval')
+        pinputdict['dead_interval'] = pconfig.get_field_value('dead_interval')
+        pinputdict['ospf_id'] = pconfig.get_field_value('ospf_id')
+        pinputdict['area'] = pconfig.get_field_value('area')
+        pinputdict['inbound_acl'] = pconfig.get_field_value('inbound_acl')
+        pinputdict['global_inbound_acl'] = pconfig.get_field_value('global_inbound_acl')
+        pinputdict['site_inbound_acl'] = pconfig.get_field_value('site_inbound_acl')
+        pinputdict['outbound_acl'] = pconfig.get_field_value('outbound_acl')
+        pinputdict['global_outbound_acl'] = pconfig.get_field_value('global_outbound_acl')
+        pinputdict['site_outbound_acl'] = pconfig.get_field_value('site_outbound_acl')
+        pinputdict['nat_inside'] = pconfig.get_field_value('nat_inside')
+        pinputdict['nat_outside'] = pconfig.get_field_value('nat_outside')
+        pinputdict['delay'] = pconfig.get_field_value('delay')
+        pinputdict['mace_enable'] = pconfig.get_field_value('mace_enable')
+        pinputdict['tcp_mss'] = pconfig.get_field_value('tcp_mss')
+        pinputdict['bandwidth'] = pconfig.get_field_value('bandwidth')
+        pinputdict['bfd'] = pconfig.get_field_value('bfd')
+        pinputdict['bfd_interval'] = pconfig.get_field_value('bfd_interval')
+        pinputdict['bfd_min_rx'] = pconfig.get_field_value('bfd_min_rx')
+        pinputdict['bfd_multiplier'] = pconfig.get_field_value('bfd_multiplier')
+        # END OF FETCHING THE LEAF PARAMETERS
+
         #Use the custom method to process the data
-        service_customization.ServiceDataCustomization.process_service_update_data(smodelctx, sdata, dev=dev, parentobj=parentobj, config=config)
+        service_customization.ServiceDataCustomization.process_service_update_data(smodelctx, sdata, dev=dev, parentobj=parentobj, config=config, inputdict=inputdict, pinputdict=pinputdict, pconfig=pconfig)
 
     def delete(self, id, sdata):
         sdata.getSession().addYangSessionPreReserveProcessor(self.delete_pre_processor)

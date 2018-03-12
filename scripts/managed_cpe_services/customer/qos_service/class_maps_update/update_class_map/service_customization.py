@@ -282,14 +282,14 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
         #for dscp_dyn in conf_class.class_map.class_match_condition:
             #if dscp_dyn.condition_type == 'ip-dscp':
                 #device_dscp.append(dscp_dyn.match_value)
-        device_dscp = [dscp_dyn.match_value for dscp_dyn in conf_class.class_map.class_match_condition if dscp_dyn.condition_type == 'ip-dscp']
+        device_dscp = [dscp_dyn.match_value for dscp_dyn in conf_class.class_map.class_match_condition if dscp_dyn.condition_type == 'ip dscp']
     if len(inputdict['dscp']) > 0:
         for ds in device_dscp:
             if ds not in dscp:
                 match_obj = class_maps.class_map.class_match_condition.class_match_condition()
-                match_obj.condition_type = "ip-dscp"
+                match_obj.condition_type = "ip dscp"
                 match_obj.match_value = ds
-                yang.Sdk.deleteData(device.url+"/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(cls_name, 'ip-dscp', ds), match_obj.getxml(filter=True), sdata.getTaskId(), sdata.getSession())
+                yang.Sdk.deleteData(device.url+"/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(cls_name, 'ip dscp', ds), match_obj.getxml(filter=True), sdata.getTaskId(), sdata.getSession())
 
     device_protocol = []
     if hasattr(conf_class.class_map, 'class_match_condition'):
@@ -402,7 +402,7 @@ def create_match_condition(entity, conf, sdata, **kwargs):
                     if pr == "http":
                         match_object = class_maps.class_map.class_match_condition.http_url.http_url()
                         http_url = inputdict['http_url']
-                        print "http_url is:",http_url
+                        # print "http_url is:",http_url
                         if util.isNotEmpty(http_url):
                             for url_http in util.convert_to_list(http_url):
                                 match_object.url = url_http
@@ -418,7 +418,7 @@ def create_match_condition(entity, conf, sdata, **kwargs):
                 if inputdict['protocol'] == "http":
                     match_object = class_maps.class_map.class_match_condition.http_url.http_url()
                     http_url = inputdict['http_url']
-                    print "http_url is:",http_url
+                    # print "http_url is:",http_url
                     if util.isNotEmpty(http_url):
                         for url_http in util.convert_to_list(http_url):
                             match_object.url = url_http
@@ -483,7 +483,7 @@ def create_match_condition(entity, conf, sdata, **kwargs):
                     match_obj.match_value = qos_group
                     yang.Sdk.createData(device.url+"/qos:class-maps/class-map=%s" %(cls_name), match_obj.getxml(filter=True), sdata.getSession(), False)
     else:
-        print "Class is not in device: ", device
+        yang.Sdk.append_taskdetail(sdata.getTaskId(), "Class-Map " + str(cls_name) + " not found on device " + str(device.device.id) + ". Skipping this device")
 
 
 class DeletePreProcessor(yang.SessionPreProcessor):

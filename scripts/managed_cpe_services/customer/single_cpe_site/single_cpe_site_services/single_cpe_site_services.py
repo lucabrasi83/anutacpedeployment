@@ -76,6 +76,7 @@ class SingleCpeSiteServices(yang.AbstractYangServiceHandler):
         inputdict['greenfield_site'] = config.get_field_value('greenfield_site')
         inputdict['brownfield_site'] = config.get_field_value('brownfield_site')
         inputdict['created_on'] = config.get_field_value('created_on')
+        inputdict['created_by'] = config.get_field_value('created_by')
         # END OF FETCHING THE LEAF PARAMETERS
 
         inputkeydict = {}

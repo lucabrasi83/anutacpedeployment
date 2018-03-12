@@ -186,7 +186,8 @@ def key_chain_add(key_chain_name, sdata, dev, **kwargs):
     key_chain_name = obj.router_key_chain.key_chain_name
     keychainobj = key_chain.router_key_chain.router_key_chain()
     keychainobj.key_chain_name = key_chain_name
-    yang.Sdk.createData(dev.url, '<key-chain/>', sdata.getSession(), False)
+    if not yang.Sdk.dataExists(dev.url + '/l3features:key-chain'):
+        yang.Sdk.createData(dev.url, '<key-chain/>', sdata.getSession(), False)
     key_chain_url = dev.url + '/l3features:key-chain'
     yang.Sdk.createData(key_chain_url, keychainobj.getxml(filter=True), sdata.getSession())
 

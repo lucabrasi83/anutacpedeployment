@@ -281,7 +281,9 @@ def delete_acl(entity, conf, sdata, **kwargs):
     access_list_name = inputdict['access_list_name']
     #acl_name = inputdict['acl_name']
 
-    url_device_acl = '/controller:devices/device=%s/acl:access-lists' %(device.device.id)
+    url_device_acl = '/controller:devices/device=%s/acl:access-lists/access-list=%s' %(device.device.id, access_list_name)
+    
+    '''
     dev_acl = yang.Sdk.getData(url_device_acl, '', sdata.getTaskId())
     conf_acl = util.parseXmlString(dev_acl)
 
@@ -293,6 +295,8 @@ def delete_acl(entity, conf, sdata, **kwargs):
         device_acl = [acl.name for acl in conf_acl.access_lists.access_list]
     
         if access_list_name in device_acl:
+    '''
+    if yang.Sdk.dataExists(url_device_acl):
             access_list_url = '/controller:devices/device=%s/acl:access-lists/access-list=%s' % (device.device.id, access_list_name)
             output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+access_list_url+'</rc-path></input>')
             ref = util.parseXmlString(output)
@@ -304,8 +308,8 @@ def delete_acl(entity, conf, sdata, **kwargs):
                             for each_ref in util.convert_to_list(eachreference.src_node):
                                 yang.Sdk.removeReference(each_ref, eachreference.dest_node)
             yang.Sdk.deleteData(access_list_url, '', sdata.getTaskId(), sdata.getSession())
-        else:
-            log("Access-List is not in device: " + str(device))
+    else:
+            yang.Sdk.append_taskdetail(sdata.getTaskId(), "Access-List " + str(access_list_name) + " not found on device " + str(device.device.id) + ". Skipping this device")
    
 
 

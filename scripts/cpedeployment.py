@@ -57,6 +57,8 @@ import managed_cpe_services.customer.single_cpe_site.single_cpe_site_services.cp
 import managed_cpe_services.customer.single_cpe_site.single_cpe_site_services.cpe.prefix_lists.prefix_list.prefix_list
 import managed_cpe_services.customer.single_cpe_site.single_cpe_site_services.cpe.advertise_networks.advertise_network.advertise_network
 import managed_cpe_services.customer.single_cpe_site.single_cpe_site_services.cpe.ip_sla.sla.sla
+import managed_cpe_services.customer.single_cpe_site.single_cpe_site_services.cpe.acl_template.acl.acl
+import managed_cpe_services.customer.single_cpe_site.single_cpe_site_services.cpe.ip_sla.responder_options.responder_options
 import managed_cpe_services.customer.single_cpe_site.single_cpe_site_services.cpe.access_lists.access_list.access_list
 import managed_cpe_services.customer.single_cpe_site.single_cpe_site_services.cpe.access_lists.access_list.access_list_rules.access_list_rules
 import managed_cpe_services.customer.single_cpe_site.single_cpe_site_services.cpe.class_maps.class_map.class_map
@@ -82,6 +84,7 @@ import managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_pr
 import managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_primary.prefix_lists.prefix_list.prefix_list
 import managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_primary.advertise_networks.advertise_network.advertise_network
 import managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_primary.ip_sla.sla.sla
+import managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_primary.ip_sla.responder_options.responder_options
 import managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_primary.access_lists.access_list.access_list
 import managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_primary.access_lists.access_list.access_list_rules.access_list_rules
 import managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_primary.class_maps.class_map.class_map
@@ -94,6 +97,9 @@ import managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_se
 import managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_secondary.prefix_lists.prefix_list.prefix_list
 import managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_secondary.advertise_networks.advertise_network.advertise_network
 import managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_secondary.ip_sla.sla.sla
+import managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_primary.acl_template.acl.acl
+import managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_secondary.acl_template.acl.acl
+import managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_secondary.ip_sla.responder_options.responder_options
 import managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_secondary.access_lists.access_list.access_list
 import managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_secondary.access_lists.access_list.access_list_rules.access_list_rules
 import managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_secondary.class_maps.class_map.class_map
@@ -130,6 +136,8 @@ import managed_cpe_services.customer.single_cpe_dual_wan_site.single_cpe_dual_wa
 import managed_cpe_services.customer.single_cpe_dual_wan_site.single_cpe_dual_wan_site_services.cpe.prefix_lists.prefix_list.prefix_list
 import managed_cpe_services.customer.single_cpe_dual_wan_site.single_cpe_dual_wan_site_services.cpe.advertise_networks.advertise_network.advertise_network
 import managed_cpe_services.customer.single_cpe_dual_wan_site.single_cpe_dual_wan_site_services.cpe.ip_sla.sla.sla
+import managed_cpe_services.customer.single_cpe_dual_wan_site.single_cpe_dual_wan_site_services.cpe.acl_template.acl.acl
+import managed_cpe_services.customer.single_cpe_dual_wan_site.single_cpe_dual_wan_site_services.cpe.ip_sla.responder_options.responder_options
 import managed_cpe_services.customer.single_cpe_dual_wan_site.single_cpe_dual_wan_site_services.cpe.access_lists.access_list.access_list
 import managed_cpe_services.customer.single_cpe_dual_wan_site.single_cpe_dual_wan_site_services.cpe.access_lists.access_list.access_list_rules.access_list_rules
 import managed_cpe_services.customer.single_cpe_dual_wan_site.single_cpe_dual_wan_site_services.cpe.class_maps.class_map.class_map
@@ -237,6 +245,9 @@ import managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_si
 import managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_primary.prefix_lists.prefix_list.prefix_list
 import managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_primary.advertise_networks.advertise_network.advertise_network
 import managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_primary.ip_sla.sla.sla
+import managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_primary.acl_template.acl.acl
+import managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_secondary.acl_template.acl.acl
+import managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_primary.ip_sla.responder_options.responder_options
 import managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_primary.access_lists.access_list.access_list
 import managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_primary.access_lists.access_list.access_list_rules.access_list_rules
 import managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_primary.class_maps.class_map.class_map
@@ -260,6 +271,7 @@ import managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_si
 import managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_secondary.prefix_lists.prefix_list.prefix_list
 import managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_secondary.advertise_networks.advertise_network.advertise_network
 import managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_secondary.ip_sla.sla.sla
+import managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_secondary.ip_sla.responder_options.responder_options
 import managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_secondary.access_lists.access_list.access_list
 import managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_secondary.access_lists.access_list.access_list_rules.access_list_rules
 import managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_secondary.class_maps.class_map.class_map
@@ -318,6 +330,10 @@ import managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cp
 import managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_primary.prefix_lists.prefix_list.prefix_list
 import managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_primary.advertise_networks.advertise_network.advertise_network
 import managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_primary.ip_sla.sla.sla
+import managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_primary.acl_template.acl.acl
+import managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_secondary.acl_template.acl.acl
+import managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_tertiary.acl_template.acl.acl
+import managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_primary.ip_sla.responder_options.responder_options
 import managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_primary.access_lists.access_list.access_list
 import managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_primary.access_lists.access_list.access_list_rules.access_list_rules
 import managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_primary.class_maps.class_map.class_map
@@ -341,6 +357,7 @@ import managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cp
 import managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_secondary.prefix_lists.prefix_list.prefix_list
 import managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_secondary.advertise_networks.advertise_network.advertise_network
 import managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_secondary.ip_sla.sla.sla
+import managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_secondary.ip_sla.responder_options.responder_options
 import managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_secondary.access_lists.access_list.access_list
 import managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_secondary.access_lists.access_list.access_list_rules.access_list_rules
 import managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_secondary.class_maps.class_map.class_map
@@ -364,6 +381,7 @@ import managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cp
 import managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_tertiary.prefix_lists.prefix_list.prefix_list
 import managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_tertiary.advertise_networks.advertise_network.advertise_network
 import managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_tertiary.ip_sla.sla.sla
+import managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_tertiary.ip_sla.responder_options.responder_options
 import managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_tertiary.access_lists.access_list.access_list
 import managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_tertiary.access_lists.access_list.access_list_rules.access_list_rules
 import managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_tertiary.class_maps.class_map.class_map
@@ -782,6 +800,8 @@ class CPEDEPLOYMENTService(yang.AbstractYangServiceHandler):
             'cpedeployment:managed-cpe-services/customer/single-cpe-site/single-cpe-site-services/cpe/prefix-lists/prefix-list': managed_cpe_services.customer.single_cpe_site.single_cpe_site_services.cpe.prefix_lists.prefix_list.prefix_list.PrefixList.getInstance(),
             'cpedeployment:managed-cpe-services/customer/single-cpe-site/single-cpe-site-services/cpe/advertise-networks/advertise-network': managed_cpe_services.customer.single_cpe_site.single_cpe_site_services.cpe.advertise_networks.advertise_network.advertise_network.AdvertiseNetwork.getInstance(),
             'cpedeployment:managed-cpe-services/customer/single-cpe-site/single-cpe-site-services/cpe/ip-sla/sla': managed_cpe_services.customer.single_cpe_site.single_cpe_site_services.cpe.ip_sla.sla.sla.Sla.getInstance(),
+            'cpedeployment:managed-cpe-services/customer/single-cpe-site/single-cpe-site-services/cpe/acl-template/acl': managed_cpe_services.customer.single_cpe_site.single_cpe_site_services.cpe.acl_template.acl.acl.AclTemplate.getInstance(),
+           	'cpedeployment:managed-cpe-services/customer/single-cpe-site/single-cpe-site-services/cpe/ip-sla/responder-options': managed_cpe_services.customer.single_cpe_site.single_cpe_site_services.cpe.ip_sla.responder_options.responder_options.ResponderOptions.getInstance(),
             'cpedeployment:managed-cpe-services/customer/single-cpe-site/single-cpe-site-services/cpe/class-maps/class-map': managed_cpe_services.customer.single_cpe_site.single_cpe_site_services.cpe.class_maps.class_map.class_map.ClassMap.getInstance(),
             'cpedeployment:managed-cpe-services/customer/single-cpe-site/single-cpe-site-services/cpe/crypto-isakmp-peers/peers/set-attributes/attribute': managed_cpe_services.customer.single_cpe_site.single_cpe_site_services.cpe.crypto_isakmp_peers.peers.set_attributes.attribute.attribute.Attribute.getInstance(),
             'cpedeployment:managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/cpe-primary/crypto-isakmp-peers/peers/set-attributes/attribute': managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_primary.crypto_isakmp_peers.peers.set_attributes.attribute.attribute.Attribute.getInstance(),
@@ -806,6 +826,9 @@ class CPEDEPLOYMENTService(yang.AbstractYangServiceHandler):
             'cpedeployment:managed-cpe-services/customer/dual-cpe-site/dual-cpe-site-services/cpe-primary/prefix-lists/prefix-list': managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_primary.prefix_lists.prefix_list.prefix_list.PrefixList.getInstance(),
             'cpedeployment:managed-cpe-services/customer/dual-cpe-site/dual-cpe-site-services/cpe-primary/advertise-networks/advertise-network': managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_primary.advertise_networks.advertise_network.advertise_network.AdvertiseNetwork.getInstance(),
             'cpedeployment:managed-cpe-services/customer/dual-cpe-site/dual-cpe-site-services/cpe-primary/ip-sla/sla': managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_primary.ip_sla.sla.sla.Sla.getInstance(),
+            'cpedeployment:managed-cpe-services/customer/dual-cpe-site/dual-cpe-site-services/cpe-primary/acl-template/acl': managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_primary.acl_template.acl.acl.AclTemplate.getInstance(),
+            'cpedeployment:managed-cpe-services/customer/dual-cpe-site/dual-cpe-site-services/cpe-secondary/acl-template/acl': managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_secondary.acl_template.acl.acl.AclTemplate.getInstance(),
+            'cpedeployment:managed-cpe-services/customer/dual-cpe-site/dual-cpe-site-services/cpe-primary/ip-sla/responder-options': managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_primary.ip_sla.responder_options.responder_options.ResponderOptions.getInstance(),
             'cpedeployment:managed-cpe-services/customer/dual-cpe-site/dual-cpe-site-services/cpe-primary/class-maps/class-map': managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_primary.class_maps.class_map.class_map.ClassMap.getInstance(),
             'cpedeployment:managed-cpe-services/customer/dual-cpe-site/dual-cpe-site-services/cpe-primary/loopback/loopback': managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_primary.loopback.loopback.loopback.Loopback.getInstance(),
             'cpedeployment:managed-cpe-services/customer/dual-cpe-site/dual-cpe-site-services/cpe-primary/crypto-isakmp-peers/peers/set-attributes/attribute': managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_primary.crypto_isakmp_peers.peers.set_attributes.attribute.attribute.Attribute.getInstance(),
@@ -817,6 +840,7 @@ class CPEDEPLOYMENTService(yang.AbstractYangServiceHandler):
             'cpedeployment:managed-cpe-services/customer/dual-cpe-site/dual-cpe-site-services/cpe-secondary/prefix-lists/prefix-list': managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_secondary.prefix_lists.prefix_list.prefix_list.PrefixList.getInstance(),
             'cpedeployment:managed-cpe-services/customer/dual-cpe-site/dual-cpe-site-services/cpe-secondary/advertise-networks/advertise-network': managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_secondary.advertise_networks.advertise_network.advertise_network.AdvertiseNetwork.getInstance(),
             'cpedeployment:managed-cpe-services/customer/dual-cpe-site/dual-cpe-site-services/cpe-secondary/ip-sla/sla': managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_secondary.ip_sla.sla.sla.Sla.getInstance(),
+            'cpedeployment:managed-cpe-services/customer/dual-cpe-site/dual-cpe-site-services/cpe-secondary/ip-sla/responder-options': managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_secondary.ip_sla.responder_options.responder_options.ResponderOptions.getInstance(),
             'cpedeployment:managed-cpe-services/customer/dual-cpe-site/dual-cpe-site-services/cpe-secondary/class-maps/class-map': managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_secondary.class_maps.class_map.class_map.ClassMap.getInstance(),
             'cpedeployment:managed-cpe-services/customer/dual-cpe-site/dual-cpe-site-services/cpe-secondary/loopback/loopback': managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_secondary.loopback.loopback.loopback.Loopback.getInstance(),
             'cpedeployment:managed-cpe-services/customer/dual-cpe-site/dual-cpe-site-services/cpe-primary-cpe-secondary-ic/end-points': managed_cpe_services.customer.dual_cpe_site.dual_cpe_site_services.cpe_primary_cpe_secondary_ic.end_points.end_points.EndPoints.getInstance(),
@@ -838,6 +862,8 @@ class CPEDEPLOYMENTService(yang.AbstractYangServiceHandler):
             'cpedeployment:managed-cpe-services/customer/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services/cpe/prefix-lists/prefix-list': managed_cpe_services.customer.single_cpe_dual_wan_site.single_cpe_dual_wan_site_services.cpe.prefix_lists.prefix_list.prefix_list.PrefixList.getInstance(),
             'cpedeployment:managed-cpe-services/customer/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services/cpe/advertise-networks/advertise-network': managed_cpe_services.customer.single_cpe_dual_wan_site.single_cpe_dual_wan_site_services.cpe.advertise_networks.advertise_network.advertise_network.AdvertiseNetwork.getInstance(),
             'cpedeployment:managed-cpe-services/customer/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services/cpe/ip-sla/sla': managed_cpe_services.customer.single_cpe_dual_wan_site.single_cpe_dual_wan_site_services.cpe.ip_sla.sla.sla.Sla.getInstance(),
+            'cpedeployment:managed-cpe-services/customer/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services/cpe/acl-template/acl': managed_cpe_services.customer.single_cpe_dual_wan_site.single_cpe_dual_wan_site_services.cpe.acl_template.acl.acl.AclTemplate.getInstance(),
+            'cpedeployment:managed-cpe-services/customer/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services/cpe/ip-sla/responder-options': managed_cpe_services.customer.single_cpe_dual_wan_site.single_cpe_dual_wan_site_services.cpe.ip_sla.responder_options.responder_options.ResponderOptions.getInstance(),
             'cpedeployment:managed-cpe-services/customer/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services/cpe/class-maps/class-map': managed_cpe_services.customer.single_cpe_dual_wan_site.single_cpe_dual_wan_site_services.cpe.class_maps.class_map.class_map.ClassMap.getInstance(),
             'cpedeployment:managed-cpe-services/customer/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services/cpe-primary-wan/end-points': managed_cpe_services.customer.single_cpe_dual_wan_site.single_cpe_dual_wan_site_services.cpe_primary_wan.end_points.end_points.EndPoints.getInstance(),
             'cpedeployment:managed-cpe-services/customer/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services/cpe-primary-wan/end-points/bgp-peers': managed_cpe_services.customer.single_cpe_dual_wan_site.single_cpe_dual_wan_site_services.cpe_primary_wan.end_points.bgp_peers.bgp_peers.BgpPeers.getInstance(),
@@ -1002,6 +1028,9 @@ class CPEDEPLOYMENTService(yang.AbstractYangServiceHandler):
             'cpedeployment:managed-cpe-services/customer/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services/cpe-primary/prefix-lists/prefix-list': managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_primary.prefix_lists.prefix_list.prefix_list.PrefixList.getInstance(),
             'cpedeployment:managed-cpe-services/customer/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services/cpe-primary/advertise-networks/advertise-network': managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_primary.advertise_networks.advertise_network.advertise_network.AdvertiseNetwork.getInstance(),
             'cpedeployment:managed-cpe-services/customer/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services/cpe-primary/ip-sla/sla': managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_primary.ip_sla.sla.sla.Sla.getInstance(),
+            'cpedeployment:managed-cpe-services/customer/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services/cpe-primary/acl-template/acl': managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_primary.acl_template.acl.acl.AclTemplate.getInstance(),
+            'cpedeployment:managed-cpe-services/customer/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services/cpe-secondary/acl-template/acl': managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_secondary.acl_template.acl.acl.AclTemplate.getInstance(),
+            'cpedeployment:managed-cpe-services/customer/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services/cpe-primary/ip-sla/responder-options': managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_primary.ip_sla.responder_options.responder_options.ResponderOptions.getInstance(),
             'cpedeployment:managed-cpe-services/customer/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services/cpe-primary/access-lists/access-list': managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_primary.access_lists.access_list.access_list.AccessList.getInstance(),
             'cpedeployment:managed-cpe-services/customer/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services/cpe-primary/access-lists/access-list/access-list-rules': managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_primary.access_lists.access_list.access_list_rules.access_list_rules.AccessListRules.getInstance(),
             'cpedeployment:managed-cpe-services/customer/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services/cpe-primary/class-maps/class-map': managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_primary.class_maps.class_map.class_map.ClassMap.getInstance(),
@@ -1024,6 +1053,7 @@ class CPEDEPLOYMENTService(yang.AbstractYangServiceHandler):
             'cpedeployment:managed-cpe-services/customer/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services/cpe-secondary/prefix-lists/prefix-list': managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_secondary.prefix_lists.prefix_list.prefix_list.PrefixList.getInstance(),
             'cpedeployment:managed-cpe-services/customer/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services/cpe-secondary/advertise-networks/advertise-network': managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_secondary.advertise_networks.advertise_network.advertise_network.AdvertiseNetwork.getInstance(),
             'cpedeployment:managed-cpe-services/customer/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services/cpe-secondary/ip-sla/sla': managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_secondary.ip_sla.sla.sla.Sla.getInstance(),
+            'cpedeployment:managed-cpe-services/customer/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services/cpe-secondary/ip-sla/responder-options': managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_secondary.ip_sla.responder_options.responder_options.ResponderOptions.getInstance(),
             'cpedeployment:managed-cpe-services/customer/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services/cpe-secondary/access-lists/access-list': managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_secondary.access_lists.access_list.access_list.AccessList.getInstance(),
             'cpedeployment:managed-cpe-services/customer/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services/cpe-secondary/access-lists/access-list/access-list-rules': managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_secondary.access_lists.access_list.access_list_rules.access_list_rules.AccessListRules.getInstance(),
             'cpedeployment:managed-cpe-services/customer/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services/cpe-secondary/class-maps/class-map': managed_cpe_services.customer.dual_cpe_dual_wan_site.dual_cpe_dual_wan_site_services.cpe_secondary.class_maps.class_map.class_map.ClassMap.getInstance(),
@@ -1062,6 +1092,10 @@ class CPEDEPLOYMENTService(yang.AbstractYangServiceHandler):
             'cpedeployment:managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/cpe-primary/prefix-lists/prefix-list': managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_primary.prefix_lists.prefix_list.prefix_list.PrefixList.getInstance(),
             'cpedeployment:managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/cpe-primary/advertise-networks/advertise-network': managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_primary.advertise_networks.advertise_network.advertise_network.AdvertiseNetwork.getInstance(),
             'cpedeployment:managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/cpe-primary/ip-sla/sla': managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_primary.ip_sla.sla.sla.Sla.getInstance(),
+            'cpedeployment:managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/cpe-primary/acl-template/acl': managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_primary.acl_template.acl.acl.AclTemplate.getInstance(),
+            'cpedeployment:managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/cpe-secondary/acl-template/acl': managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_secondary.acl_template.acl.acl.AclTemplate.getInstance(),
+            'cpedeployment:managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/cpe-tertiary/acl-template/acl': managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_tertiary.acl_template.acl.acl.AclTemplate.getInstance(),
+            'cpedeployment:managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/cpe-primary/ip-sla/responder-options': managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_primary.ip_sla.responder_options.responder_options.ResponderOptions.getInstance(),
             'cpedeployment:managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/cpe-primary/access-lists/access-list': managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_primary.access_lists.access_list.access_list.AccessList.getInstance(),
             'cpedeployment:managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/cpe-primary/access-lists/access-list/access-list-rules': managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_primary.access_lists.access_list.access_list_rules.access_list_rules.AccessListRules.getInstance(),
             'cpedeployment:managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/cpe-primary/class-maps/class-map': managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_primary.class_maps.class_map.class_map.ClassMap.getInstance(),
@@ -1084,6 +1118,7 @@ class CPEDEPLOYMENTService(yang.AbstractYangServiceHandler):
             'cpedeployment:managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/cpe-secondary/prefix-lists/prefix-list': managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_secondary.prefix_lists.prefix_list.prefix_list.PrefixList.getInstance(),
             'cpedeployment:managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/cpe-secondary/advertise-networks/advertise-network': managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_secondary.advertise_networks.advertise_network.advertise_network.AdvertiseNetwork.getInstance(),
             'cpedeployment:managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/cpe-secondary/ip-sla/sla': managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_secondary.ip_sla.sla.sla.Sla.getInstance(),
+            'cpedeployment:managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/cpe-secondary/ip-sla/responder-options': managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_secondary.ip_sla.responder_options.responder_options.ResponderOptions.getInstance(),
             'cpedeployment:managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/cpe-secondary/access-lists/access-list': managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_secondary.access_lists.access_list.access_list.AccessList.getInstance(),
             'cpedeployment:managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/cpe-secondary/access-lists/access-list/access-list-rules': managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_secondary.access_lists.access_list.access_list_rules.access_list_rules.AccessListRules.getInstance(),
             'cpedeployment:managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/cpe-secondary/class-maps/class-map': managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_secondary.class_maps.class_map.class_map.ClassMap.getInstance(),
@@ -1106,6 +1141,7 @@ class CPEDEPLOYMENTService(yang.AbstractYangServiceHandler):
             'cpedeployment:managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/cpe-tertiary/prefix-lists/prefix-list': managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_tertiary.prefix_lists.prefix_list.prefix_list.PrefixList.getInstance(),
             'cpedeployment:managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/cpe-tertiary/advertise-networks/advertise-network': managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_tertiary.advertise_networks.advertise_network.advertise_network.AdvertiseNetwork.getInstance(),
             'cpedeployment:managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/cpe-tertiary/ip-sla/sla': managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_tertiary.ip_sla.sla.sla.Sla.getInstance(),
+            'cpedeployment:managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/cpe-tertiary/ip-sla/responder-options': managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_tertiary.ip_sla.responder_options.responder_options.ResponderOptions.getInstance(),
             'cpedeployment:managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/cpe-tertiary/access-lists/access-list': managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_tertiary.access_lists.access_list.access_list.AccessList.getInstance(),
             'cpedeployment:managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/cpe-tertiary/access-lists/access-list/access-list-rules': managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_tertiary.access_lists.access_list.access_list_rules.access_list_rules.AccessListRules.getInstance(),
             'cpedeployment:managed-cpe-services/customer/triple-cpe-site/triple-cpe-site-services/cpe-tertiary/class-maps/class-map': managed_cpe_services.customer.triple_cpe_site.triple_cpe_site_services.cpe_tertiary.class_maps.class_map.class_map.ClassMap.getInstance(),
