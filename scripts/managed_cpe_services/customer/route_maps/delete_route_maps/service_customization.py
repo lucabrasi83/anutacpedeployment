@@ -255,10 +255,13 @@ def delete_route_map(entity, conf, sdata, **kwargs):
     route_map_name = inputdict['route_map_name']
     sequence_number = inputdict['sequence_number']
 
-    url_device_route_map = '/controller:devices/device=%s/l3features:route-maps' %(device.device.id)
+    url_device_route_map = '/controller:devices/device=%s/l3features:route-maps/route-map=%s' %(device.device.id, route_map_name)
+    
+    '''
     device_route_map = yang.Sdk.getData(url_device_route_map, '', sdata.getTaskId())
     conf_route = util.parseXmlString(device_route_map)
 
+    
     device_route = []
     device_route_entries = []
     device_route_match = []
@@ -286,6 +289,7 @@ def delete_route_map(entity, conf, sdata, **kwargs):
                         #for set1 in entry.set_action:
                             #set_name = set1.set_type + ',' + set1.value
                             #device_route_set.append(set_name)
+        '''
 
     action = inputdict['action']
     entry = inputdict['entry']
@@ -294,7 +298,8 @@ def delete_route_map(entity, conf, sdata, **kwargs):
     set_type = inputdict['set_type']
     set_ip = inputdict['ip']
     set_value = inputdict['set_value']
-    if route_map_name in device_route:
+    # if route_map_name in device_route:
+    if yang.Sdk.dataExists(url_device_route_map):
         if entry == 'match-condition':
             matchcondition_obj = route_maps.route_map.route_map_entries.match_condition.match_condition()
             if condition_type is not None:
@@ -308,7 +313,8 @@ def delete_route_map(entity, conf, sdata, **kwargs):
                 condition_type = condition_type.replace(' ', '%20')
                 condition_value = condition_value.replace(' ', '%20')
                 match_condition_url = '/controller:devices/device=%s/l3features:route-maps/route-map=%s/route-map-entries=%s/match-condition=%s,%s' % (device.device.id, route_map_name, sequence_number,condition_type,condition_value)
-                if input_name in device_route_match:
+                #if input_name in device_route_match:
+                if yang.Sdk.dataExists(match_condition_url):
                     output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+match_condition_url+'</rc-path></input>')
                     ref = util.parseXmlString(output)
                     log("xml_op:%s" %(ref))
@@ -339,7 +345,8 @@ def delete_route_map(entity, conf, sdata, **kwargs):
                 set_type = set_type.replace(' ', '%20')
                 set_value = set_value.replace(' ', '%20')
                 set_action_url = '/controller:devices/device=%s/l3features:route-maps/route-map=%s/route-map-entries=%s/set-action=%s,%s' % (device.device.id, route_map_name,sequence_number,set_type,set_value)
-                if input_set_name in device_route_set:
+                #if input_set_name in device_route_set:
+                if yang.Sdk.dataExists(set_action_url):
                     output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+set_action_url+'</rc-path></input>')
                     ref = util.parseXmlString(output)
                     log("xml_op:%s" %(ref))
@@ -355,7 +362,8 @@ def delete_route_map(entity, conf, sdata, **kwargs):
         #Delete Entire Route-Map sequence entry
         if entry == 'delete-sequence-entry':
                 route_map_entry_url = '/controller:devices/device=%s/l3features:route-maps/route-map=%s/route-map-entries=%s' % (device.device.id, route_map_name, sequence_number) 
-                if sequence_number in device_route_entries:
+                # if sequence_number in device_route_entries:
+                if yang.Sdk.dataExists(route_map_entry_url):
                     output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+route_map_entry_url+'</rc-path></input>')
                     ref = util.parseXmlString(output)
                     log("xml_op:%s" %(ref))
@@ -369,7 +377,7 @@ def delete_route_map(entity, conf, sdata, **kwargs):
                 else:
                     print "Set action is not in device: ", device
     else:
-        print "Route-map is not in device: ", device       
+        yang.Sdk.append_taskdetail(sdata.getTaskId(), "Route-Map " + str(route_map_name) + " not found on device " + str(device.device.id) + ". Skipping this device")       
                 
 class DeletePreProcessor(yang.SessionPreProcessor):
     def processBeforeReserve(self, session):

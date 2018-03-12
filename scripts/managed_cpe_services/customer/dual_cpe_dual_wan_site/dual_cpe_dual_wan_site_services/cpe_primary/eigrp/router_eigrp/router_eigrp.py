@@ -86,6 +86,12 @@ class RouterEigrp(yang.AbstractYangServiceHandler):
         inputdict['distance_internal_routes'] = config.get_field_value('distance_internal_routes')
         inputdict['distance_external_routes'] = config.get_field_value('distance_external_routes')
         inputdict['nsf'] = config.get_field_value('nsf')
+        inputdict['default_metric'] = config.get_field_value('default_metric')
+        inputdict['bandwidth_metric'] = config.get_field_value('bandwidth_metric')
+        inputdict['delay_metric'] = config.get_field_value('delay_metric')
+        inputdict['reliability_metric'] = config.get_field_value('reliability_metric')
+        inputdict['load_metric'] = config.get_field_value('load_metric')
+        inputdict['mtu_metric'] = config.get_field_value('mtu_metric')
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'cpe-primary')
@@ -132,6 +138,12 @@ class RouterEigrp(yang.AbstractYangServiceHandler):
         inputdict['distance_internal_routes'] = config.get_field_value('distance_internal_routes')
         inputdict['distance_external_routes'] = config.get_field_value('distance_external_routes')
         inputdict['nsf'] = config.get_field_value('nsf')
+        inputdict['default_metric'] = config.get_field_value('default_metric')
+        inputdict['bandwidth_metric'] = config.get_field_value('bandwidth_metric')
+        inputdict['delay_metric'] = config.get_field_value('delay_metric')
+        inputdict['reliability_metric'] = config.get_field_value('reliability_metric')
+        inputdict['load_metric'] = config.get_field_value('load_metric')
+        inputdict['mtu_metric'] = config.get_field_value('mtu_metric')
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'cpe-primary')
@@ -170,6 +182,12 @@ class RouterEigrp(yang.AbstractYangServiceHandler):
         inputdict['distance_internal_routes'] = config.get_field_value('distance_internal_routes')
         inputdict['distance_external_routes'] = config.get_field_value('distance_external_routes')
         inputdict['nsf'] = config.get_field_value('nsf')
+        inputdict['default_metric'] = config.get_field_value('default_metric')
+        inputdict['bandwidth_metric'] = config.get_field_value('bandwidth_metric')
+        inputdict['delay_metric'] = config.get_field_value('delay_metric')
+        inputdict['reliability_metric'] = config.get_field_value('reliability_metric')
+        inputdict['load_metric'] = config.get_field_value('load_metric')
+        inputdict['mtu_metric'] = config.get_field_value('mtu_metric')
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'cpe-primary')

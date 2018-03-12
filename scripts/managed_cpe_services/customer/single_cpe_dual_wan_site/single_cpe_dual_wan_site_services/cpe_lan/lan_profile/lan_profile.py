@@ -83,6 +83,7 @@ class LanProfile(yang.AbstractYangServiceHandler):
         inputdict['hierarchical_lan_outbound_policy'] = config.get_field_value('hierarchical_lan_outbound_policy')
         inputdict['hierarchical_egress_policy'] = config.get_field_value('hierarchical_egress_policy')
         inputdict['shape_average_rate'] = config.get_field_value('shape_average_rate')
+        inputdict['police_cir_rate'] = config.get_field_value('police_cir_rate')
         inputdict['outbound_lan_policy'] = config.get_field_value('outbound_lan_policy')
         inputdict['auto_negotiation'] = config.get_field_value('auto_negotiation')
         if inputdict.get('auto_negotiation') is None:
@@ -119,8 +120,8 @@ class LanProfile(yang.AbstractYangServiceHandler):
 
         inputkeydict = {}
         # START OF FETCHING THE PARENT KEY LEAF PARAMETERS
-        inputkeydict['managed_cpe_services_customer_single_cpe_site_single_cpe_site_services_site_name'] = sdata.getRcPath().split('/')[-3].split('=')[1]
-        inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-5].split('=')[1]
+        #inputkeydict['managed_cpe_services_customer_single_cpe_site_single_cpe_site_services_site_name'] = sdata.getRcPath().split('/')[-3].split('=')[1]
+        #inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-5].split('=')[1]
         # END OF FETCHING THE PARENT KEY LEAF PARAMETERS
 
         #Use the custom methods to process the data
@@ -153,6 +154,7 @@ class LanProfile(yang.AbstractYangServiceHandler):
         inputdict['hierarchical_lan_outbound_policy'] = config.get_field_value('hierarchical_lan_outbound_policy')
         inputdict['hierarchical_egress_policy'] = config.get_field_value('hierarchical_egress_policy')
         inputdict['shape_average_rate'] = config.get_field_value('shape_average_rate')
+        inputdict['police_cir_rate'] = config.get_field_value('police_cir_rate')
         inputdict['outbound_lan_policy'] = config.get_field_value('outbound_lan_policy')
         inputdict['auto_negotiation'] = config.get_field_value('auto_negotiation')
         if inputdict.get('auto_negotiation') is None:
@@ -194,6 +196,7 @@ class LanProfile(yang.AbstractYangServiceHandler):
         pinputdict['hierarchical_lan_outbound_policy'] = pconfig.get_field_value('hierarchical_lan_outbound_policy')
         pinputdict['hierarchical_egress_policy'] = pconfig.get_field_value('hierarchical_egress_policy')
         pinputdict['shape_average_rate'] = pconfig.get_field_value('shape_average_rate')
+        pinputdict['police_cir_rate'] = pconfig.get_field_value('police_cir_rate')
         pinputdict['outbound_lan_policy'] = pconfig.get_field_value('outbound_lan_policy')
         pinputdict['auto_negotiation'] = pconfig.get_field_value('auto_negotiation')
         if pinputdict.get('auto_negotiation') is None:
@@ -254,6 +257,7 @@ class LanProfile(yang.AbstractYangServiceHandler):
         inputdict['hierarchical_lan_outbound_policy'] = config.get_field_value('hierarchical_lan_outbound_policy')
         inputdict['hierarchical_egress_policy'] = config.get_field_value('hierarchical_egress_policy')
         inputdict['shape_average_rate'] = config.get_field_value('shape_average_rate')
+        inputdict['police_cir_rate'] = config.get_field_value('police_cir_rate')
         inputdict['outbound_lan_policy'] = config.get_field_value('outbound_lan_policy')
         inputdict['auto_negotiation'] = config.get_field_value('auto_negotiation')
         if inputdict.get('auto_negotiation') is None:

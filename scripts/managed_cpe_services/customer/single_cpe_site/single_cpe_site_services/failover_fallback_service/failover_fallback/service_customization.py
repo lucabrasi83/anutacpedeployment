@@ -55,6 +55,7 @@ from cpedeployment.cpedeployment_lib import getParentObject
 from cpedeployment.cpedeployment_lib import log
 from servicemodel.controller.devices.device import vrfs
 from servicemodel.controller.devices.device import interfaces
+from cpedeployment.bgppeer_lib import update_bgp_peer
 
 class ServiceDataCustomization:
 
@@ -125,18 +126,21 @@ class ServiceDataCustomization:
 
 
 def fail_fall(smodelctx, sdata, **kwargs):
-    inputdict = kwargs['inputdict']
-    device = inputdict['device']
-    dev = devicemgr.getDeviceById(device)
-    cpe_wan_ebgp_neighbor = inputdict['cpe_wan_ebgp_neighbor']
-    dps_tunnel_id = inputdict['dps_tunnel_id']
-    failover_dps = inputdict['failover_dps']
-    fallback_dps = inputdict['fallback_dps']
-    failover_wan = inputdict['failover_wan']
-    fallback_wan = inputdict['fallback_wan']
-    
-    vrf = None
     obj_prim = getLocalObject(sdata, 'single-cpe-site-services=')
+    device = obj_prim.single_cpe_site_services.cpe.device_ip
+    inputdict = kwargs['inputdict']
+    dev = devicemgr.getDeviceById(device)
+    cpe_primary_wan_ebgp_neighbor = inputdict['cpe_primary_wan_ebgp_neighbor']
+    cpe_secondary_wan_ebgp_neighbor = inputdict['cpe_secondary_wan_ebgp_neighbor']
+    vrf = None
+    pri_cpe_in_route_map = ""
+    pri_cpe_out_route_map = ""
+    pri_bgp_ep_name = None
+    sec_bgp_ep_name = None
+    pri_bgp_peer_name = None
+    sec_bgp_peer_name = None
+    sec_cpe_in_route_map = ""
+    sec_cpe_out_route_map = ""
     if device == obj_prim.single_cpe_site_services.cpe.device_ip:
         if hasattr(obj_prim.single_cpe_site_services.cpe_wan, 'end_points'):
             endpoints = util.convert_to_list(obj_prim.single_cpe_site_services.cpe_wan.end_points)
@@ -148,6 +152,62 @@ def fail_fall(smodelctx, sdata, **kwargs):
                 if vrf is None:
                     vrf = "GLOBAL"
                 if hasattr(endpoint, 'bgp_peers'):
+                    pri_router_bgp_neighbor_url = dev.url + '/l3features:vrfs/vrf=%s/router-bgp/neighbor=%s' % (vrf, cpe_primary_wan_ebgp_neighbor)
+
+                    sec_router_bgp_neighbor_url = dev.url + '/l3features:vrfs/vrf=%s/router-bgp/neighbor=%s' % (vrf, cpe_secondary_wan_ebgp_neighbor)
+
+                    # Check if Neighbor effectively exists on device
+                    if yang.Sdk.dataExists(pri_router_bgp_neighbor_url) and yang.Sdk.dataExists(sec_router_bgp_neighbor_url):
+                        bgppeers = util.convert_to_list(endpoint.bgp_peers)
+                        for bgppeer in bgppeers:
+                            if cpe_primary_wan_ebgp_neighbor == bgppeer.peer_ip:
+                                pri_bgp_ep_name = endpoint.endpoint_name
+                                pri_bgp_peer_name = bgppeer.BGP_peer_name
+                                if hasattr(bgppeer, 'import_route_map'):
+                                    pri_cpe_in_route_map = bgppeer.import_route_map
+                                if hasattr(bgppeer, 'export_route_map'):
+                                    pri_cpe_out_route_map = bgppeer.export_route_map
+                            if cpe_secondary_wan_ebgp_neighbor == bgppeer.peer_ip:
+                                sec_bgp_ep_name = endpoint.endpoint_name
+                                sec_bgp_peer_name = bgppeer.BGP_peer_name
+                                if hasattr(bgppeer, 'import_route_map'):
+                                    sec_cpe_in_route_map = bgppeer.import_route_map
+                                if hasattr(bgppeer, 'export_route_map'):
+                                    sec_cpe_out_route_map = bgppeer.export_route_map
+
+                        parent_uri = sdata.getRcPath().split('/', 6)
+                        parent_uri = '/'.join(parent_uri[0:6])
+
+                        if inputdict['swap_bgp_route_maps'] == "true":
+
+                            if pri_bgp_ep_name is not None and pri_bgp_peer_name is not None:
+                                pri_bgp_peer_url = parent_uri + '/cpe-wan/end-points=%s/bgp-peers=%s' % (pri_bgp_ep_name, pri_bgp_peer_name)
+
+                                pri_payload = """
+                                            <bgp-peers xmlns="http://anutanetworks.com/cpedeployment">
+                                            <BGP-peer-name>%s</BGP-peer-name>
+                                            <import-route-map>%s</import-route-map>
+                                            <export-route-map>%s</export-route-map>
+                                            </bgp-peers>
+                                              """ % (pri_bgp_peer_name, sec_cpe_in_route_map, sec_cpe_out_route_map)
+
+                                yang.Sdk.patchData(pri_bgp_peer_url, pri_payload, sdata, False)
+
+                            if sec_bgp_ep_name is not None and sec_bgp_peer_name is not None:
+
+                                sec_bgp_peer_url = parent_uri + '/cpe-wan/end-points=%s/bgp-peers=%s' % (sec_bgp_ep_name, sec_bgp_peer_name)
+
+                                sec_payload = """
+                                            <bgp-peers xmlns="http://anutanetworks.com/cpedeployment">
+                                            <BGP-peer-name>%s</BGP-peer-name>
+                                            <import-route-map>%s</import-route-map>
+                                            <export-route-map>%s</export-route-map>
+                                            </bgp-peers>
+                                               """ % (sec_bgp_peer_name, pri_cpe_in_route_map, pri_cpe_out_route_map)
+
+                                yang.Sdk.patchData(sec_bgp_peer_url, sec_payload, sdata, False)
+
+                '''
                     bgppeers = util.convert_to_list(endpoint.bgp_peers)
                     for bgppeer in bgppeers:
                         if cpe_wan_ebgp_neighbor == bgppeer.peer_ip:
@@ -159,7 +219,9 @@ def fail_fall(smodelctx, sdata, **kwargs):
                                 primobj.shut = "false"
                             router_bgp_neighbor_url = dev.url + '/l3features:vrfs/vrf=%s/router-bgp' % (vrf)
                             yang.Sdk.createData(router_bgp_neighbor_url, primobj.getxml(filter=True), sdata.getSession(), False)
+                '''
 
+    '''
     #Failover/Fallback DMVPN DPS Tunnel
     if failover_dps == 'true':
         failobj = interfaces.interface.interface()
@@ -174,7 +236,7 @@ def fail_fall(smodelctx, sdata, **kwargs):
         fallobj.long_name = dps_tunnel_id
         fallobj.admin_state = 'UP'
         yang.Sdk.createData(dev.url + '/interface:interfaces', fallobj.getxml(filter=True), sdata.getSession(), False)
-    
+    '''
 
 
 class DeletePreProcessor(yang.SessionPreProcessor):
@@ -188,3 +250,4 @@ class CreatePreProcessor(yang.SessionPreProcessor):
         operations = session.getOperations()
         """Add any move operations for creation"""
         log('operations: %s' % (operations))
+        yang.moveOperations(operations, ['UpdateRouterBGPNeighbor'], ['CreateRouteMap','CreateRouteMapConditions'], True)

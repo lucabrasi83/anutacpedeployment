@@ -6,7 +6,7 @@
             <group>com.anuta.ncx.packages</group>
             <name>servicemodel</name>
             <order>0</order>
-            <version>6.0.1.1</version>
+            <version>6.0.3.4</version>
         </dependency>
         <dependency>
             <group>com.anuta.ncx.packages</group>
@@ -49,8 +49,8 @@
     <description>CPEDEPLOYMENT Service Package</description>
     <module-name>cpedeployment</module-name>
     <name>CPEDEPLOYMENT Service</name>
-    <ncx-version>[6.0.1,)</ncx-version>
+    <ncx-version>[6.0.3,)</ncx-version>
     <order>-1</order>
     <type>SERVICE_MODEL</type>
-    <version>6.0.5.5</version>
+    <version>6.0.7.7</version>
 </package>

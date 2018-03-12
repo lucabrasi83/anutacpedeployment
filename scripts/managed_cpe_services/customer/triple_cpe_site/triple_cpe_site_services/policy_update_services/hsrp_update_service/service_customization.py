@@ -121,6 +121,11 @@ class ServiceDataCustomization:
                     site_output1 = yang.Sdk.getData(lan_ic_uri1, '', sdata.getTaskId())
                     conf1 = util.parseXmlString(site_output1)
                     interface_name = conf1.end_points.interface_name
+                    if conf1.end_points.interface_type == 'Sub-Interface':
+                        if '.' not in interface_name:
+                            vlan_id = conf1.end_points.vlan_id
+                            if vlan_id is not None and '.' not in interface_name:
+                                interface_name = interface_name + '.' + str(vlan_id)
                     if hasattr(conf1.end_points, 'profile_name'):
                         lan_profile = conf1.end_points.profile_name
                         lan_ic_uri2 = "%s/cpe-lan/lan-profile=%s" % (parent_uri, lan_profile)
@@ -176,6 +181,11 @@ class ServiceDataCustomization:
                     site_output1 = yang.Sdk.getData(lan_ic_uri1, '', sdata.getTaskId())
                     conf1 = util.parseXmlString(site_output1)
                     interface_name = conf1.end_points.interface_name
+                    if conf1.end_points.interface_type == 'Sub-Interface':
+                        if '.' not in interface_name:
+                            vlan_id = conf1.end_points.vlan_id
+                            if vlan_id is not None and '.' not in interface_name:
+                                interface_name = interface_name + '.' + str(vlan_id)
                     if hasattr(conf1.end_points, 'profile_name'):
                         lan_profile = conf1.end_points.profile_name
                         lan_ic_uri2 = "%s/cpe-lan/lan-profile=%s" % (parent_uri, lan_profile)
@@ -232,6 +242,11 @@ class ServiceDataCustomization:
                     site_output1 = yang.Sdk.getData(lan_ic_uri1, '', sdata.getTaskId())
                     conf1 = util.parseXmlString(site_output1)
                     interface_name = conf1.end_points.interface_name
+                    if conf1.end_points.interface_type == 'Sub-Interface':
+                        if '.' not in interface_name:
+                            vlan_id = conf1.end_points.vlan_id
+                            if vlan_id is not None and '.' not in interface_name:
+                                interface_name = interface_name + '.' + str(vlan_id)
                     if hasattr(conf1.end_points, 'profile_name'):
                         lan_profile = conf1.end_points.profile_name
                         lan_ic_uri2 = "%s/cpe-lan/lan-profile=%s" % (parent_uri, lan_profile)

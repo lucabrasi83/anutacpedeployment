@@ -98,8 +98,13 @@ def bgp_peer(cpeentity, entity, smodelctx, sdata, device, **kwargs):
     bgp_neighbor_obj.peer_group = peer_group
     bgp_neighbor_obj.remote_as = remote_as
     bgp_neighbor_obj.description = peer_description
-    bgp_neighbor_obj.next_hop_self = next_hop_self
-    bgp_neighbor_obj.send_community = send_community
+    if next_hop_self == "true":
+        bgp_neighbor_obj.next_hop_self = next_hop_self
+    if send_community == "true":
+        bgp_neighbor_obj.send_community = send_community
+
+    if inputdict.get('bfd_fall_over') is not None:
+        bgp_neighbor_obj.bfd_fall_over = inputdict['bfd_fall_over']
 
     if import_route_map != "":
         from cpedeployment_lib import route_maps
@@ -109,9 +114,11 @@ def bgp_peer(cpeentity, entity, smodelctx, sdata, device, **kwargs):
         from cpedeployment_lib import route_maps
         route_maps(export_route_map, device, sdata, None, cpeentity)
         bgp_neighbor_obj.out_route_map = export_route_map
-    bgp_neighbor_obj.soft_reconfiguration = soft_reconfiguration
+    if soft_reconfiguration == "true":
+        bgp_neighbor_obj.soft_reconfiguration = soft_reconfiguration
     bgp_neighbor_obj.password = password
-    bgp_neighbor_obj.default_originate = default_originate
+    if default_originate == "true":
+        bgp_neighbor_obj.default_originate = default_originate
     bgp_neighbor_obj.def_originate_route_map = default_originate_route_map
     if timers == 'true':
         bgp_neighbor_obj.keepalive_interval = keepalive_interval
@@ -217,6 +224,25 @@ def update_bgp_peer(cpeentity, entity, smodelctx, sdata, device, **kwargs):
     peer_ip = previousconfig.get_field_value('peer_ip')
     in_route_map = config.get_field_value('import_route_map')
     out_route_map = config.get_field_value('export_route_map')
+    prev_in_route_map = previousconfig.get_field_value('import_route_map')
+    prev_out_route_map = previousconfig.get_field_value('export_route_map')
+    send_community = config.get_field_value('send_community')
+    prev_send_community = previousconfig.get_field_value('send_community')
+    soft_reconfiguration = config.get_field_value('soft_reconfiguration')
+    prev_soft_reconfiguration = previousconfig.get_field_value('soft_reconfiguration')
+    advertisement_interval = config.get_field_value('advertisement_interval')
+    prev_advertisement_interval = previousconfig.get_field_value('advertisement_interval')
+    time_in_sec = config.get_field_value('time_in_sec')
+    prev_time_in_sec = previousconfig.get_field_value('time_in_sec')
+    bfd_fall_over = config.get_field_value('bfd_fall_over')
+    prev_bfd_fall_over = previousconfig.get_field_value('bfd_fall_over')
+    timers = config.get_field_value('timers')
+    prev_timers = previousconfig.get_field_value('timers')
+    keepalive_interval = config.get_field_value('keepalive_interval')
+    prev_keeaplive_interval = previousconfig.get_field_value('keepalive_interval')
+    holdtime = config.get_field_value('holdtime')
+    prev_holdtime = previousconfig.get_field_value('holdtime')
+
 
     bgp_neighbor_obj = vrfs.vrf.router_bgp.neighbor.neighbor()
     bgp_neighbor_obj.ip_address = peer_ip
@@ -262,3 +288,40 @@ def update_bgp_peer(cpeentity, entity, smodelctx, sdata, device, **kwargs):
         payload = payload.replace('</neighbor>', '%s</neighbor>' % raw_payload)
 
         yang.Sdk.createData(router_bgp_neighbor_url, raw_payload, sdata.getSession(), False)
+
+    bgp_neighbor_obj_new = vrfs.vrf.router_bgp.neighbor.neighbor()
+    bgp_neighbor_obj_new.ip_address = peer_ip
+
+    if send_community != prev_send_community:
+        bgp_neighbor_obj_new.send_community = send_community
+
+    if soft_reconfiguration != prev_soft_reconfiguration:
+        bgp_neighbor_obj_new.soft_reconfiguration = soft_reconfiguration
+
+    if advertisement_interval != prev_advertisement_interval:
+        if advertisement_interval == "false":
+            bgp_neighbor_obj_new.advertisement_interval._empty_tag = True
+
+    if time_in_sec != prev_time_in_sec:
+        bgp_neighbor_obj_new.advertisement_interval = time_in_sec
+
+    if bfd_fall_over != prev_bfd_fall_over:
+        if bfd_fall_over == "false":
+            bgp_neighbor_obj_new._empty_tag = True
+        else:
+            bgp_neighbor_obj_new.bfd_fall_over = bfd_fall_over
+
+    if timers != prev_timers:
+        if timers == "false":
+            bgp_neighbor_obj_new.keepalive_interval._empty_tag = True
+            bgp_neighbor_obj_new.holdtime._empty_tag = True
+        else:
+            if keepalive_interval != prev_keeaplive_interval:
+                bgp_neighbor_obj_new.keepalive_interval = keepalive_interval
+
+            if holdtime != prev_holdtime:
+                bgp_neighbor_obj_new.holdtime = holdtime
+                
+    yang.Sdk.patchData(router_bgp_neighbor_url, bgp_neighbor_obj_new.getxml(filter=True), sdata, add_reference=True)
+
+

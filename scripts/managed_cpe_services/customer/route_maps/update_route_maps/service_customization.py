@@ -52,6 +52,7 @@ single-cpe-dual-wan-sites
 from servicemodel import util
 from servicemodel import yang
 from servicemodel import devicemgr
+import re
 from servicemodel.controller.devices.device import route_maps
 from servicemodel.controller.devices.device import as_path_acls
 
@@ -319,6 +320,12 @@ def create_route_map(entity, conf, sdata, **kwargs):
                     acl_output_url = url+"/access-lists/access-list=%s" % (condition_value)
                     if yang.Sdk.dataExists(acl_output_url):
                         access_group_def(url, condition_value, device, sdata)
+
+                if condition_type == 'prefix-list' and condition_value is not None:
+                    from cpedeployment.endpoint_lib import prefix_list_gen
+                    prefix_dict = {"prefix_list_name": condition_value}
+                    prefix_list_gen(None, sdata, device, entity, inputdict=prefix_dict)
+
                 match_condition_url = device.url + '/l3features:route-maps/route-map=%s/route-map-entries=%s' % (route_map_name,sequence_number)
                 yang.Sdk.createData(match_condition_url, matchcondition_obj.getxml(filter=True), sdata.getSession(), False)
                 
@@ -357,7 +364,12 @@ def create_route_map(entity, conf, sdata, **kwargs):
                     acl_output_url = url+"/access-lists/access-list=%s" % (condition_value)
                     if yang.Sdk.dataExists(acl_output_url):
                         access_group_def(url, condition_value, device, sdata)
-                                        
+                   
+                if condition_type == 'prefix-list' and condition_value is not None:
+                    from cpedeployment.endpoint_lib import prefix_list_gen
+                    prefix_dict = {"prefix_list_name": condition_value}
+                    prefix_list_gen(None, sdata, device, entity, inputdict=prefix_dict)
+
                 match_condition_url = device.url + '/l3features:route-maps/route-map=%s/route-map-entries=%s' % (route_map_name,sequence_number)
                 yang.Sdk.createData(match_condition_url, matchcondition_obj.getxml(filter=True), sdata.getSession(), False)
 
@@ -375,60 +387,51 @@ def create_route_map(entity, conf, sdata, **kwargs):
                 bgp_as_regex = re.match(r'\bAS\b', set_value)
                 if bgp_as_regex is not None and set_type == 'as-path prepend':
                     if entity == 'cpe':
-                        obj_bgp_as = getLocalObject(sdata, 'single-cpe-site-services')
-                        if hasattr(obj_bgp_as.single_cpe_site_services, 'bgp_as'):
-                            bgpas = obj_bgp_as.single_cpe_site_services.bgp_as
+                        if hasattr(conf.single_cpe_site_services, 'bgp_as'):
+                            bgpas = conf.single_cpe_site_services.bgp_as
                             set_obj1.value = re.sub(r'\bAS\b', bgpas, set_value)
                     elif entity == 'cpe_dual':
-                        obj_bgp_as = getLocalObject(sdata, 'single-cpe-dual-wan-site-services')
-                        if hasattr(obj_bgp_as.single_cpe_dual_wan_site_services, 'bgp_as'):
-                            bgpas = obj_bgp_as.single_cpe_dual_wan_site_services.bgp_as
+                        if hasattr(conf.single_cpe_dual_wan_site_services, 'bgp_as'):
+                            bgpas = conf.single_cpe_dual_wan_site_services.bgp_as
                             set_obj1.value = re.sub(r'\bAS\b', bgpas, set_value)
                     elif entity == 'cpe_primary' or entity == 'cpe_secondary':
-                        obj_bgp_as = getLocalObject(sdata, 'dual-cpe-site-services')
-                        if hasattr(obj_bgp_as.dual_cpe_site_services, 'bgp_as'):
-                            bgpas = obj_bgp_as.dual_cpe_site_services.bgp_as
+                        if hasattr(conf.dual_cpe_site_services, 'bgp_as'):
+                            bgpas = conf.dual_cpe_site_services.bgp_as
                             set_obj1.value = re.sub(r'\bAS\b', bgpas, set_value)
                     elif entity == 'cpe_primary_dual' or entity == 'cpe_secondary_dual':
-                        obj_bgp_as = getLocalObject(sdata, 'dual-cpe-dual-wan-site-services')
-                        if hasattr(obj_bgp_as.dual_cpe_dual_wan_site_services, 'bgp_as'):
-                            bgpas = obj_bgp_as.dual_cpe_dual_wan_site_services.bgp_as
+                        if hasattr(conf.dual_cpe_dual_wan_site_services, 'bgp_as'):
+                            bgpas = conf.dual_cpe_dual_wan_site_services.bgp_as
                             set_obj1.value = re.sub(r'\bAS\b', bgpas, set_value)
                     elif entity == 'cpe_primary_triple' or entity == 'cpe_secondary_triple' or entity == 'cpe_tertiary_triple':
-                        obj_bgp_as = getLocalObject(sdata, 'triple-cpe-site-services')
-                        if hasattr(obj_bgp_as.triple_cpe_site_services, 'bgp_as'):
-                            bgpas = obj_bgp_as.triple_cpe_site_services.bgp_as
+                        if hasattr(conf.triple_cpe_site_services, 'bgp_as'):
+                            bgpas = conf.triple_cpe_site_services.bgp_as
                             set_obj1.value = re.sub(r'\bAS\b', bgpas, set_value)
 
                 #Handle AS keyword for Set Community and replace by site service AS number
                 elif 'AS' in set_value and set_type == 'community':
                     if entity == 'cpe':
-                            obj_bgp_as = getLocalObject(sdata, 'single-cpe-site-services')
-                            if hasattr(obj_bgp_as.single_cpe_site_services, 'bgp_as'):
-                                bgpas = obj_bgp_as.single_cpe_site_services.bgp_as
+                            if hasattr(conf.single_cpe_site_services, 'bgp_as'):
+                                bgpas = conf.single_cpe_site_services.bgp_as
                                 set_obj1.value = set_value.replace('AS', bgpas)
                     elif entity == 'cpe_dual':
-                            obj_bgp_as = getLocalObject(sdata, 'single-cpe-dual-wan-site-services')
-                            if hasattr(obj_bgp_as.single_cpe_dual_wan_site_services, 'bgp_as'):
-                                bgpas = obj_bgp_as.single_cpe_dual_wan_site_services.bgp_as
+                            if hasattr(conf.single_cpe_dual_wan_site_services, 'bgp_as'):
+                                bgpas = conf.single_cpe_dual_wan_site_services.bgp_as
                                 set_obj1.value = set_value.replace('AS', bgpas)
                     elif entity == 'cpe_primary' or entity == 'cpe_secondary':
-                            obj_bgp_as = getLocalObject(sdata, 'dual-cpe-site-services')
-                            if hasattr(obj_bgp_as.dual_cpe_site_services, 'bgp_as'):
-                                bgpas = obj_bgp_as.dual_cpe_site_services.bgp_as
+                            if hasattr(conf.dual_cpe_site_services, 'bgp_as'):
+                                bgpas = conf.dual_cpe_site_services.bgp_as
                                 set_obj1.value = set_value.replace('AS', bgpas)
                     elif entity == 'cpe_primary_dual' or entity == 'cpe_secondary_dual':
-                            obj_bgp_as = getLocalObject(sdata, 'dual-cpe-dual-wan-site-services')
-                            if hasattr(obj_bgp_as.dual_cpe_dual_wan_site_services, 'bgp_as'):
-                                bgpas = obj_bgp_as.dual_cpe_dual_wan_site_services.bgp_as
+                            if hasattr(conf.dual_cpe_dual_wan_site_services, 'bgp_as'):
+                                bgpas = conf.dual_cpe_dual_wan_site_services.bgp_as
                                 set_obj1.value = set_value.replace('AS', bgpas)
                     elif entity == 'cpe_primary_triple' or entity == 'cpe_secondary_triple' or entity == 'cpe_tertiary_triple':
-                            obj_bgp_as = getLocalObject(sdata, 'triple-cpe-site-services')
-                            if hasattr(obj_bgp_as.triple_cpe_site_services, 'bgp_as'):
-                                bgpas = obj_bgp_as.triple_cpe_site_services.bgp_as
+                            if hasattr(conf.triple_cpe_site_services, 'bgp_as'):
+                                bgpas = conf.triple_cpe_site_services
                                 set_obj1.value = set_value.replace('AS', bgpas)
 
                 elif set_type == 'comm-list':
+                    from cpedeployment.cpedeployment_lib import community_lists
                     community_lists(set_value, device, sdata)
                     set_obj1.value = set_value
                 else:
@@ -436,7 +439,7 @@ def create_route_map(entity, conf, sdata, **kwargs):
             set_action_url = device.url + '/l3features:route-maps/route-map=%s/route-map-entries=%s' % (route_map_name,sequence_number)
             yang.Sdk.createData(set_action_url, set_obj1.getxml(filter=True), sdata.getSession(), False)
     else:
-        print "Route-map is not in device: ", device
+        yang.Sdk.append_taskdetail(sdata.getTaskId(), "Route-Map " + str(route_map_name) + " not found on device " + str(device.device.id) + ". Skipping this device")
 
 
 def as_path_acl(condition_value, device, sdata):

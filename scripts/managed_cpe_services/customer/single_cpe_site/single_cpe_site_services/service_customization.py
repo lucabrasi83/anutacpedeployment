@@ -86,6 +86,17 @@ class ServiceDataCustomization:
         yang.Sdk.createData(sdata.getRcPath(), payload, sdata.getSession(), False)
         yang.Sdk.createData(sdata.getRcPath(), payload_time, sdata.getSession(), False)
 
+        taskid = sdata.getTaskId()
+
+        output = yang.Sdk.invokeRpc('tasks:get-basic-task-detail', '<taskId>' + str(taskid) + '</taskId>')
+        basic_task_details_out = util.parseXmlString(output)
+        if hasattr(basic_task_details_out, 'taskDetail'):
+            if hasattr(basic_task_details_out.taskDetail, 'userName'):
+              taskuser = basic_task_details_out.taskDetail.userName
+
+              payload_user = '<created-by>' + str(taskuser) + '</created-by>'
+              yang.Sdk.createData(sdata.getRcPath(), payload_user, sdata.getSession(), False)
+
     @staticmethod
     def process_service_update_data(smodelctx, sdata, **kwargs):
       """callback called for update operation"""
@@ -109,17 +120,17 @@ class DeletePreProcessor(yang.SessionPreProcessor):
         operations = session.getOperations()
         """Add any move operations for Deletion"""
         log('operations: %s' % (operations))
-        yang.moveOperations(operations, ['DeleteRouteMap'], ['DeleteRouteMapActions', 'DeleteRouteMapConditions', 'UpdateInterface'], True)
+        #yang.moveOperations(operations, ['DeleteRouteMap', 'DeleteInterface'], ['DeleteRouteMapActions', 'DeleteRouteMapConditions', 'UpdateInterface'], True)
         yang.moveOperations(operations, ['DeleteRouterBGPAggregateSummaryNetwork', 'DeleteRouterBGPNetwork', 'DeleteRouterEigrpRedistribute', 'DeleteRouterEigrpSummaryMetric','deleteVrfRouterEigrpNetwork', 'DeleteRouterEigrpNetwork'], ['DeleteRouterBGPRedistribute'], True)
         print 'pass: operations: %s' % (operations)
 
-        yang.moveOperations(operations, ['DeleteRouterBGPNeighbor', 'deleteVrfRouterEigrp', 'removeRouterEigrp'], ['DeleteRouterEigrpDistributeList', 'DeleteRouterEigrpRedistribute', 'DeleteRouterEigrpSummaryMetric', 'deleteVrfRouterEigrpNetwork', 'DeleteRouterEigrpNetwork', 'DeleteRouterBGPAggregateSummaryNetwork', 'DeleteRouterBGPNetwork'], True)
+        yang.moveOperations(operations, ['DeleteRouterBGP', 'deleteVrfRouterEigrp', 'removeRouterEigrp'], ['DeleteRouterBGPNeighbor', 'DeleteRouterEigrpDistributeList', 'DeleteRouterEigrpRedistribute', 'DeleteRouterEigrpSummaryMetric', 'deleteVrfRouterEigrpNetwork', 'DeleteRouterEigrpNetwork', 'DeleteRouterBGPAggregateSummaryNetwork', 'DeleteRouterBGPNetwork'], True)
         print 'pass0: operations: %s' % (operations)
         print 'pass01: operations: %s' % (operations)
         yang.moveOperations(operations, ['DeleteInterface', 'DeleteInterfaceEigrp', 'DeleteInterfaceEigrpSummaryNetwork', 'DeleteInterfaceOspf', 'DeleteInterfaceHSRP', 'UpdateInterface'], ['DeleteRouterOspf'], True)
         print 'pass12: operations: %s' % (operations)
-        yang.moveOperations(operations, ['DeleteInterface'], ['DeleteInterfaceEigrp', 'DeleteInterfaceEigrpSummaryNetwork', 'DeleteInterfaceOspf', 'DeleteInterfaceHSRP'], True)
-        yang.moveOperations(operations, ['DeleteQClassMapMatchCondition','DeleteQClassMapMatchConditionHttpUrl','DeleteVrf'], ['DeleteSLA', 'DeleteCryptoWithIKE', 'DeleteRouterBGPNeighbor', 'DeleteVrfImportMap', 'DeleteVrfExportMap', 'DeleteVrfRTImport', 'DeleteVrfRTExport', 'DeleteVrfRouteEntry', 'DeleteIpNatTranslationInterface', 'DeleteIpNatTranslationPool', 'UpdateInterface','DeleteInterface'], True)
+        yang.moveOperations(operations, ['DeleteRouteMap', 'DeleteInterface'], ['DeleteRouteMapActions', 'DeleteRouteMapConditions', 'DeleteInterfaceEigrp', 'DeleteInterfaceEigrpSummaryNetwork', 'DeleteInterfaceOspf', 'DeleteInterfaceHSRP'], True)
+        yang.moveOperations(operations, ['DeleteQClassMapMatchCondition','DeleteQClassMapMatchConditionHttpUrl','DeleteVrf'], ['DeleteSLA', 'DeleteCryptoWithIKE', 'DeleteRouterBGP', 'DeleteVrfImportMap', 'DeleteVrfExportMap', 'DeleteVrfRTImport', 'DeleteVrfRTExport', 'DeleteVrfRouteEntry', 'DeleteIpNatTranslationInterface', 'DeleteIpNatTranslationPool', 'UpdateInterface','DeleteInterface'], True)
         print 'pass13: operations: %s' % (operations)
         # yang.moveOperations(operations, ['DeleteQClassMapMatchCondition'], ['DeleteQClassMapMatchConditionHttpUrl'], True)
         # print 'pass1: operations: %s' % (operations)

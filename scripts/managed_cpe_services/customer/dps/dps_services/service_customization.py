@@ -65,6 +65,22 @@ class ServiceDataCustomization:
       if modify:
         config = kwargs['config']
         inputdict = kwargs['inputdict']
+      import time
+      now = time.strftime("%Y-%b-%d %I:%M %p %Z", time.localtime())  
+      payload_time = '<created-on>' + now + '</created-on>'
+      yang.Sdk.createData(sdata.getRcPath(), payload_time, sdata.getSession(), False)
+
+      taskid = sdata.getTaskId()
+
+      output = yang.Sdk.invokeRpc('tasks:get-basic-task-detail', '<taskId>' + str(taskid) + '</taskId>')
+      basic_task_details_out = util.parseXmlString(output)
+      if hasattr(basic_task_details_out, 'taskDetail'):
+        if hasattr(basic_task_details_out.taskDetail, 'userName'):
+          taskuser = basic_task_details_out.taskDetail.userName
+
+          payload_user = '<created-by>' + str(taskuser) + '</created-by>'
+          yang.Sdk.createData(sdata.getRcPath(), payload_user, sdata.getSession(), False)
+
 
     @staticmethod
     def process_service_device_bindings(smodelctx, sdata, dev, **kwargs):
@@ -78,6 +94,8 @@ class ServiceDataCustomization:
         config = kwargs['config']
         inputdict = kwargs['inputdict']
         devbindobjs = kwargs['devbindobjs']
+
+      
 
 
     @staticmethod

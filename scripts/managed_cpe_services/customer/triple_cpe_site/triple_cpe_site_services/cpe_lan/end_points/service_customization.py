@@ -84,6 +84,7 @@ from cpedeployment.endpoint_lib import new_back_endpoint
 from cpedeployment.endpoint_lib import deallocate_ipaddress_from_ipam
 from cpedeployment.endpoint_lib import delete_physical_interface
 from cpedeployment.endpoint_lib import update_hsrp_priority
+from cpedeployment.endpoint_lib import update_lan_endpoint
 
 
 class ServiceDataCustomization:
@@ -131,6 +132,14 @@ class ServiceDataCustomization:
         dev = kwargs['dev']
         for device in util.convert_to_list(dev):
             update_hsrp_priority('customer_lan_ic_triple', smodelctx, sdata, device, **kwargs)
+
+        #Previous config and previous inputdict
+        pconfig = kwargs['pconfig']
+        pinputdict = kwargs['pinputdict']
+        dev = kwargs['dev']
+        
+        for device in util.convert_to_list(dev):
+            update_lan_endpoint(sdata, device, **kwargs)
 
     @staticmethod
     def process_service_delete_data(smodelctx, sdata, **kwargs):

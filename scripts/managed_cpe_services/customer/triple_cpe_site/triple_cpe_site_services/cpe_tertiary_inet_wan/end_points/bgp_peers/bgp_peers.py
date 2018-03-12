@@ -103,6 +103,7 @@ class BgpPeers(yang.AbstractYangServiceHandler):
         inputdict['holdtime'] = config.get_field_value('holdtime')
         if inputdict.get('holdtime') is None:
           inputdict['holdtime'] = '30'
+        inputdict['bfd_fall_over'] = config.get_field_value('bfd_fall_over')
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'end-points')
@@ -167,6 +168,7 @@ class BgpPeers(yang.AbstractYangServiceHandler):
         inputdict['holdtime'] = config.get_field_value('holdtime')
         if inputdict.get('holdtime') is None:
           inputdict['holdtime'] = '30'
+        inputdict['bfd_fall_over'] = config.get_field_value('bfd_fall_over')
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'end-points')
@@ -222,6 +224,7 @@ class BgpPeers(yang.AbstractYangServiceHandler):
         inputdict['holdtime'] = config.get_field_value('holdtime')
         if inputdict.get('holdtime') is None:
           inputdict['holdtime'] = '30'
+        inputdict['bfd_fall_over'] = config.get_field_value('bfd_fall_over')
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'end-points')

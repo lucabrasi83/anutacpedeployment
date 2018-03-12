@@ -258,7 +258,9 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
     qos_group = inputdict['qos_group']
     protocol = inputdict['protocol']
 
-    url_device_class = '/controller:devices/device=%s/qos:class-maps' %(device.device.id)
+    url_device_class = '/controller:devices/device=%s/qos:class-maps/class-map=%s' %(device.device.id, cls_name)
+    
+    '''
     device_class = yang.Sdk.getData(url_device_class, '', sdata.getTaskId())
     conf_cls = util.parseXmlString(device_class)
 
@@ -269,6 +271,10 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
             #device_cls.append(cls.name)
         device_cls = [cls.name for cls in conf_cls.class_maps.class_map]
     if cls_name in device_cls:
+    '''
+    if yang.Sdk.dataExists(url_device_class):
+
+        '''
         url_device_class_map = '/controller:devices/device=%s/qos:class-maps/class-map=%s' %(device.device.id, cls_name)
         device_class_map = yang.Sdk.getData(url_device_class_map, '', sdata.getTaskId())
         conf_class = util.parseXmlString(device_class_map)
@@ -281,22 +287,31 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
             #for dscp_dyn in conf_class.class_map.class_match_condition:
                 #if dscp_dyn.condition_type == 'ip-dscp':
                     #device_dscp.append(dscp_dyn.match_value)
-            device_dscp = [dscp_dyn.match_value for dscp_dyn in conf_class.class_map.class_match_condition if dscp_dyn.condition_type == 'ip-dscp']
+            device_dscp = [dscp_dyn.match_value for dscp_dyn in conf_class.class_map.class_match_condition if dscp_dyn.condition_type == 'ip dscp']
+        '''
         if len(inputdict['dscp']) > 0:
             if isinstance(inputdict['dscp'], list) is True:
                 for ds in inputdict['dscp']:
-                    if ds in device_dscp:
+                    device_dscp_url = device.url + "/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(cls_name, 'ip dscp', ds)
+                    # if ds in device_dscp:
+                    if yang.Sdk.dataExists(device_dscp_url):
                         match_obj = class_maps.class_map.class_match_condition.class_match_condition()
                         match_obj.condition_type = "ip dscp"
                         match_obj.match_value = ds
-                        yang.Sdk.deleteData(device.url+"/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(cls_name, 'ip-dscp', ds), match_obj.getxml(filter=True), sdata.getTaskId(), sdata.getSession())
+                        yang.Sdk.deleteData(device.url+"/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(cls_name, 'ip dscp', ds), match_obj.getxml(filter=True), sdata.getTaskId(), sdata.getSession())
+                    else:
+                        yang.Sdk.append_taskdetail(sdata.getTaskId(), "Class-Map " + str(cls_name) + " match condition IP DSCP " + str(ds) + " not found on device " + str(device.device.id) + ". Skipping this device")
             else:
-                if inputdict['dscp'] in device_dscp:
+                # if inputdict['dscp'] in device_dscp:
+                device_dscp_url = device.url + "/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(cls_name, 'ip dscp', inputdict['dscp'])
+                if yang.Sdk.dataExists(device_dscp_url):
                     match_obj = class_maps.class_map.class_match_condition.class_match_condition()
                     match_obj.condition_type = "ip dscp"
                     match_obj.match_value = inputdict['dscp']
-                    yang.Sdk.deleteData(device.url+"/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(cls_name, 'ip-dscp', inputdict['dscp']), match_obj.getxml(filter=True), sdata.getTaskId(), sdata.getSession())
-
+                    yang.Sdk.deleteData(device.url+"/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(cls_name, 'ip dscp', inputdict['dscp']), match_obj.getxml(filter=True), sdata.getTaskId(), sdata.getSession())
+                else:
+                    yang.Sdk.append_taskdetail(sdata.getTaskId(), "Class-Map " + str(cls_name) + " match condition IP DSCP " + str(inputdict['dscp']) + " not found on device " + str(device.device.id) + ". Skipping this device")
+        '''
         device_protocol = []
         if hasattr(conf_class.class_map, 'class_match_condition'):
             conf_class.class_map.class_match_condition = util.convert_to_list(conf_class.class_map.class_match_condition)
@@ -304,10 +319,13 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
                 #if protocol_dyn.condition_type == 'protocol':
                     #device_protocol.append(protocol_dyn.match_value)
             device_protocol = [protocol_dyn.match_value for protocol_dyn in conf_class.class_map.class_match_condition if protocol_dyn.condition_type == 'protocol']
+        '''
         if len(inputdict['protocol']) > 0:
             if isinstance(inputdict['protocol'], list) is True:
                 for pr in inputdict['protocol']:
-                    if pr in device_protocol:
+                    # if pr in device_protocol:
+                    device_protocol_url = "/controller:devices/device=%s/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(device.device.id, cls_name, 'protocol', pr.replace(' ', '%20'))
+                    if yang.Sdk.dataExists(device_protocol_url):
                         cls_protocol_url = "/controller:devices/device=%s/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(device.device.id, cls_name, 'protocol', pr.replace(' ', '%20'))
                         output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+cls_protocol_url+'</rc-path></input>')
                         ref = util.parseXmlString(output)
@@ -328,7 +346,7 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
                             #         device_http_url.append(dev_http_url.url)
                             match_object = class_maps.class_map.class_match_condition.http_url.http_url()
                             http_url = inputdict['http_url']
-                            print "http_url is:",http_url
+                            # print "http_url is:",http_url
 
                             path = '/controller:devices/device=%s/qos:class-maps/class-map=%s/class-match-condition=%s,%s' %(device.device.id, cls_name, 'protocol', pr)
                             http = yang.Sdk.getData(path, '', sdata.getTaskId())
@@ -357,8 +375,12 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
                                 match_obj.match_value = pr
                                 match_obj.only_http = 'true'
                                 yang.Sdk.deleteData(device.url+"/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(cls_name, 'protocol', pr), match_obj.getxml(filter=True), sdata.getTaskId(), sdata.getSession())
+                    else:
+                        yang.Sdk.append_taskdetail(sdata.getTaskId(), "Class-Map " + str(cls_name) + " match condition protocol " + str(pr) + " not found on device " + str(device.device.id) + ". Skipping this device")
             else:
-                if inputdict['protocol'] in device_protocol:
+                # if inputdict['protocol'] in device_protocol:
+                device_protocol_url = "/controller:devices/device=%s/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(device.device.id, cls_name, 'protocol', inputdict['protocol'].replace(' ', '%20'))
+                if yang.Sdk.dataExists(device_protocol_url):
                     cls_protocol_url = "/controller:devices/device=%s/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(device.device.id, cls_name, 'protocol', inputdict['protocol'].replace(' ', '%20'))
                     output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+cls_protocol_url+'</rc-path></input>')
                     ref = util.parseXmlString(output)
@@ -380,7 +402,7 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
                         #         device_http_url.append(dev_http_url.url)
                         match_object = class_maps.class_map.class_match_condition.http_url.http_url()
                         http_url = inputdict['http_url']
-                        print "http_url is:",http_url
+                        # print "http_url is:",http_url
 
                         path = '/controller:devices/device=%s/qos:class-maps/class-map=%s/class-match-condition=%s,%s' %(device.device.id, cls_name, 'protocol', inputdict['protocol'])
                         http = yang.Sdk.getData(path, '', sdata.getTaskId())
@@ -400,7 +422,10 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
                             match_obj.match_value = inputdict['protocol']
                             match_obj.only_http = 'true'
                             yang.Sdk.deleteData(device.url+"/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(cls_name, 'protocol', inputdict['protocol']), match_obj.getxml(filter=True), sdata.getTaskId(), sdata.getSession())
+                else:
+                    yang.Sdk.append_taskdetail(sdata.getTaskId(), "Class-Map " + str(cls_name) + " match condition protocol " + str(inputdict['protocol']) + " not found on device " + str(device.device.id) + ". Skipping this device")
 
+        '''
         device_access_group = []
         if hasattr(conf_class.class_map, 'class_match_condition'):
             conf_class.class_map.class_match_condition = util.convert_to_list(conf_class.class_map.class_match_condition)
@@ -408,11 +433,14 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
                 #if access_dyn.condition_type == 'access-group':
                     #device_access_group.append(access_dyn.match_value)
             device_access_group = [access_dyn.match_value for access_dyn in conf_class.class_map.class_match_condition if access_dyn.condition_type == 'access-group']
+        '''
         if util.isNotEmpty(access_group):
             if len(inputdict['access_group']) > 0:
                 if isinstance(inputdict['access_group'], list) is True:
                     for eachacl in inputdict['access_group']:
-                        if eachacl in device_access_group:
+                        device_cls_acl_url = "/controller:devices/device=%s/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(device.device.id, cls_name, 'access-group', eachacl)
+                        # if eachacl in device_access_group:
+                        if yang.Sdk.dataExists(device_cls_acl_url):
                             cls_acl_url = "/controller:devices/device=%s/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(device.device.id, cls_name, 'access-group', eachacl)
                             output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+cls_acl_url+'</rc-path></input>')
                             ref = util.parseXmlString(output)
@@ -425,8 +453,28 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
                             match_obj.condition_type = "access-group"
                             match_obj.match_value = eachacl
                             yang.Sdk.deleteData(cls_acl_url, match_obj.getxml(filter=True), sdata.getTaskId(), sdata.getSession())
+
+                            url_device_acl = device.url + "/acl:access-lists/access-list=%s" % eachacl
+                            if yang.Sdk.dataExists(url_device_acl):
+                                access_list_url = '/controller:devices/device=%s/acl:access-lists/access-list=%s' % (device.device.id, eachacl)
+                                output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+access_list_url+'</rc-path></input>')
+                                ref = util.parseXmlString(output)
+                                if hasattr(ref.output, 'references'):
+                                    if hasattr(ref.output.references, 'reference'):
+                                        for eachreference in util.convert_to_list(ref.output.references.reference):
+                                            if hasattr(eachreference, 'src_node'):
+                                                for each_ref in util.convert_to_list(eachreference.src_node):
+                                                    yang.Sdk.removeReference(each_ref, eachreference.dest_node)
+                                yang.Sdk.deleteData(access_list_url, None, sdata.getTaskId(), sdata.getSession())
+
+                        else:
+                            yang.Sdk.append_taskdetail(sdata.getTaskId(), "Class-Map " + str(cls_name) + " match condition access-group " + str(eachacl) + " not found on device " + str(device.device.id) + ". Skipping this device")
+                        
+                        
                 else:
-                    if access_group in device_access_group:
+                    device_cls_acl_url = "/controller:devices/device=%s/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(device.device.id, cls_name, 'access-group', access_group)
+                    #if access_group in device_access_group:
+                    if yang.Sdk.dataExists(device_cls_acl_url):
                         cls_acl_url = "/controller:devices/device=%s/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(device.device.id, cls_name, 'access-group', access_group)
                         output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+cls_acl_url+'</rc-path></input>')
                         ref = util.parseXmlString(output)
@@ -439,7 +487,22 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
                         match_obj.condition_type = "access-group"
                         match_obj.match_value = access_group
                         yang.Sdk.deleteData(cls_acl_url, match_obj.getxml(filter=True), sdata.getTaskId(), sdata.getSession())
-
+                        
+                        url_device_acl = device.url + "/acl:access-lists/access-list=%s" % access_group
+                        if yang.Sdk.dataExists(url_device_acl):
+                            access_list_url = '/controller:devices/device=%s/acl:access-lists/access-list=%s' % (device.device.id, access_group)
+                            output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+access_list_url+'</rc-path></input>')
+                            ref = util.parseXmlString(output)
+                            if hasattr(ref.output, 'references'):
+                                if hasattr(ref.output.references, 'reference'):
+                                    for eachreference in util.convert_to_list(ref.output.references.reference):
+                                        if hasattr(eachreference, 'src_node'):
+                                            for each_ref in util.convert_to_list(eachreference.src_node):
+                                                yang.Sdk.removeReference(each_ref, eachreference.dest_node)
+                            yang.Sdk.deleteData(access_list_url, None, sdata.getTaskId(), sdata.getSession())
+                    else:
+                        yang.Sdk.append_taskdetail(sdata.getTaskId(), "Class-Map " + str(cls_name) + " match condition access-group " + str(access_group) + " not found on device " + str(device.device.id) + ". Skipping this device")
+        '''
         device_qos_group = []
         if hasattr(conf_class.class_map, 'class_match_condition'):
             conf_class.class_map.class_match_condition = util.convert_to_list(conf_class.class_map.class_match_condition)
@@ -447,23 +510,32 @@ def delete_match_condition(entity, conf, sdata, **kwargs):
                 #if qos_dyn.condition_type == 'qos-group':
                     #device_qos_group.append(qos_dyn.match_value)
             device_qos_group = [qos_dyn.match_value for qos_dyn in conf_class.class_map.class_match_condition if qos_dyn.condition_type == 'qos-group']
+        '''
         if util.isNotEmpty(qos_group):
             if len(inputdict['qos_group']) > 0:
                 if isinstance(inputdict['qos_group'], list) is True:
                     for eachqosg in inputdict['qos_group']:
-                        if eachqosg in device_qos_group:
+                        device_qos_group_url = device.url+"/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(cls_name, 'qos-group', eachqosg)
+                        # if eachqosg in device_qos_group:
+                        if yang.Sdk.dataExists(device_qos_group_url):
                             match_obj = class_maps.class_map.class_match_condition.class_match_condition()
                             match_obj.condition_type = "qos-group"
                             match_obj.match_value = eachqosg
                             yang.Sdk.deleteData(device.url+"/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(cls_name, 'qos-group', eachqosg), match_obj.getxml(filter=True), sdata.getTaskId(), sdata.getSession())
+                        else:
+                            yang.Sdk.append_taskdetail(sdata.getTaskId(), "Class-Map " + str(cls_name) + " match condition qos-group " + str(eachqosg) + " not found on device " + str(device.device.id) + ". Skipping this device")
                 else:
-                    if qos_group in device_qos_group:
+                    # if qos_group in device_qos_group:
+                    device_qos_group_url = device.url+"/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(cls_name, 'qos-group', qos_group)
+                    if yang.Sdk.dataExists(device_qos_group_url):
                             match_obj = class_maps.class_map.class_match_condition.class_match_condition()
                             match_obj.condition_type = "qos-group"
                             match_obj.match_value = qos_group
                             yang.Sdk.deleteData(device.url+"/qos:class-maps/class-map=%s/class-match-condition=%s,%s" %(cls_name, 'qos-group', qos_group), match_obj.getxml(filter=True), sdata.getTaskId(), sdata.getSession())
+                    else:
+                         yang.Sdk.append_taskdetail(sdata.getTaskId(), "Class-Map " + str(cls_name) + " match condition qos-group " + str(qos_group) + " not found on device " + str(device.device.id) + ". Skipping this device")
     else:
-        print "Class is not in device: ", device
+        yang.Sdk.append_taskdetail(sdata.getTaskId(), "Class-Map " + str(cls_name) + " not found on device " + str(device.device.id) + ". Skipping this device")
 
 
 class DeletePreProcessor(yang.SessionPreProcessor):
