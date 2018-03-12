@@ -57,6 +57,7 @@ from cpedeployment.cpedeployment_lib import getParentObject
 from cpedeployment.cpedeployment_lib import log
 
 from cpedeployment.endpoint_lib import back_endpoint
+from cpedeployment.endpoint_lib import update_lan_endpoint
 from cpedeployment.endpoint_lib import deallocate_ipaddress_from_ipam
 from cpedeployment.endpoint_lib import delete_physical_interface
 
@@ -97,6 +98,14 @@ class ServiceDataCustomization:
       if modify and kwargs is not None:
         for key, value in kwargs.iteritems():
           log("%s == %s" %(key,value))
+          
+      #Previous config and previous inputdict
+      pconfig = kwargs['pconfig']
+      pinputdict = kwargs['pinputdict']
+      dev = kwargs['dev']
+      
+      for device in util.convert_to_list(dev):
+          update_lan_endpoint(sdata, device, **kwargs)
 
     @staticmethod
     def process_service_delete_data(smodelctx, sdata, **kwargs):

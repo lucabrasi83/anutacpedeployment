@@ -305,7 +305,7 @@ def object_group_def(source_object_group, dev, sdata):
     uri = sdata.getRcPath()
     uri_list = uri.split('/', 5)
     url = '/'.join(uri_list[0:4])
-    xml_output = yang.Sdk.getData(url+"/acl:object-groups/object-group="+str(source_object_group), '', sdata.getTaskId())
+    xml_output = yang.Sdk.getData(url+"/object-groups/object-group="+str(source_object_group), '', sdata.getTaskId())
     obj = util.parseXmlString(xml_output)
     objectgroup_obj = object_groups_acl.object_group.object_group()
     objectgroup_obj.name = obj.object_group.name
@@ -315,13 +315,12 @@ def object_group_def(source_object_group, dev, sdata):
             objectgroup_obj.description = obj.object_group.description
     objectgroup_url = dev.url + '/acl:object-groups-acl'
     #yang.Sdk.createData(dev.url, '<object-groups-acl/>', sdata.getSession())
-    yang.Sdk.createData(objectgroup_url, objectgroup_obj.getxml(filter=True), sdata.getSession(), False)
+    yang.Sdk.createData(objectgroup_url, objectgroup_obj.getxml(filter=True), sdata.getSession())
     if hasattr(obj.object_group, 'networks'):
         if hasattr(obj.object_group.networks, 'network'):
             for objectgroup in util.convert_to_list(obj.object_group.networks.network):
-                network_obj = object_groups_acl.object_group.networks.network.network()
                 net_url = dev.url + '/acl:object-groups-acl/object-group=%s' %(obj.object_group.name)
-                yang.Sdk.createData(net_url, '<networks/>', sdata.getSession(), False)
+                #yang.Sdk.createData(net_url, '<networks/>', sdata.getSession())
 
                 if hasattr(objectgroup, 'group_object'):
                     if util.isNotEmpty(objectgroup.group_object):
@@ -329,7 +328,7 @@ def object_group_def(source_object_group, dev, sdata):
                         network_obj.group_object = objectgroup.group_object
                         network_obj.name = "group-object" + " " + objectgroup.group_object
                         network_url = dev.url + '/acl:object-groups-acl/object-group=%s/networks' %(obj.object_group.name)
-                        yang.Sdk.createData(network_url, network_obj.getxml(filter=True), sdata.getSession(), False)
+                        yang.Sdk.createData(network_url, network_obj.getxml(filter=True), sdata.getSession())
 
                 if hasattr(objectgroup, 'host'):
                     if util.isNotEmpty(objectgroup.host):
@@ -337,19 +336,126 @@ def object_group_def(source_object_group, dev, sdata):
                         network_obj1.host = objectgroup.host
                         network_obj1.name = "host" + " " + objectgroup.host
                         network_url = dev.url + '/acl:object-groups-acl/object-group=%s/networks' %(obj.object_group.name)
-                        yang.Sdk.createData(network_url, network_obj1.getxml(filter=True), sdata.getSession(), False)
+                        yang.Sdk.createData(network_url, network_obj1.getxml(filter=True), sdata.getSession())
 
                 if hasattr(objectgroup, 'prefix'):
                     if util.isNotEmpty(objectgroup.prefix):
                         network_obj2 = object_groups_acl.object_group.networks.network.network()
-                        prefix = util.IPPrefix(objectgroup.prefix)
+                        #Haulotte Specific Dual CPE Sites. Keyword 'GUEST_LAN_PROFILE' to be replaced by GUEST LAN Profile CIDR
+                        if objectgroup.prefix == 'HAULOTTE-GUESTS':
+                            obj_haulotte_guests = getLocalObject(sdata, 'dual-cpe-site-services')
+                            log("haulotte guest obj is: %s" % (obj_haulotte_guests))
+                            obj_haulotte_guests.dual_cpe_site_services.cpe_lan.lan_profile = util.convert_to_list(obj_haulotte_guests.dual_cpe_site_services.cpe_lan.lan_profile)
+                            for lanprof in obj_haulotte_guests.dual_cpe_site_services.cpe_lan.lan_profile:
+                                if lanprof.profile_name == 'GUEST_LAN_PROFILE':
+                                    haulotte_guests_prefix = lanprof.get_field_value('cidr')
+                                    prefix = util.IPPrefix(haulotte_guests_prefix)
+                        else:
+                            prefix = util.IPPrefix(objectgroup.prefix)
                         ip_address = prefix.address
                         netmask = prefix.netmask
                         network_obj2.ip_address = ip_address
                         network_obj2.netmask = netmask
                         network_obj2.name = ip_address + " " + netmask
                         network_url = dev.url + '/acl:object-groups-acl/object-group=%s/networks' %(obj.object_group.name)
-                        yang.Sdk.createData(network_url, network_obj2.getxml(filter=True), sdata.getSession(), False)
+                        yang.Sdk.createData(network_url, network_obj2.getxml(filter=True), sdata.getSession())
+
+    if hasattr(obj.object_group, 'services'):
+        
+        if hasattr(obj.object_group.services, 'service'):
+
+            port_dict = { '179': 'bgp', '19': 'chargen', '514': 'cmd', '13': 'daytime', '9': 'discard', '53': 'domain',
+                          '3949': 'drip', '7': 'echo', '512': 'exec', '79': 'finger', '21': 'ftp', '20': 'ftp-data',
+                          '70': 'gopher', '101': 'hostname', '113': 'ident', '194': 'irc', '543': 'klogin', '544': 'kshell',
+                          '513': 'login', '515': 'lpd', '119': 'nntp', '15001': 'onep-plain', '15002': 'onep-tls', '496': 'pim-auto-rp',
+                          '109': 'pop2', '110': 'pop3', '25': 'smtp', '111': 'sunrpc', '49': 'tacacs', '517': 'talk', '23': 'telnet',
+                          '37': 'time', '540': 'uucp', '43': 'whois', '80': 'www', '135': 'msrpc'
+                          }
+            udp_port_dict = { '512': 'biff', '68': 'bootpc', '67': 'bootps', '9': 'discard', '195': 'dnsix',
+                          '53': 'domain', '7': 'echo', '500': 'isakmp', '434': 'mobile-ip', '42': 'nameserver', '138': 'netbios-dgm',
+                          '137': 'netbios-ns', '139': 'netbios-ss', '4500': 'non500-isakmp', '123': 'ntp', '496': 'pim-auto-rp',
+                          '520': 'rip', '161': 'snmp', '162': 'snmptrap', '111': 'sunrpc', '514': 'syslog', '49': 'tacacs',
+                          '517': 'talk', '69': 'tftp', '37': 'time', '513': 'who', '177': 'xdmcp', '135': 'msrpc'
+                          }
+            ip_prot_dict = { '47': 'gre', '1': 'icmp', '6': 'tcp', '17': 'udp', '51': 'ahp', '50': 'esp', '89': 'ospf',
+                             '4': 'ipinip', '88': 'eigrp', '2': 'igmp', '94': 'nos', '103': 'pim'
+                            }
+
+            service_url = dev.url + '/acl:object-groups-acl/object-group=%s/services' %(obj.object_group.name)
+
+            for objectgroup in util.convert_to_list(obj.object_group.services.service):
+                if hasattr(objectgroup, 'group_object'):
+                    if util.isNotEmpty(objectgroup.group_object):
+                        service_obj = object_groups_acl.object_group.services.service.service()
+                        service_obj.group_object = objectgroup.group_object
+                        service_obj.name = "group-object" + " " + objectgroup.group_object
+                        yang.Sdk.createData(service_url, service_obj.getxml(filter=True), sdata.getSession())
+
+                if hasattr(objectgroup, 'protocol_type'):
+                    if util.isNotEmpty(objectgroup.protocol_type):
+                        if objectgroup.protocol_type == "IP-Protocol-Number":
+                            service_obj1 = object_groups_acl.object_group.services.service.service()
+                            if util.isNotEmpty(objectgroup.ip_protocol):
+                                
+                                ip_prot_num = objectgroup.ip_protocol
+                                if ip_prot_num in ip_prot_dict:
+                                    ip_prot_num = ip_prot_dict[ip_prot_num]
+                                    service_obj1.protocol = ip_prot_num
+                                    service_obj1.name = ip_prot_num
+                                else:
+                                    service_obj1.ip_protocol = ip_prot_num
+                                    service_obj1.name = ip_prot_num
+
+                                yang.Sdk.createData(service_url, service_obj1.getxml(filter=True), sdata.getSession())
+
+                        if  objectgroup.protocol_type == "Protocol-Name":
+                            service_obj_name_list = []
+                            service_obj2 = object_groups_acl.object_group.services.service.service()
+                            if util.isNotEmpty(objectgroup.protocol_name):
+                                service_obj2.protocol = objectgroup.protocol_name
+                                service_obj_name_list.append(objectgroup.protocol_name)
+
+                            if hasattr(objectgroup, 'port_operation'):
+                                if util.isNotEmpty(objectgroup.port_operation):
+                                    service_obj2.operation = objectgroup.port_operation
+                                    service_obj_name_list.append(objectgroup.port_operation)
+
+                            if hasattr(objectgroup, 'operator'):
+                                if util.isNotEmpty(objectgroup.operator):
+                                    service_obj2.compare = objectgroup.operator
+                                    service_obj_name_list.append(objectgroup.operator)
+
+                            if hasattr(objectgroup, 'port_number'):
+                                if util.isNotEmpty(objectgroup.port_number):
+                                    port_num = objectgroup.port_number
+                                    if objectgroup.protocol_name == "tcp":
+                                        if port_num in port_dict:
+                                            port_num = port_dict[port_num]
+                                    elif objectgroup.protocol_name == "udp":
+                                        if port_num in udp_port_dict:
+                                            port_num = udp_port_dict[port_num]
+
+                                    service_obj2.port = port_num
+                                    service_obj_name_list.append(port_num)
+
+                            if hasattr(objectgroup, 'end_port'):
+                                if util.isNotEmpty(objectgroup.end_port):
+                                    end_port_num = objectgroup.end_port
+                                    if objectgroup.protocol_name == "tcp":
+                                        if end_port_num in port_dict:
+                                            end_port_num = port_dict[end_port_num]
+                                    elif objectgroup.protocol_name == "udp":
+                                        if end_port_num in udp_port_dict:
+                                            end_port_num = udp_port_dict[end_port_num]
+                                            
+                                    service_obj2.end_port = end_port_num
+                                    service_obj_name_list.append(end_port_num)
+
+                            service_obj_name = ' '.join(service_obj_name_list)
+
+                            service_obj2.name = service_obj_name
+
+                            yang.Sdk.createData(service_url, service_obj2.getxml(filter=True), sdata.getSession())
 
 
 def create_acl(entity, conf, sdata, **kwargs):
@@ -578,8 +684,191 @@ def create_acl(entity, conf, sdata, **kwargs):
 
         access_rule_url = device.url + '/acl:access-lists/access-list=%s/acl-rules' %(access_list_name)
         yang.Sdk.createData(access_rule_url, access_rule_obj.getxml(filter=True), sdata.getSession(), False)
+
+        uri_add_acl = sdata.getRcPath()
+        add_acl_output = yang.Sdk.getData(uri_add_acl, '', sdata.getTaskId())
+        add_acl_obj = util.parseXmlString(add_acl_output)
+
+        if hasattr(add_acl_obj.update_access_list, 'additional_acl_entry'):
+            add_acl_list = util.convert_to_list(add_acl_obj.update_access_list.additional_acl_entry)
+
+            for add_rule in add_acl_list:
+                add_name_rule = []
+                add_access_rule_obj = access_lists.access_list.acl_rules.acl_rule.acl_rule()
+                port_dict = { '179': 'bgp', '19': 'chargen', '514': 'cmd', '13': 'daytime', '9': 'discard', '53': 'domain',
+                                  '3949': 'drip', '7': 'echo', '512': 'exec', '79': 'finger', '21': 'ftp', '20': 'ftp-data',
+                                  '70': 'gopher', '101': 'hostname', '113': 'ident', '194': 'irc', '543': 'klogin', '544': 'kshell',
+                                  '513': 'login', '515': 'lpd', '119': 'nntp', '15001': 'onep-plain', '15002': 'onep-tls', '496': 'pim-auto-rp',
+                                  '109': 'pop2', '110': 'pop3', '25': 'smtp', '111': 'sunrpc', '49': 'tacacs', '517': 'talk', '23': 'telnet',
+                                  '37': 'time', '540': 'uucp', '43': 'whois', '80': 'www', '135': 'msrpc'
+                                  }
+                udp_port_dict = { '512': 'biff', '68': 'bootpc', '67': 'bootps', '9': 'discard', '195': 'dnsix',
+                                  '53': 'domain', '7': 'echo', '500': 'isakmp', '434': 'mobile-ip', '42': 'nameserver', '138': 'netbios-dgm',
+                                  '137': 'netbios-ns', '139': 'netbios-ss', '4500': 'non500-isakmp', '123': 'ntp', '496': 'pim-auto-rp',
+                                  '520': 'rip', '161': 'snmp', '162': 'snmptrap', '111': 'sunrpc', '514': 'syslog', '49': 'tacacs',
+                                  '517': 'talk', '69': 'tftp', '37': 'time', '513': 'who', '177': 'xdmcp', '135': 'msrpc'
+                                  }
+                add_access_rule_obj.action = add_rule.action
+                if hasattr(add_rule, 'protocol') and util.isNotEmpty(add_rule.protocol):
+                    add_access_rule_obj.layer4protocol = add_rule.protocol
+                else:
+                    add_access_rule_obj.layer4protocol = None
+                if hasattr(add_rule, 'acl_sequence_num') and util.isNotEmpty(add_rule.acl_sequence_num):
+                    add_access_rule_obj.linenumber = add_rule.acl_sequence_num
+                    #name_rule = acl_sequence_num + ' ' + action + ' ' + protocol
+                    #name_rule = action + ' ' + protocol
+                if hasattr(add_rule, 'protocol') and util.isNotEmpty(add_rule.protocol):
+                    #name_rule = action + ' ' + protocol
+                    add_name_rule.append(add_rule.action)
+                    add_name_rule.append(add_rule.protocol)
+                else:
+                    #name_rule = action
+                    add_name_rule.append(add_rule.action)
+                if hasattr(add_rule, 'service_obj_name') and util.isNotEmpty(add_rule.service_obj_name):
+                    object_group_def(add_rule.service_obj_name, device, sdata)
+                    add_access_rule_obj.service_obj_name = add_rule.service_obj_name
+                    #name_rule += ' ' + service_obj_name
+                    add_name_rule.append(add_rule.service_obj_name)
+                add_access_rule_obj.source_condition_type = add_rule.source_condition
+                if add_rule.source_condition == 'cidr':
+                    cidr_pattern = '^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}' + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])' + '/(([0-9])|([1-2][0-9])|(3[0-2]))$';
+                    if re.match(cidr_pattern,add_rule.source_object) == None:
+                        raise Exception ("Please provide valid CIDR for source-object in access-list")
+                    prefix = util.IPPrefix(add_rule.source_object)
+                    ip_address = prefix.address
+                    netmask = prefix.wildcard
+                    add_access_rule_obj.source_mask = netmask
+                    (addrStr, cidrStr) = add_rule.source_object.split('/')
+                    addr = addrStr.split('.')
+                    cidr = int(cidrStr)
+                    mask = [0, 0, 0, 0]
+                    for i in xrange(cidr):
+                        mask[i/8] = mask[i/8] + (1 << (7 - i % 8))
+                    #net = []
+                    #for i in range(4):
+                        #net.append(int(addr[i]) & mask[i])
+                    net = [int(addr[i]) & mask[i] for i in xrange(4)]
+
+                    network = ".".join(map(str, net))
+                    #name_rule += ' ' + network + ' ' + netmask
+                    add_name_rule.append(network)
+                    add_name_rule.append(netmask)
+                    add_access_rule_obj.source_ip = network
+                if add_rule.source_condition == 'host':
+                    host_pattern = '^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}' + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$';
+                    if re.match(host_pattern,add_rule.source_object) == None:
+                        raise Exception ("Please provide valid ip-address for source-object in access-list")
+                    add_access_rule_obj.source_ip = add_rule.source_object
+                    #name_rule += ' ' + 'host' + ' ' + source_object
+                    add_name_rule.append('host')
+                    add_name_rule.append(add_rule.source_object)
+                if add_rule.source_condition == 'objectgroup':
+                    if util.isNotEmpty(add_rule.source_object_group):
+                        object_group_def(add_rule.source_object_group, device, sdata)
+                        add_access_rule_obj.source_obj_name = add_rule.source_object_group
+                        #name_rule += ' ' + 'object-group' + ' ' + source_object_group
+                        add_name_rule.append('object-group')
+                        add_name_rule.append(add_rule.source_object_group)
+                if add_rule.source_condition == 'any':
+                    #name_rule += ' ' + 'any'
+                    add_name_rule.append('any')
+                if hasattr(add_rule, 'source_port') and util.isNotEmpty(add_rule.source_port):
+                        if util.isEmpty(add_rule.source_port_operator):
+                            raise Exception("Please provide Source Port Operator in acl")
+                        add_access_rule_obj.source_port_operator = add_rule.source_port_operator
+                        each_port = add_rule.source_port.split(' ')
+                        if add_rule.protocol == 'tcp':
+                            each_port = ([port_dict[each] if each in port_dict else each for each in each_port])
+                        elif add_rule.protocol == 'udp':
+                            each_port = ([udp_port_dict[each] if each in udp_port_dict else each for each in each_port])
+                        source_port = ' '.join(each_port)
+                        add_access_rule_obj.source_port = source_port
+                        #name_rule += ' ' + source_port_operator + ' ' + source_port
+                        add_name_rule.append(add_rule.source_port_operator)
+                        add_name_rule.append(source_port)
+                if hasattr(add_rule, 'destination_condition') and util.isNotEmpty(add_rule.destination_condition):
+                    add_access_rule_obj.dest_condition_type = add_rule.destination_condition
+                    if add_rule.destination_condition == 'cidr':
+                        cidr_pattern = '^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}' + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])' + '/(([0-9])|([1-2][0-9])|(3[0-2]))$';
+                        if re.match(cidr_pattern,add_rule.destination_object) == None:
+                            raise Exception ("Please provide valid CIDR for destination-object in access-list")
+                        prefix = util.IPPrefix(add_rule.destination_object)
+                        ip_address = prefix.address
+                        netmask = prefix.wildcard
+                        add_access_rule_obj.dest_mask = netmask
+                        (addrStr, cidrStr) = add_rule.destination_object.split('/')
+                        addr = addrStr.split('.')
+                        cidr = int(cidrStr)
+                        mask = [0, 0, 0, 0]
+                        for i in range(cidr):
+                            mask[i/8] = mask[i/8] + (1 << (7 - i % 8))
+                        #net = []
+                        #for i in range(4):
+                            #net.append(int(addr[i]) & mask[i])
+                        net = [int(addr[i]) & mask[i] for i in xrange(4)]
+
+                        network = ".".join(map(str, net))
+                        #name_rule += ' ' + network + ' ' + netmask
+                        add_name_rule.append(network)
+                        add_name_rule.append(netmask)
+                        add_access_rule_obj.dest_ip = network
+                    if add_rule.destination_condition == 'host':
+                        host_pattern = '^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}' + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$';
+                        if re.match(host_pattern,add_rule.destination_object) == None:
+                            raise Exception ("Please provide valid ip-address for destination-object in access-list")
+                        add_access_rule_obj.dest_ip = add_rule.destination_object
+                        #name_rule += ' ' + 'host' + ' ' + destination_object
+                        add_name_rule.append('host')
+                        add_name_rule.append(add_rule.destination_object)
+                    if add_rule.destination_condition == 'objectgroup':
+                        if util.isNotEmpty(add_rule.destination_object_group):
+                            object_group_def(add_rule.destination_object_group, device, sdata)
+                            add_access_rule_obj.dest_obj_name = destination_object_group
+                            #name_rule += ' ' + 'object-group' + ' ' + destination_object_group
+                            add_name_rule.append('object-group')
+                            add_name_rule.append(add_rule.destination_object_group)
+                    if add_rule.destination_condition == 'any':
+                        #name_rule += ' ' + 'any'
+                        add_name_rule.append('any')
+                if hasattr(add_rule, 'port_number') and util.isNotEmpty(add_rule.port_number):
+                        if util.isEmpty(add_rule.dest_port_operator):
+                            raise Exception("Please provide Destination Port Operator in acl")
+                        add_access_rule_obj.dest_port_operator = add_rule.dest_port_operator
+                        each_port = add_rule.port_number.split(' ')
+                        if add_rule.protocol == 'tcp':
+                            each_port = ([port_dict[each] if each in port_dict else each for each in each_port])
+                        elif add_rule.protocol == 'udp':
+                            each_port = ([udp_port_dict[each] if each in udp_port_dict else each for each in each_port])
+                        port_number = ' '.join(each_port)
+                        add_access_rule_obj.dest_port = port_number
+                        #name_rule += ' ' + dest_port_operator + ' ' + port_number
+                        add_name_rule.append(add_rule.dest_port_operator)
+                        add_name_rule.append(port_number)
+                if hasattr(add_rule, 'match_packets') and util.isNotEmpty(add_rule.match_packets):
+                    add_access_rule_obj.match_packets = add_rule.match_packets
+                    #name_rule += ' ' + match_packets
+                    add_name_rule.append(add_rule.match_packets)
+                    if add_rule.match_packets == 'precedence':
+                        if hasattr(add_rule, 'precedence') and util.isNotEmpty(add_rule.precedence):
+                            add_access_rule_obj.precedence = add_rule.precedence
+                            #name_rule += ' ' + precedence
+                            add_name_rule.append(precedence)
+                    else:
+                        if hasattr(add_rule, 'dscp') and util.isNotEmpty(add_rule.dscp):
+                            add_access_rule_obj.precedence = add_rule.dscp
+                            #name_rule += ' ' + dscp
+                            add_name_rule.append(add_rule.dscp)
+                
+                add_access_rule_obj.name = ' '.join(add_name_rule)
+                #access_rules_url = device.url + "/access-lists/access-list=%s" %(access_list_name)
+                #yang.Sdk.createData(access_rules_url, '<acl-rules/>', sdata.getSession())
+
+                add_access_rule_url = device.url + '/acl:access-lists/access-list=%s/acl-rules' %(access_list_name)
+                yang.Sdk.createData(add_access_rule_url, add_access_rule_obj.getxml(filter=True), sdata.getSession(), False)
+
+
     else:
-        print "Access-list is not in device: ", device
+        yang.Sdk.append_taskdetail(sdata.getTaskId(), "Access-List " + str(access_list_name) + " not found on device " + str(device.device.id) + ". Skipping this device")
 
 
 def delete_acl(entity, conf, sdata, **kwargs):
@@ -831,9 +1120,207 @@ def delete_acl(entity, conf, sdata, **kwargs):
 
             yang.Sdk.deleteData(access_list_url, access_rule_obj.getxml(filter=True), sdata.getTaskId(), sdata.getSession())
         else:
-            print "Access-rules are not in device: ", device
+            yang.Sdk.append_taskdetail(sdata.getTaskId(), "Access-List  " + str(access_list_name) + " Rule " + str(name_rule) + " not found on device " + str(device.device.id) + ". Skipping this device")
+
+        uri_add_acl = sdata.getRcPath()
+        add_acl_output = yang.Sdk.getData(uri_add_acl, '', sdata.getTaskId())
+        add_acl_obj = util.parseXmlString(add_acl_output)
+
+        if hasattr(add_acl_obj.update_access_list, 'additional_acl_entry'):
+            add_acl_list = util.convert_to_list(add_acl_obj.update_access_list.additional_acl_entry)
+
+            for add_rule in add_acl_list:
+                add_name_rule = []
+                add_access_rule_obj = access_lists.access_list.acl_rules.acl_rule.acl_rule()
+                port_dict = { '179': 'bgp', '19': 'chargen', '514': 'cmd', '13': 'daytime', '9': 'discard', '53': 'domain',
+                                  '3949': 'drip', '7': 'echo', '512': 'exec', '79': 'finger', '21': 'ftp', '20': 'ftp-data',
+                                  '70': 'gopher', '101': 'hostname', '113': 'ident', '194': 'irc', '543': 'klogin', '544': 'kshell',
+                                  '513': 'login', '515': 'lpd', '119': 'nntp', '15001': 'onep-plain', '15002': 'onep-tls', '496': 'pim-auto-rp',
+                                  '109': 'pop2', '110': 'pop3', '25': 'smtp', '111': 'sunrpc', '49': 'tacacs', '517': 'talk', '23': 'telnet',
+                                  '37': 'time', '540': 'uucp', '43': 'whois', '80': 'www', '135': 'msrpc'
+                                  }
+                udp_port_dict = { '512': 'biff', '68': 'bootpc', '67': 'bootps', '9': 'discard', '195': 'dnsix',
+                                  '53': 'domain', '7': 'echo', '500': 'isakmp', '434': 'mobile-ip', '42': 'nameserver', '138': 'netbios-dgm',
+                                  '137': 'netbios-ns', '139': 'netbios-ss', '4500': 'non500-isakmp', '123': 'ntp', '496': 'pim-auto-rp',
+                                  '520': 'rip', '161': 'snmp', '162': 'snmptrap', '111': 'sunrpc', '514': 'syslog', '49': 'tacacs',
+                                  '517': 'talk', '69': 'tftp', '37': 'time', '513': 'who', '177': 'xdmcp', '135': 'msrpc'
+                                  }
+                add_access_rule_obj.action = add_rule.action
+                if hasattr(add_rule, 'protocol') and util.isNotEmpty(add_rule.protocol):
+                    add_access_rule_obj.layer4protocol = add_rule.protocol
+                else:
+                    add_access_rule_obj.layer4protocol = None
+                if hasattr(add_rule, 'acl_sequence_num') and util.isNotEmpty(add_rule.acl_sequence_num):
+                    add_access_rule_obj.linenumber = add_rule.acl_sequence_num
+                    #name_rule = acl_sequence_num + ' ' + action + ' ' + protocol
+                    #name_rule = action + ' ' + protocol
+                if hasattr(add_rule, 'protocol') and util.isNotEmpty(add_rule.protocol):
+                    #name_rule = action + ' ' + protocol
+                    add_name_rule.append(add_rule.action)
+                    add_name_rule.append(add_rule.protocol)
+                else:
+                    #name_rule = action
+                    add_name_rule.append(add_rule.action)
+                if hasattr(add_rule, 'service_obj_name') and util.isNotEmpty(add_rule.service_obj_name):
+                    object_group_def(add_rule.service_obj_name, device, sdata)
+                    add_access_rule_obj.service_obj_name = add_rule.service_obj_name
+                    #name_rule += ' ' + service_obj_name
+                    add_name_rule.append(add_rule.service_obj_name)
+                add_access_rule_obj.source_condition_type = add_rule.source_condition
+                if add_rule.source_condition == 'cidr':
+                    cidr_pattern = '^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}' + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])' + '/(([0-9])|([1-2][0-9])|(3[0-2]))$';
+                    if re.match(cidr_pattern,add_rule.source_object) == None:
+                        raise Exception ("Please provide valid CIDR for source-object in access-list")
+                    prefix = util.IPPrefix(add_rule.source_object)
+                    ip_address = prefix.address
+                    netmask = prefix.wildcard
+                    add_access_rule_obj.source_mask = netmask
+                    (addrStr, cidrStr) = add_rule.source_object.split('/')
+                    addr = addrStr.split('.')
+                    cidr = int(cidrStr)
+                    mask = [0, 0, 0, 0]
+                    for i in xrange(cidr):
+                        mask[i/8] = mask[i/8] + (1 << (7 - i % 8))
+                    #net = []
+                    #for i in range(4):
+                        #net.append(int(addr[i]) & mask[i])
+                    net = [int(addr[i]) & mask[i] for i in xrange(4)]
+
+                    network = ".".join(map(str, net))
+                    #name_rule += ' ' + network + ' ' + netmask
+                    add_name_rule.append(network)
+                    add_name_rule.append(netmask)
+                    add_access_rule_obj.source_ip = network
+                if add_rule.source_condition == 'host':
+                    host_pattern = '^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}' + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$';
+                    if re.match(host_pattern,add_rule.source_object) == None:
+                        raise Exception ("Please provide valid ip-address for source-object in access-list")
+                    add_access_rule_obj.source_ip = add_rule.source_object
+                    #name_rule += ' ' + 'host' + ' ' + source_object
+                    add_name_rule.append('host')
+                    add_name_rule.append(add_rule.source_object)
+                if add_rule.source_condition == 'objectgroup':
+                    if util.isNotEmpty(add_rule.source_object_group):
+                        object_group_def(add_rule.source_object_group, device, sdata)
+                        add_access_rule_obj.source_obj_name = add_rule.source_object_group
+                        #name_rule += ' ' + 'object-group' + ' ' + source_object_group
+                        add_name_rule.append('object-group')
+                        add_name_rule.append(add_rule.source_object_group)
+                if add_rule.source_condition == 'any':
+                    #name_rule += ' ' + 'any'
+                    add_name_rule.append('any')
+                if hasattr(add_rule, 'source_port') and util.isNotEmpty(add_rule.source_port):
+                        if util.isEmpty(add_rule.source_port_operator):
+                            raise Exception("Please provide Source Port Operator in acl")
+                        add_access_rule_obj.source_port_operator = add_rule.source_port_operator
+                        each_port = add_rule.source_port.split(' ')
+                        if add_rule.protocol == 'tcp':
+                            each_port = ([port_dict[each] if each in port_dict else each for each in each_port])
+                        elif add_rule.protocol == 'udp':
+                            each_port = ([udp_port_dict[each] if each in udp_port_dict else each for each in each_port])
+                        source_port = ' '.join(each_port)
+                        add_access_rule_obj.source_port = source_port
+                        #name_rule += ' ' + source_port_operator + ' ' + source_port
+                        add_name_rule.append(add_rule.source_port_operator)
+                        add_name_rule.append(source_port)
+                if hasattr(add_rule, 'destination_condition') and util.isNotEmpty(add_rule.destination_condition):
+                    add_access_rule_obj.dest_condition_type = add_rule.destination_condition
+                    if add_rule.destination_condition == 'cidr':
+                        cidr_pattern = '^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}' + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])' + '/(([0-9])|([1-2][0-9])|(3[0-2]))$';
+                        if re.match(cidr_pattern,add_rule.destination_object) == None:
+                            raise Exception ("Please provide valid CIDR for destination-object in access-list")
+                        prefix = util.IPPrefix(add_rule.destination_object)
+                        ip_address = prefix.address
+                        netmask = prefix.wildcard
+                        add_access_rule_obj.dest_mask = netmask
+                        (addrStr, cidrStr) = add_rule.destination_object.split('/')
+                        addr = addrStr.split('.')
+                        cidr = int(cidrStr)
+                        mask = [0, 0, 0, 0]
+                        for i in range(cidr):
+                            mask[i/8] = mask[i/8] + (1 << (7 - i % 8))
+                        #net = []
+                        #for i in range(4):
+                            #net.append(int(addr[i]) & mask[i])
+                        net = [int(addr[i]) & mask[i] for i in xrange(4)]
+
+                        network = ".".join(map(str, net))
+                        #name_rule += ' ' + network + ' ' + netmask
+                        add_name_rule.append(network)
+                        add_name_rule.append(netmask)
+                        add_access_rule_obj.dest_ip = network
+                    if add_rule.destination_condition == 'host':
+                        host_pattern = '^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}' + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$';
+                        if re.match(host_pattern,add_rule.destination_object) == None:
+                            raise Exception ("Please provide valid ip-address for destination-object in access-list")
+                        add_access_rule_obj.dest_ip = add_rule.destination_object
+                        #name_rule += ' ' + 'host' + ' ' + destination_object
+                        add_name_rule.append('host')
+                        add_name_rule.append(add_rule.destination_object)
+                    if add_rule.destination_condition == 'objectgroup':
+                        if util.isNotEmpty(add_rule.destination_object_group):
+                            object_group_def(add_rule.destination_object_group, device, sdata)
+                            add_access_rule_obj.dest_obj_name = destination_object_group
+                            #name_rule += ' ' + 'object-group' + ' ' + destination_object_group
+                            add_name_rule.append('object-group')
+                            add_name_rule.append(add_rule.destination_object_group)
+                    if add_rule.destination_condition == 'any':
+                        #name_rule += ' ' + 'any'
+                        add_name_rule.append('any')
+                if hasattr(add_rule, 'port_number') and util.isNotEmpty(add_rule.port_number):
+                        if util.isEmpty(add_rule.dest_port_operator):
+                            raise Exception("Please provide Destination Port Operator in acl")
+                        add_access_rule_obj.dest_port_operator = add_rule.dest_port_operator
+                        each_port = add_rule.port_number.split(' ')
+                        if add_rule.protocol == 'tcp':
+                            each_port = ([port_dict[each] if each in port_dict else each for each in each_port])
+                        elif add_rule.protocol == 'udp':
+                            each_port = ([udp_port_dict[each] if each in udp_port_dict else each for each in each_port])
+                        port_number = ' '.join(each_port)
+                        add_access_rule_obj.dest_port = port_number
+                        #name_rule += ' ' + dest_port_operator + ' ' + port_number
+                        add_name_rule.append(add_rule.dest_port_operator)
+                        add_name_rule.append(port_number)
+                if hasattr(add_rule, 'match_packets') and util.isNotEmpty(add_rule.match_packets):
+                    add_access_rule_obj.match_packets = add_rule.match_packets
+                    #name_rule += ' ' + match_packets
+                    add_name_rule.append(add_rule.match_packets)
+                    if add_rule.match_packets == 'precedence':
+                        if hasattr(add_rule, 'precedence') and util.isNotEmpty(add_rule.precedence):
+                            add_access_rule_obj.precedence = add_rule.precedence
+                            #name_rule += ' ' + precedence
+                            add_name_rule.append(precedence)
+                    else:
+                        if hasattr(add_rule, 'dscp') and util.isNotEmpty(add_rule.dscp):
+                            add_access_rule_obj.precedence = add_rule.dscp
+                            #name_rule += ' ' + dscp
+                            add_name_rule.append(add_rule.dscp)
+                
+                add_name_rule = ' '.join(add_name_rule)
+                #access_rules_url = device.url + "/access-lists/access-list=%s" %(access_list_name)
+                #yang.Sdk.createData(access_rules_url, '<acl-rules/>', sdata.getSession())
+
+                add_access_list_url = '/controller:devices/device=%s/acl:access-lists/access-list=%s/acl-rules/acl-rule=%s' % (device.device.id, access_list_name, add_name_rule.replace(' ', '%20'))
+
+                if yang.Sdk.dataExists(add_access_list_url):
+                    add_access_rule_obj.name = add_name_rule
+                    add_name_rule = add_name_rule.replace(' ', '%20')
+                    add_access_list_url = '/controller:devices/device=%s/acl:access-lists/access-list=%s/acl-rules/acl-rule=%s' % (device.device.id, access_list_name, add_name_rule)
+                    output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+add_access_list_url+'</rc-path></input>')
+                    ref = util.parseXmlString(output)
+                    log("xml_op:%s" %(ref))
+                    if hasattr(ref.output, 'references'):
+                        if hasattr(ref.output.references, 'reference'):
+                            if hasattr(ref.output.references.reference, 'src_node'):
+                                for each_ref in util.convert_to_list(ref.output.references.reference.src_node):
+                                    yang.Sdk.removeReference(each_ref, add_access_list_url)
+
+                    yang.Sdk.deleteData(add_access_list_url, add_access_rule_obj.getxml(filter=True), sdata.getTaskId(), sdata.getSession())
+                else:
+                    yang.Sdk.append_taskdetail(sdata.getTaskId(), "Access-List  " + str(access_list_name) + " Rule " + str(add_name_rule) + " not found on device " + str(device.device.id) + ". Skipping this device")
+
     else:
-        print "Access-list is not in device: ", device
+       yang.Sdk.append_taskdetail(sdata.getTaskId(), "Access-List " + str(access_list_name) + " not found on device " + str(device.device.id) + ". Skipping this device")
 
 
 class DeletePreProcessor(yang.SessionPreProcessor):

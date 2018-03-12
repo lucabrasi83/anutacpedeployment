@@ -315,6 +315,8 @@ def delete_dmvpn(entity, conf, sdata, **kwargs):
     wan_tunnel_ip = inputdict['wan_tunnel_ip']
     wan_public_ip = inputdict['wan_public_ip']
 
+    url_device_tunnel = '/controller:devices/device=%s/dmvpn:dmvpntunnels/dmvpntunnel=%s' %(device.device.id, tunnel_id)
+    '''
     url_device_pre_tunnel = '/controller:devices/device=%s' %(device.device.id)
     device_pre_tunnel = yang.Sdk.getData(url_device_pre_tunnel, '', sdata.getTaskId())
     conf_pre_tunnel = util.parseXmlString(device_pre_tunnel)
@@ -332,16 +334,18 @@ def delete_dmvpn(entity, conf, sdata, **kwargs):
             device_tunnel = [tunnel.name for tunnel in conf_tunnel.dmvpntunnels.dmvpntunnel]
 
         if tunnel_id in device_tunnel:
-            url_device_tunnel_nhrp = '/controller:devices/device=%s/dmvpn:dmvpntunnels/dmvpntunnel=%s' %(device.device.id, tunnel_id)
-            device_tunnel_nhrp = yang.Sdk.getData(url_device_tunnel_nhrp, '', sdata.getTaskId())
-            conf_tunnel_nhrp = util.parseXmlString(device_tunnel_nhrp)
-            device_tunnel_nhrp = []
-            if hasattr(conf_tunnel_nhrp.dmvpntunnel, 'nhrp_maps'):
-                conf_tunnel_nhrp.dmvpntunnel.nhrp_maps = util.convert_to_list(conf_tunnel_nhrp.dmvpntunnel.nhrp_maps)
-                #for nhrp in conf_tunnel_nhrp.dmvpntunnel.nhrp_maps:
-                    #if nhrp.sourceip == wan_tunnel_ip and nhrp.destip == wan_public_ip:
-                        #device_tunnel_nhrp.append(nhrp.sourceip)
-                device_tunnel_nhrp = [nhrp.sourceip for nhrp in conf_tunnel_nhrp.dmvpntunnel.nhrp_maps if nhrp.sourceip == wan_tunnel_ip and nhrp.destip == wan_public_ip]
+        '''
+    if yang.Sdk.dataExists(url_device_tunnel):
+        url_device_tunnel_nhrp = '/controller:devices/device=%s/dmvpn:dmvpntunnels/dmvpntunnel=%s' %(device.device.id, tunnel_id)
+        device_tunnel_nhrp = yang.Sdk.getData(url_device_tunnel_nhrp, '', sdata.getTaskId())
+        conf_tunnel_nhrp = util.parseXmlString(device_tunnel_nhrp)
+        device_tunnel_nhrp = []
+        if hasattr(conf_tunnel_nhrp.dmvpntunnel, 'nhrp_maps'):
+            conf_tunnel_nhrp.dmvpntunnel.nhrp_maps = util.convert_to_list(conf_tunnel_nhrp.dmvpntunnel.nhrp_maps)
+            #for nhrp in conf_tunnel_nhrp.dmvpntunnel.nhrp_maps:
+                #if nhrp.sourceip == wan_tunnel_ip and nhrp.destip == wan_public_ip:
+                    #device_tunnel_nhrp.append(nhrp.sourceip)
+            device_tunnel_nhrp = [nhrp.sourceip for nhrp in conf_tunnel_nhrp.dmvpntunnel.nhrp_maps if nhrp.sourceip == wan_tunnel_ip and nhrp.destip == wan_public_ip]
             if wan_tunnel_ip in device_tunnel_nhrp:
                 dmvpn_obj_nhrp = dmvpntunnels.dmvpntunnel.nhrp_maps.nhrp_maps()
                 dmvpn_obj_nhrp.sourceip = wan_tunnel_ip
@@ -350,7 +354,7 @@ def delete_dmvpn(entity, conf, sdata, **kwargs):
                 dmvpn_obj_nhrp_url = '/controller:devices/device=%s/dmvpn:dmvpntunnels/dmvpntunnel=%s/nhrp-maps=%s,%s' % (device.device.id, tunnel_id, wan_tunnel_ip, wan_public_ip)
                 output = yang.Sdk.invokeRpc('ncxsdk:get-inbound-references', '<input><rc-path>'+dmvpn_obj_nhrp_url+'</rc-path></input>')
                 ref = util.parseXmlString(output)
-                log("xml_op:%s" %(ref))
+                # log("xml_op:%s" %(ref))
                 if hasattr(ref.output, 'references'):
                     if hasattr(ref.output.references, 'reference'):
                         if hasattr(ref.output.references.reference, 'src_node'):
@@ -358,11 +362,11 @@ def delete_dmvpn(entity, conf, sdata, **kwargs):
                                 yang.Sdk.removeReference(each_ref, dmvpn_obj_nhrp_url)
                 yang.Sdk.deleteData(dmvpn_obj_nhrp_url, dmvpn_obj_nhrp.getxml(filter=True), sdata.getTaskId(), sdata.getSession())
             else:
-                print "Dmvpn tunnel with nhrp-map is not in device: ", device
+                yang.Sdk.append_taskdetail(sdata.getTaskId(), "NHRP Map " + str(wan_tunnel_ip) + " " + str(wan_public_ip) + " DMVPN Tunnel Interface ID " + str(tunnel_id) + " not found on device " + str(device.device.id) + ". Skipping this device")
         else:
-            print "Dmvpn tunnel is not in device: ", device
+            yang.Sdk.append_taskdetail(sdata.getTaskId(), "NHRP Mappings on DMVPN Tunnel Interface ID " + str(tunnel_id) + " not found on device " + str(device.device.id) + ". Skipping this device")
     else:
-        print "Dmvpn tunnels is not in device: ", device
+         yang.Sdk.append_taskdetail(sdata.getTaskId(), "DMVPN Tunnel Interface ID " + str(tunnel_id) + " not found on device " + str(device.device.id) + ". Skipping this device")
 
 
 def create_dmvpn(entity, conf, sdata, smodelctx, **kwargs):
@@ -411,6 +415,7 @@ def create_dmvpn(entity, conf, sdata, smodelctx, **kwargs):
     nhrp_nw_id = inputdict['nhrp_nw_id']
     tunnel_key = inputdict['tunnel_key']
     nhrp_authentication_key = inputdict['nhrp_authentication_key']
+    nhrp_holdtime = inputdict['nhrp_holdtime']
     wan_tunnel_ip = inputdict['wan_tunnel_ip']
     wan_public_ip = inputdict['wan_public_ip']
     mtu = inputdict['mtu']
@@ -419,12 +424,15 @@ def create_dmvpn(entity, conf, sdata, smodelctx, **kwargs):
     ipsec_profile = inputdict['ipsec_profile']
     fvrf = inputdict['fvrf']
 
+    url_device_tunnel = '/controller:devices/device=%s/dmvpn:dmvpntunnels/dmvpntunnel=%s' %(device.device.id, tunnel_id)
+
+    '''
     url_device_pre_tunnel = '/controller:devices/device=%s' %(device.device.id)
     device_pre_tunnel = yang.Sdk.getData(url_device_pre_tunnel, '', sdata.getTaskId())
     conf_pre_tunnel = util.parseXmlString(device_pre_tunnel)
 
     if hasattr(conf_pre_tunnel.device, 'dmvpntunnels'):
-        url_device_tunnel = '/controller:devices/device=%s/dmvpn:dmvpntunnels' %(device.device.id)
+       
         device_tunnel = yang.Sdk.getData(url_device_tunnel, '', sdata.getTaskId())
         conf_tunnel = util.parseXmlString(device_tunnel)
 
@@ -436,39 +444,42 @@ def create_dmvpn(entity, conf, sdata, smodelctx, **kwargs):
             device_tunnel = [tunnel.name for tunnel in conf_tunnel.dmvpntunnels.dmvpntunnel]
 
         if tunnel_id in device_tunnel:
-            dmvpn_obj = dmvpntunnels.dmvpntunnel.dmvpntunnel()
-            dmvpn_obj.name = tunnel_id
-            if util.isNotEmpty(tunnel_bandwidth):
-                dmvpn_obj.bandwidth = tunnel_bandwidth
-            if util.isNotEmpty(nhrp_authentication_key):
-                dmvpn_obj.nhrp_auth_key = nhrp_authentication_key
-            if util.isNotEmpty(nhrp_nw_id):
-                dmvpn_obj.nhrp_network_id = nhrp_nw_id
-            if util.isNotEmpty(mtu):
-                dmvpn_obj.mtu = mtu
-            if util.isNotEmpty(tcp_adjust_mss):
-                dmvpn_obj.tcp_adjust_mss = tcp_adjust_mss
-            if util.isNotEmpty(tunnel_key):
-                dmvpn_obj.tunnel_key = tunnel_key
-            if util.isNotEmpty(fvrf) and fvrf != 'GLOBAL':
-                dmvpn_obj.front_vrf_name = fvrf
-            if util.isNotEmpty(ipsec_profile):
-                IpsecCreation(sdata, device, ipsec_profile, fvrf, wan_public_ip, smodelctx)
-                dmvpn_obj.ipsec_profile_name = ipsec_profile
-                uri = sdata.getRcPath()
-                uri_list = uri.split('/', 5)
-                url = '/'.join(uri_list[0:4])
-                xml_output = yang.Sdk.getData(url+"/ipsec/ipsec-profiles/ipsec-profile="+str(ipsec_profile), '', sdata.getTaskId())
-                obj1 = util.parseXmlString(xml_output)
-                dmvpn_obj.shared = obj1.ipsec_profile.get_field_value('shared')
-            if util.isNotEmpty(wan_tunnel_ip) and util.isNotEmpty(wan_public_ip):
-                nhrp_maps_obj_2 = dmvpn_obj.nhrp_maps.add(sourceip=wan_tunnel_ip, destip=wan_public_ip)
-                nhrp_maps_obj_2.nhrp_type = 'nhs'
-            yang.Sdk.createData(device.url+'/dmvpn:dmvpntunnels', dmvpn_obj.getxml(filter=True), sdata.getSession(), False)
-        else:
-            print "Dmvpn tunnel is not in device: ", device
+        '''
+    if yang.Sdk.dataExists(url_device_tunnel):
+        dmvpn_obj = dmvpntunnels.dmvpntunnel.dmvpntunnel()
+        dmvpn_obj.name = tunnel_id
+        if util.isNotEmpty(tunnel_bandwidth):
+            dmvpn_obj.bandwidth = tunnel_bandwidth
+        if util.isNotEmpty(nhrp_authentication_key):
+            dmvpn_obj.nhrp_auth_key = nhrp_authentication_key
+        if util.isNotEmpty(nhrp_nw_id):
+            dmvpn_obj.nhrp_network_id = nhrp_nw_id
+        if util.isNotEmpty(mtu):
+            dmvpn_obj.mtu = mtu
+        if util.isNotEmpty(nhrp_holdtime):
+            dmvpn_obj.nhrp_holdtime = nhrp_holdtime
+        if util.isNotEmpty(tcp_adjust_mss):
+            dmvpn_obj.tcp_adjust_mss = tcp_adjust_mss
+        if util.isNotEmpty(tunnel_key):
+            dmvpn_obj.tunnel_key = tunnel_key
+        if util.isNotEmpty(fvrf) and fvrf != 'GLOBAL':
+            dmvpn_obj.front_vrf_name = fvrf
+        if util.isNotEmpty(ipsec_profile):
+            IpsecCreation(sdata, device, ipsec_profile, fvrf, wan_public_ip, smodelctx)
+            dmvpn_obj.ipsec_profile_name = ipsec_profile
+            uri = sdata.getRcPath()
+            uri_list = uri.split('/', 5)
+            url = '/'.join(uri_list[0:4])
+            xml_output = yang.Sdk.getData(url+"/ipsec/ipsec-profiles/ipsec-profile="+str(ipsec_profile), '', sdata.getTaskId())
+            obj1 = util.parseXmlString(xml_output)
+            dmvpn_obj.shared = obj1.ipsec_profile.get_field_value('shared')
+        if util.isNotEmpty(wan_tunnel_ip) and util.isNotEmpty(wan_public_ip):
+            nhrp_maps_obj_2 = dmvpn_obj.nhrp_maps.add(sourceip=wan_tunnel_ip, destip=wan_public_ip)
+            nhrp_maps_obj_2.nhrp_type = 'nhs'
+        yang.Sdk.patchData(device.url+'/dmvpn:dmvpntunnels/dmvpntunnel=%s' % tunnel_id, dmvpn_obj.getxml(filter=True), sdata, add_reference=False)
     else:
-        print "Dmvpn tunnels is not in device: ", device
+        yang.Sdk.append_taskdetail(sdata.getTaskId(), "DMVPN Tunnel Interface ID " + str(tunnel_id) + " not found on device " + str(device.device.id) + ". Skipping this device")         
+   
 
 
 class DeletePreProcessor(yang.SessionPreProcessor):

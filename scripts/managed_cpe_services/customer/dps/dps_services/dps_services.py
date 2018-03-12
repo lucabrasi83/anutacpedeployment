@@ -70,6 +70,8 @@ class DpsServices(yang.AbstractYangServiceHandler):
 
         # START OF FETCHING THE LEAF PARAMETERS
         inputdict['name'] = config.get_field_value('name')
+        inputdict['created_on'] = config.get_field_value('created_on')
+        inputdict['created_by'] = config.get_field_value('created_by')
         inputdict['single_cpe_site'] = config.get_field_value('single_cpe_site')
         inputdict['single_cpe_sites'] = config.get_field_value('single_cpe_sites')
         inputdict['dual_cpe_site'] = config.get_field_value('dual_cpe_site')

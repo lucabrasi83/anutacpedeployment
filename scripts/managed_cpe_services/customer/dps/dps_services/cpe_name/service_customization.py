@@ -249,7 +249,7 @@ def delete_route_map_from_redistribute_dps(entity, conf, sdata, **kwargs):
     redistribute_static_route_policy = None
     is_new_site = 'false'
     if entity == 'cpe':
-        device = devicemgr.getDeviceById(conf.single_cpe_site_services.cpe.device_ip)
+        device = devicemgr.getDeviceById(conf.single_cpe_site_services.cpe.device_ip, False, 5)
         if hasattr(conf.single_cpe_site_services.cpe_lan, 'end_points'):
             obj = util.convert_to_list(conf.single_cpe_site_services.cpe_lan.end_points)
             for endpoint in obj:
@@ -287,7 +287,7 @@ def delete_route_map_from_redistribute_dps(entity, conf, sdata, **kwargs):
                 if hasattr(conf.single_cpe_site_services.cpe.vrfs.vrf, 'bgp_address_family'):
                     bgp_address_family = conf.single_cpe_site_services.cpe.vrfs.vrf.bgp_address_family
     elif entity == 'cpe_primary':
-        device = devicemgr.getDeviceById(conf.dual_cpe_site_services.cpe_primary.device_ip)
+        device = devicemgr.getDeviceById(conf.dual_cpe_site_services.cpe_primary.device_ip, False, 5)
         if hasattr(conf.dual_cpe_site_services.cpe_lan, 'end_points'):
             obj = util.convert_to_list(conf.dual_cpe_site_services.cpe_lan.end_points)
             for endpoint in obj:
@@ -326,7 +326,7 @@ def delete_route_map_from_redistribute_dps(entity, conf, sdata, **kwargs):
                 if hasattr(conf.dual_cpe_site_services.cpe_primary.vrfs.vrf, 'bgp_address_family'):
                     bgp_address_family = conf.dual_cpe_site_services.cpe_primary.vrfs.vrf.bgp_address_family
     elif entity == 'cpe_secondary' or entity == 'cpe_secondary_only':
-        device = devicemgr.getDeviceById(conf.dual_cpe_site_services.cpe_secondary.device_ip)
+        device = devicemgr.getDeviceById(conf.dual_cpe_site_services.cpe_secondary.device_ip, False, 5)
         if hasattr(conf.dual_cpe_site_services.cpe_lan, 'end_points'):
             obj = util.convert_to_list(conf.dual_cpe_site_services.cpe_lan.end_points)
             for endpoint in obj:
@@ -365,7 +365,7 @@ def delete_route_map_from_redistribute_dps(entity, conf, sdata, **kwargs):
                 if hasattr(conf.dual_cpe_site_services.cpe_secondary.vrfs.vrf, 'bgp_address_family'):
                     bgp_address_family = conf.dual_cpe_site_services.cpe_secondary.vrfs.vrf.bgp_address_family
     elif entity == 'cpe_dual':
-        device = devicemgr.getDeviceById(conf.single_cpe_dual_wan_site_services.cpe.device_ip)
+        device = devicemgr.getDeviceById(conf.single_cpe_dual_wan_site_services.cpe.device_ip, False, 5)
         if hasattr(conf.single_cpe_dual_wan_site_services.cpe_lan, 'end_points'):
             obj = util.convert_to_list(conf.single_cpe_dual_wan_site_services.cpe_lan.end_points)
             for endpoint in obj:
@@ -403,7 +403,7 @@ def delete_route_map_from_redistribute_dps(entity, conf, sdata, **kwargs):
                 if hasattr(conf.single_cpe_dual_wan_site_services.cpe.vrfs.vrf, 'bgp_address_family'):
                     bgp_address_family = conf.single_cpe_dual_wan_site_services.cpe.vrfs.vrf.bgp_address_family
     elif entity == 'cpe_primary_dual':
-        device = devicemgr.getDeviceById(conf.dual_cpe_dual_wan_site_services.cpe_primary.device_ip)
+        device = devicemgr.getDeviceById(conf.dual_cpe_dual_wan_site_services.cpe_primary.device_ip, False, 5)
         if hasattr(conf.dual_cpe_dual_wan_site_services.cpe_lan, 'end_points'):
             obj = util.convert_to_list(conf.dual_cpe_dual_wan_site_services.cpe_lan.end_points)
             for endpoint in obj:
@@ -442,7 +442,7 @@ def delete_route_map_from_redistribute_dps(entity, conf, sdata, **kwargs):
                 if hasattr(conf.dual_cpe_dual_wan_site_services.cpe_primary.vrfs.vrf, 'bgp_address_family'):
                     bgp_address_family = conf.dual_cpe_dual_wan_site_services.cpe_primary.vrfs.vrf.bgp_address_family
     elif entity == 'cpe_secondary_dual' or entity == 'cpe_secondary_only_dual':
-        device = devicemgr.getDeviceById(conf.dual_cpe_dual_wan_site_services.cpe_secondary.device_ip)
+        device = devicemgr.getDeviceById(conf.dual_cpe_dual_wan_site_services.cpe_secondary.device_ip, False, 5)
         if hasattr(conf.dual_cpe_dual_wan_site_services.cpe_lan, 'end_points'):
             obj = util.convert_to_list(conf.dual_cpe_dual_wan_site_services.cpe_lan.end_points)
             for endpoint in obj:
@@ -481,7 +481,7 @@ def delete_route_map_from_redistribute_dps(entity, conf, sdata, **kwargs):
                 if hasattr(conf.dual_cpe_dual_wan_site_services.cpe_secondary.vrfs.vrf, 'bgp_address_family'):
                     bgp_address_family = conf.dual_cpe_dual_wan_site_services.cpe_secondary.vrfs.vrf.bgp_address_family
     elif entity == 'cpe_primary_triple':
-        device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_primary.device_ip)
+        device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_primary.device_ip, False, 5)
         if hasattr(conf.triple_cpe_site_services.cpe_lan, 'end_points'):
             obj = util.convert_to_list(conf.triple_cpe_site_services.cpe_lan.end_points)
             for endpoint in obj:
@@ -598,6 +598,7 @@ def delete_route_map_from_redistribute_dps(entity, conf, sdata, **kwargs):
 
 
 def dps(entity, conf, sdata, **kwargs):
+    from itertools import izip
     device = None
     interface_name = None
     b2b_interface_name = None
@@ -606,8 +607,10 @@ def dps(entity, conf, sdata, **kwargs):
     bgp_address_family = None
     int_name = None
     lan_vrf = None
+    int_name_list = []
+    int_mode_list = []
     if entity == 'cpe':
-        device = devicemgr.getDeviceById(conf.single_cpe_site_services.cpe.device_ip)
+        device = devicemgr.getDeviceById(conf.single_cpe_site_services.cpe.device_ip, False, 5)
         if hasattr(conf.single_cpe_site_services.cpe_lan, 'end_points'):
             obj = util.convert_to_list(conf.single_cpe_site_services.cpe_lan.end_points)
             for endpoint in obj:
@@ -617,17 +620,23 @@ def dps(entity, conf, sdata, **kwargs):
                     if endpoint.interface_type == 'Physical':
                         interface_name = endpoint.interface_name
                         mode = 'l3-interface'
+                        int_name_list.append(interface_name)
+                        int_mode_list.append(mode)
                     elif endpoint.interface_type == 'Sub-Interface':
                         interface_name = endpoint.interface_name + '.' + str(endpoint.vlan_id)
                         mode = 'sub-interface'
+                        int_name_list.append(interface_name)
+                        int_mode_list.append(mode)
                     elif endpoint.interface_type == 'SVI':
                         interface_name = "Vlan" + str(endpoint.vlan_id)
                         mode = 'vlan'
+                        int_name_list.append(interface_name)
+                        int_mode_list.append(mode)
         bgp_as = conf.single_cpe_site_services.bgp_as
         if hasattr(conf.single_cpe_site_services.cpe.vrfs.vrf, 'bgp_address_family'):
             bgp_address_family = conf.single_cpe_site_services.cpe.vrfs.vrf.bgp_address_family
     elif entity == 'cpe_primary':
-        device = devicemgr.getDeviceById(conf.dual_cpe_site_services.cpe_primary.device_ip)
+        device = devicemgr.getDeviceById(conf.dual_cpe_site_services.cpe_primary.device_ip, False, 5)
         if hasattr(conf.dual_cpe_site_services.cpe_lan, 'end_points'):
             obj = util.convert_to_list(conf.dual_cpe_site_services.cpe_lan.end_points)
             for endpoint in obj:
@@ -638,17 +647,23 @@ def dps(entity, conf, sdata, **kwargs):
                         if endpoint.interface_type == 'Physical':
                             interface_name = endpoint.interface_name
                             mode = 'l3-interface'
+                            int_name_list.append(interface_name)
+                            int_mode_list.append(mode)
                         elif endpoint.interface_type == 'Sub-Interface':
                             interface_name = endpoint.interface_name + '.' + str(endpoint.vlan_id)
                             mode = 'sub-interface'
+                            int_name_list.append(interface_name)
+                            int_mode_list.append(mode)
                         elif endpoint.interface_type == 'SVI':
                             interface_name = "Vlan" + str(endpoint.vlan_id)
                             mode = 'vlan'
+                            int_name_list.append(interface_name)
+                            int_mode_list.append(mode)
         bgp_as = conf.dual_cpe_site_services.bgp_as
         if hasattr(conf.dual_cpe_site_services.cpe_primary.vrfs.vrf, 'bgp_address_family'):
             bgp_address_family = conf.dual_cpe_site_services.cpe_primary.vrfs.vrf.bgp_address_family
     elif entity == 'cpe_secondary' or entity == 'cpe_secondary_only':
-        device = devicemgr.getDeviceById(conf.dual_cpe_site_services.cpe_secondary.device_ip)
+        device = devicemgr.getDeviceById(conf.dual_cpe_site_services.cpe_secondary.device_ip, False, 5)
         if hasattr(conf.dual_cpe_site_services.cpe_lan, 'end_points'):
             obj = util.convert_to_list(conf.dual_cpe_site_services.cpe_lan.end_points)
             for endpoint in obj:
@@ -659,17 +674,23 @@ def dps(entity, conf, sdata, **kwargs):
                         if endpoint.interface_type == 'Physical':
                             interface_name = endpoint.interface_name
                             mode = 'l3-interface'
+                            int_name_list.append(interface_name)
+                            int_mode_list.append(mode)
                         elif endpoint.interface_type == 'Sub-Interface':
                             interface_name = endpoint.interface_name + '.' + str(endpoint.vlan_id)
                             mode = 'sub-interface'
+                            int_name_list.append(interface_name)
+                            int_mode_list.append(mode)
                         elif endpoint.interface_type == 'SVI':
                             interface_name = "Vlan" + str(endpoint.vlan_id)
                             mode = 'vlan'
+                            int_name_list.append(interface_name)
+                            int_mode_list.append(mode)
         bgp_as = conf.dual_cpe_site_services.bgp_as
         if hasattr(conf.dual_cpe_site_services.cpe_secondary.vrfs.vrf, 'bgp_address_family'):
             bgp_address_family = conf.dual_cpe_site_services.cpe_secondary.vrfs.vrf.bgp_address_family
     elif entity == 'cpe_dual':
-        device = devicemgr.getDeviceById(conf.single_cpe_dual_wan_site_services.cpe.device_ip)
+        device = devicemgr.getDeviceById(conf.single_cpe_dual_wan_site_services.cpe.device_ip, False, 5)
         if hasattr(conf.single_cpe_dual_wan_site_services.cpe_lan, 'end_points'):
             obj = util.convert_to_list(conf.single_cpe_dual_wan_site_services.cpe_lan.end_points)
             for endpoint in obj:
@@ -679,17 +700,23 @@ def dps(entity, conf, sdata, **kwargs):
                     if endpoint.interface_type == 'Physical':
                         interface_name = endpoint.interface_name
                         mode = 'l3-interface'
+                        int_name_list.append(interface_name)
+                        int_mode_list.append(mode)
                     elif endpoint.interface_type == 'Sub-Interface':
                         interface_name = endpoint.interface_name + '.' + str(endpoint.vlan_id)
                         mode = 'sub-interface'
+                        int_name_list.append(interface_name)
+                        int_mode_list.append(mode)
                     elif endpoint.interface_type == 'SVI':
-                            interface_name = "Vlan" + str(endpoint.vlan_id)
-                            mode = 'vlan'
+                        interface_name = "Vlan" + str(endpoint.vlan_id)
+                        mode = 'vlan'
+                        int_name_list.append(interface_name)
+                        int_mode_list.append(mode)
         bgp_as = conf.single_cpe_dual_wan_site_services.bgp_as
         if hasattr(conf.single_cpe_dual_wan_site_services.cpe.vrfs.vrf, 'bgp_address_family'):
             bgp_address_family = conf.single_cpe_dual_wan_site_services.cpe.vrfs.vrf.bgp_address_family
     elif entity == 'cpe_primary_dual':
-        device = devicemgr.getDeviceById(conf.dual_cpe_dual_wan_site_services.cpe_primary.device_ip)
+        device = devicemgr.getDeviceById(conf.dual_cpe_dual_wan_site_services.cpe_primary.device_ip, False, 5)
         if hasattr(conf.dual_cpe_dual_wan_site_services.cpe_lan, 'end_points'):
             obj = util.convert_to_list(conf.dual_cpe_dual_wan_site_services.cpe_lan.end_points)
             for endpoint in obj:
@@ -700,17 +727,23 @@ def dps(entity, conf, sdata, **kwargs):
                         if endpoint.interface_type == 'Physical':
                             interface_name = endpoint.interface_name
                             mode = 'l3-interface'
+                            int_name_list.append(interface_name)
+                            int_mode_list.append(mode)
                         elif endpoint.interface_type == 'Sub-Interface':
                             interface_name = endpoint.interface_name + '.' + str(endpoint.vlan_id)
                             mode = 'sub-interface'
+                            int_name_list.append(interface_name)
+                            int_mode_list.append(mode)
                         elif endpoint.interface_type == 'SVI':
                             interface_name = "Vlan" + str(endpoint.vlan_id)
                             mode = 'vlan'
+                            int_name_list.append(interface_name)
+                            int_mode_list.append(mode)
         bgp_as = conf.dual_cpe_dual_wan_site_services.bgp_as
         if hasattr(conf.dual_cpe_dual_wan_site_services.cpe_primary.vrfs.vrf, 'bgp_address_family'):
             bgp_address_family = conf.dual_cpe_dual_wan_site_services.cpe_primary.vrfs.vrf.bgp_address_family
     elif entity == 'cpe_secondary_dual' or entity == 'cpe_secondary_only_dual':
-        device = devicemgr.getDeviceById(conf.dual_cpe_dual_wan_site_services.cpe_secondary.device_ip)
+        device = devicemgr.getDeviceById(conf.dual_cpe_dual_wan_site_services.cpe_secondary.device_ip, False, 5)
         if hasattr(conf.dual_cpe_dual_wan_site_services.cpe_lan, 'end_points'):
             obj = util.convert_to_list(conf.dual_cpe_dual_wan_site_services.cpe_lan.end_points)
             for endpoint in obj:
@@ -721,17 +754,23 @@ def dps(entity, conf, sdata, **kwargs):
                         if endpoint.interface_type == 'Physical':
                             interface_name = endpoint.interface_name
                             mode = 'l3-interface'
+                            int_name_list.append(interface_name)
+                            int_mode_list.append(mode)
                         elif endpoint.interface_type == 'Sub-Interface':
                             interface_name = endpoint.interface_name + '.' + str(endpoint.vlan_id)
                             mode = 'sub-interface'
+                            int_name_list.append(interface_name)
+                            int_mode_list.append(mode)
                         elif endpoint.interface_type == 'SVI':
                             interface_name = "Vlan" + str(endpoint.vlan_id)
                             mode = 'vlan'
+                            int_name_list.append(interface_name)
+                            int_mode_list.append(mode)
         bgp_as = conf.dual_cpe_dual_wan_site_services.bgp_as
         if hasattr(conf.dual_cpe_dual_wan_site_services.cpe_secondary.vrfs.vrf, 'bgp_address_family'):
             bgp_address_family = conf.dual_cpe_dual_wan_site_services.cpe_secondary.vrfs.vrf.bgp_address_family
     elif entity == 'cpe_primary_triple':
-        device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_primary.device_ip)
+        device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_primary.device_ip, False, 5)
         if hasattr(conf.triple_cpe_site_services.cpe_lan, 'end_points'):
             obj = util.convert_to_list(conf.triple_cpe_site_services.cpe_lan.end_points)
             for endpoint in obj:
@@ -742,12 +781,18 @@ def dps(entity, conf, sdata, **kwargs):
                         if endpoint.interface_type == 'Physical':
                             interface_name = endpoint.interface_name
                             mode = 'l3-interface'
+                            int_name_list.append(interface_name)
+                            int_mode_list.append(mode)
                         elif endpoint.interface_type == 'Sub-Interface':
                             interface_name = endpoint.interface_name + '.' + str(endpoint.vlan_id)
                             mode = 'sub-interface'
+                            int_name_list.append(interface_name)
+                            int_mode_list.append(mode)
                         elif endpoint.interface_type == 'SVI':
                             interface_name = "Vlan" + str(endpoint.vlan_id)
                             mode = 'vlan'
+                            int_name_list.append(interface_name)
+                            int_mode_list.append(mode)
         bgp_as = conf.triple_cpe_site_services.bgp_as
         if hasattr(conf.triple_cpe_site_services.cpe_primary.vrfs.vrf, 'bgp_address_family'):
             bgp_address_family = conf.triple_cpe_site_services.cpe_primary.vrfs.vrf.bgp_address_family
@@ -782,7 +827,7 @@ def dps(entity, conf, sdata, **kwargs):
         if vrf != 'GLOBAL':
             xml_output = yang.Sdk.getData(url+"/vrfs", '',sdata.getTaskId())
             obj = util.parseXmlString(xml_output)
-            util.log_debug( "obj: ",obj)
+            #util.log_debug( "obj: ",obj)
 
             if hasattr(obj.vrfs, 'vrf'):
                 obj.vrfs.vrf = util.convert_to_list(obj.vrfs.vrf)
@@ -855,32 +900,33 @@ def dps(entity, conf, sdata, **kwargs):
                 yang.Sdk.createData(device.url + '/l3features:vrfs', vrfobj.getxml(filter=True), sdata.getSession())
 
     if inputdict['lan_interface'] == 'true':
-        intf_obj = interfaces.interface.interface()
-        if util.isEmpty(interface_name) or interface_name is None:
-            raise Exception('Please check DPS flag is checked on Site Service LAN interface')
-        intf_obj.name = interface_name
-        intf_obj.long_name = interface_name
-        intf_obj.mode = mode
-        if inputdict['hierarchical_inbound_policy'] == 'false':
-            if util.isNotEmpty(inputdict['hierarchical_policy']):
-                hierarchical_policy_class(entity, inputdict['hierarchical_policy'], device, sdata)
-                intf_obj.inbound_qos = inputdict['hierarchical_policy']
-        elif inputdict['hierarchical_inbound_policy'] == 'true':
-            if util.isNotEmpty(inputdict['hierarchical_policy']):
-                hierarchical_policy_class(entity, inputdict['hierarchical_policy'], device, sdata)
-                intf_obj.inbound_qos = inputdict['hierarchical_policy']
+        for _interface_name, _mode in izip(int_name_list, int_mode_list):
+            intf_obj = interfaces.interface.interface()
+            if util.isEmpty(_interface_name) or _interface_name is None:
+                raise Exception('Please check DPS flag is checked on Site Service LAN interface')
+            intf_obj.name = _interface_name
+            intf_obj.long_name = _interface_name
+            intf_obj.mode = _mode
+            if inputdict['hierarchical_inbound_policy'] == 'false':
+                if util.isNotEmpty(inputdict['hierarchical_policy']):
+                    hierarchical_policy_class(entity, inputdict['hierarchical_policy'], device, sdata)
+                    intf_obj.inbound_qos = inputdict['hierarchical_policy']
+            elif inputdict['hierarchical_inbound_policy'] == 'true':
+                if util.isNotEmpty(inputdict['hierarchical_policy']):
+                    hierarchical_policy_class(entity, inputdict['hierarchical_policy'], device, sdata)
+                    intf_obj.inbound_qos = inputdict['hierarchical_policy']
 
-        if inputdict['vrf_receive'] == 'true':
-            if vrf is not None and vrf != 'GLOBAL':
-                intf_obj.vrf_receive = vrf
-        if inputdict['bgp_policy'] == 'true':
-            intf_obj.bgp_policy = 'true'
-        if inputdict['bgp_policy_qos'] == 'true':
-            intf_obj.bgp_policy_qos = 'true'
-        if util.isNotEmpty(inputdict['pbr_policy']):
-            route_maps(inputdict['pbr_policy'], device, sdata)
-            intf_obj.pbr_policy = inputdict['pbr_policy']
-        yang.Sdk.createData(device.url+'/interface:interfaces', intf_obj.getxml(filter=True), sdata.getSession(), False)
+            if inputdict['vrf_receive'] == 'true':
+                if vrf is not None and vrf != 'GLOBAL':
+                    intf_obj.vrf_receive = vrf
+            if inputdict['bgp_policy'] == 'true':
+                intf_obj.bgp_policy = 'true'
+            if inputdict['bgp_policy_qos'] == 'true':
+                intf_obj.bgp_policy_qos = 'true'
+            if util.isNotEmpty(inputdict['pbr_policy']):
+                route_maps(inputdict['pbr_policy'], device, sdata)
+                intf_obj.pbr_policy = inputdict['pbr_policy']
+            yang.Sdk.createData(device.url+'/interface:interfaces', intf_obj.getxml(filter=True), sdata.getSession(), False)
 
     if inputdict['b2b_interface'] == 'true':
         if entity == 'cpe_primary':
@@ -1026,7 +1072,8 @@ def dps(entity, conf, sdata, **kwargs):
         ospf_url = device.url + '/l3features:vrfs/vrf=%s' % (vrf)
         yang.Sdk.createData(ospf_url, ospf_obj.getxml(filter=True), sdata.getSession())
         ospf_url1 = ospf_url + '/router-ospf=%s' %(inputdict['ospf_id'])
-        yang.Sdk.createData(ospf_url1, '<redistribute/>', sdata.getSession())
+        if not yang.Sdk.dataExists(ospf_url1 + '/redistribute'):
+            yang.Sdk.createData(ospf_url1, '<redistribute/>', sdata.getSession(), False)
         if util.isNotEmpty(inputdict['static_route_map']):
             route_maps(inputdict['static_route_map'], device, sdata)
             ospf_static_obj = vrfs.vrf.router_ospf.redistribute.ospf_redistribute.ospf_redistribute()
@@ -1037,9 +1084,10 @@ def dps(entity, conf, sdata, **kwargs):
             yang.Sdk.createData(ospf_static_url, ospf_static_obj.getxml(filter=True), sdata.getSession())
 
         if util.isNotEmpty(inputdict['connected_route_map']):
-            if util.isEmpty(interface_name):
+            _interface_name = ' '.join(int_name_list)
+            if util.isEmpty(_interface_name):
                 raise Exception('Please check DPS flag is checked on LAN interface on the site service')
-            route_maps(inputdict['connected_route_map'], device, sdata, interface_name)
+            route_maps(inputdict['connected_route_map'], device, sdata, _interface_name)
             ospf_connect_obj = vrfs.vrf.router_ospf.redistribute.ospf_redistribute.ospf_redistribute()
             ospf_connect_obj.protocol = 'connected'
             ospf_connect_obj.route_map = inputdict['connected_route_map']
@@ -1178,7 +1226,8 @@ def dps(entity, conf, sdata, **kwargs):
 
         xml_output = yang.Sdk.getData(url+"/dmvpn-tunnel-profiles/dmvpn-tunnel-profile="+str(dmvpn_profile), '', sdata.getTaskId())
         obj_dmvpn = util.parseXmlString(xml_output)
-        yang.Sdk.createData(device.url, '<dmvpntunnels/>', sdata.getSession(), False)
+        if not yang.Sdk.dataExists(device.url + '/dmvpn:dmvpntunnels'):
+            yang.Sdk.createData(device.url, '<dmvpntunnels/>', sdata.getSession(), False)
         dmvpn_obj = dmvpntunnels.dmvpntunnel.dmvpntunnel()
         if vrf != 'GLOBAL':
             uri1 = sdata.getRcPath()
@@ -1548,25 +1597,29 @@ def class_map(entity, url, cls_name, dev, sdata):
 
 
 def delete_interface(entity, smodelctx, sdata, conf, **kwargs):
+    #Added Support for Multiple LAN interfaces in DPS Service
+    from itertools import izip
     device = None
     interface_name = None
     mode = None
     inputdict = kwargs['inputdict']
+    int_name_list = []
+    int_mode_list = []
 
     if entity == 'cpe':
-        device = devicemgr.getDeviceById(conf.single_cpe_site_services.cpe.device_ip)
+        device = devicemgr.getDeviceById(conf.single_cpe_site_services.cpe.device_ip, False, 5)
     elif entity == 'cpe_primary':
-        device = devicemgr.getDeviceById(conf.dual_cpe_site_services.cpe_primary.device_ip)
+        device = devicemgr.getDeviceById(conf.dual_cpe_site_services.cpe_primary.device_ip, False, 5)
     elif entity == 'cpe_secondary' or entity == 'cpe_secondary_only':
-        device = devicemgr.getDeviceById(conf.dual_cpe_site_services.cpe_secondary.device_ip)
+        device = devicemgr.getDeviceById(conf.dual_cpe_site_services.cpe_secondary.device_ip, False, 5)
     elif entity == 'cpe_dual':
-        device = devicemgr.getDeviceById(conf.single_cpe_dual_wan_site_services.cpe.device_ip)
+        device = devicemgr.getDeviceById(conf.single_cpe_dual_wan_site_services.cpe.device_ip, False, 5)
     elif entity == 'cpe_primary_dual':
-        device = devicemgr.getDeviceById(conf.dual_cpe_dual_wan_site_services.cpe_primary.device_ip)
+        device = devicemgr.getDeviceById(conf.dual_cpe_dual_wan_site_services.cpe_primary.device_ip, False, 5)
     elif entity == 'cpe_secondary_dual' or entity == 'cpe_secondary_only_dual':
-        device = devicemgr.getDeviceById(conf.dual_cpe_dual_wan_site_services.cpe_secondary.device_ip)
+        device = devicemgr.getDeviceById(conf.dual_cpe_dual_wan_site_services.cpe_secondary.device_ip, False, 5)
     elif entity == 'cpe_primary_triple':
-        device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_primary.device_ip)
+        device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_primary.device_ip, False, 5)
 
     if entity == 'cpe':
         obj = util.convert_to_list(conf.single_cpe_site_services.cpe_lan.end_points)
@@ -1575,6 +1628,8 @@ def delete_interface(entity, smodelctx, sdata, conf, **kwargs):
                 if endpoint.dps == 'true':
                     if endpoint.device_ip == device.device.id:
                         interface_name,mode = endpoint_def(endpoint)
+                        int_name_list.append(interface_name)
+                        int_mode_list.append(mode)
             else:
                 interface_name,mode = endpoint_def(endpoint)
     elif entity == 'cpe_primary':
@@ -1584,6 +1639,8 @@ def delete_interface(entity, smodelctx, sdata, conf, **kwargs):
                 if endpoint.dps == 'true':
                     if endpoint.device_ip == device.device.id:
                         interface_name,mode = endpoint_def(endpoint)
+                        int_name_list.append(interface_name)
+                        int_mode_list.append(mode)
             else:
                 interface_name,mode = endpoint_def(endpoint)
     elif entity == 'cpe_secondary' or entity == 'cpe_secondary_only':
@@ -1593,6 +1650,8 @@ def delete_interface(entity, smodelctx, sdata, conf, **kwargs):
                 if endpoint.dps == 'true':
                     if endpoint.device_ip == device.device.id:
                         interface_name,mode = endpoint_def(endpoint)
+                        int_name_list.append(interface_name)
+                        int_mode_list.append(mode)
             else:
                 interface_name,mode = endpoint_def(endpoint)
     elif entity == 'cpe_dual':
@@ -1602,6 +1661,8 @@ def delete_interface(entity, smodelctx, sdata, conf, **kwargs):
                 if endpoint.dps == 'true':
                     if endpoint.device_ip == device.device.id:
                         interface_name,mode = endpoint_def(endpoint)
+                        int_name_list.append(interface_name)
+                        int_mode_list.append(mode)
             else:
                 interface_name,mode = endpoint_def(endpoint)
     elif entity == 'cpe_primary_dual':
@@ -1611,6 +1672,8 @@ def delete_interface(entity, smodelctx, sdata, conf, **kwargs):
                 if endpoint.dps == 'true':
                     if endpoint.device_ip == device.device.id:
                         interface_name,mode = endpoint_def(endpoint)
+                        int_name_list.append(interface_name)
+                        int_mode_list.append(mode)
             else:
                 interface_name,mode = endpoint_def(endpoint)
     elif entity == 'cpe_secondary_dual' or entity == 'cpe_secondary_only_dual':
@@ -1620,6 +1683,8 @@ def delete_interface(entity, smodelctx, sdata, conf, **kwargs):
                 if endpoint.dps == 'true':
                     if endpoint.device_ip == device.device.id:
                         interface_name,mode = endpoint_def(endpoint)
+                        int_name_list.append(interface_name)
+                        int_mode_list.append(mode)
             else:
                 interface_name,mode = endpoint_def(endpoint)
     elif entity == 'cpe_primary_triple':
@@ -1629,24 +1694,28 @@ def delete_interface(entity, smodelctx, sdata, conf, **kwargs):
                 if endpoint.dps == 'true':
                     if endpoint.device_ip == device.device.id:
                         interface_name,mode = endpoint_def(endpoint)
+                        int_name_list.append(interface_name)
+                        int_mode_list.append(mode)
             else:
                 interface_name,mode = endpoint_def(endpoint)
 
-    intf_obj_phy = interfaces.interface.interface()
-    intf_obj_phy.name = interface_name
-    intf_obj_phy.long_name = interface_name
-    intf_obj_phy.mode = mode
-    if util.isNotEmpty(inputdict['hierarchical_policy']) or inputdict['hierarchical_policy'] is not None or util.isNotEmpty(inputdict['inbound_policy']) or inputdict['inbound_policy'] is not None:
-        intf_obj_phy.inbound_qos._empty_tag = True
-    intf_obj_phy.vrf_receive._empty_tag = True
-    if util.isNotEmpty(inputdict['pbr_policy']) or inputdict['pbr_policy'] is not None:
-        intf_obj_phy.pbr_policy._empty_tag = True
-    intf_obj_phy.bgp_policy._empty_tag = True
-    intf_obj_phy.bgp_policy_qos._empty_tag = True
-    uri = device.url + '/interface:interfaces/interface=%s' % (str(interface_name).replace('/', '%2F'))
-    payload = intf_obj_phy.getxml(filter=True)
-    if device.isInterfaceInDeviceExists(interface_name):
-        yang.Sdk.patchData(uri, payload, sdata, add_reference=False)
+    for _interface_name, _mode in izip(int_name_list, int_mode_list):
+
+        intf_obj_phy = interfaces.interface.interface()
+        intf_obj_phy.name = _interface_name
+        intf_obj_phy.long_name = _interface_name
+        intf_obj_phy.mode = _mode
+        if util.isNotEmpty(inputdict['hierarchical_policy']) or inputdict['hierarchical_policy'] is not None or util.isNotEmpty(inputdict['inbound_policy']) or inputdict['inbound_policy'] is not None:
+            intf_obj_phy.inbound_qos._empty_tag = True
+        intf_obj_phy.vrf_receive._empty_tag = True
+        if util.isNotEmpty(inputdict['pbr_policy']) or inputdict['pbr_policy'] is not None:
+            intf_obj_phy.pbr_policy._empty_tag = True
+        intf_obj_phy.bgp_policy._empty_tag = True
+        intf_obj_phy.bgp_policy_qos._empty_tag = True
+        uri = device.url + '/interface:interfaces/interface=%s' % (str(_interface_name).replace('/', '%2F'))
+        payload = intf_obj_phy.getxml(filter=True)
+        if device.isInterfaceInDeviceExists(_interface_name):
+            yang.Sdk.patchData(uri, payload, sdata, add_reference=False)
 
 
 def endpoint_def(endpoint):
@@ -1673,7 +1742,7 @@ class DeletePreProcessor(yang.SessionPreProcessor):
         print 'pass_0: operations: %s' % (operations)
         yang.moveOperations(operations, ['DeleteInterface'], ['DeleteRouteMapConditions', 'UpdateInterface'], True)
         print 'pass0: operations: %s' % (operations)
-        yang.moveOperations(operations, ['DeleteVrf'], ['DeleteRouterBGPNetwork', 'DeleteVrfRTExport', 'DeleteVrfRTImport', 'DeleteVrfImportMap', 'DeleteVrfExportMap', 'DeleteRouterOspf', 'DeleteRouterOspfNetwork', 'DeleteInterface'], True)
+        yang.moveOperations(operations, ['DeleteVrf'], ['DeleteRouterBGPNetwork', 'DeleteVrfRTExport', 'DeleteVrfRTImport', 'DeleteVrfImportMap', 'DeleteVrfExportMap', 'DeleteRouterOspf', 'DeleteRouterOspfNetwork', 'DeleteInterface', 'DeleteRouteMapActions'], True)
         print 'pass0_1: operations: %s' % (operations)
         yang.moveOperations(operations, ['DeleteQClassMapMatchCondition'], ['DeleteVrf'], True)
         print 'pass1: operations: %s' % (operations)

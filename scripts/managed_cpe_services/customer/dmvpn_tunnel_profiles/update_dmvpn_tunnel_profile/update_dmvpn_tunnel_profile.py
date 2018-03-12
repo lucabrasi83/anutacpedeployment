@@ -82,6 +82,7 @@ class UpdateDmvpnTunnelProfile(yang.AbstractYangServiceHandler):
         inputdict['wan_tunnel_ip'] = config.get_field_value('wan_tunnel_ip')
         inputdict['wan_public_ip'] = config.get_field_value('wan_public_ip')
         inputdict['mtu'] = config.get_field_value('mtu')
+        inputdict['nhrp_holdtime'] = config.get_field_value('nhrp_holdtime')
         inputdict['tcp_adjust_mss'] = config.get_field_value('tcp_adjust_mss')
         inputdict['tunnel_bandwidth'] = config.get_field_value('tunnel_bandwidth')
         inputdict['fvrf'] = config.get_field_value('fvrf')
@@ -151,6 +152,7 @@ class UpdateDmvpnTunnelProfile(yang.AbstractYangServiceHandler):
         inputdict['tunnel_bandwidth'] = config.get_field_value('tunnel_bandwidth')
         inputdict['fvrf'] = config.get_field_value('fvrf')
         inputdict['ipsec_profile'] = config.get_field_value('ipsec_profile')
+        inputdict['nhrp_holdtime'] = config.get_field_value('nhrp_holdtime')
         # END OF FETCHING THE LEAF PARAMETERS
         dev = []
         #Use the custom method to process the data
@@ -189,6 +191,7 @@ class UpdateDmvpnTunnelProfile(yang.AbstractYangServiceHandler):
         inputdict['tunnel_bandwidth'] = config.get_field_value('tunnel_bandwidth')
         inputdict['fvrf'] = config.get_field_value('fvrf')
         inputdict['ipsec_profile'] = config.get_field_value('ipsec_profile')
+        inputdict['nhrp_holdtime'] = config.get_field_value('nhrp_holdtime')
         # END OF FETCHING THE LEAF PARAMETERS
         dev = []
         #Use the custom method to process the data
