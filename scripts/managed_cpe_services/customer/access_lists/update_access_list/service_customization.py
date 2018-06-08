@@ -275,6 +275,20 @@ class ServiceDataCustomization:
                         elif inputdict['operation'] == 'CREATE':
                             create_acl(entity, conf, sdata, **kwargs)
 
+            if util.isNotEmpty(inputdict['device_group']):
+                dev_group_output = yang.Sdk.invokeRpc('controller:apply-data-grouping', '''<input><group-name>'''+ inputdict['device_group'] + '''</group-name></input>''')
+                dev_group_obj = util.parseXmlString(dev_group_output)
+                if hasattr(dev_group_obj, 'output'):
+                    if hasattr(dev_group_obj.output, 'result'):
+                        for each_dev in util.convert_to_list(dev_group_obj.output.result):
+                            if hasattr(each_dev, 'device'):
+                                if hasattr(each_dev.device, 'id'):
+                                    if inputdict['operation'] == 'DELETE':
+                                        delete_acl(each_dev.device.id, None, sdata, **kwargs)
+                                    elif inputdict['operation'] == 'CREATE':
+                                        create_acl(each_dev.device.id, None, sdata, **kwargs)
+            modify_acl(sdata, **kwargs)
+
     @staticmethod
     def process_service_update_data(smodelctx, sdata, **kwargs):
       """callback called for update operation"""
@@ -300,6 +314,111 @@ class ServiceDataCustomization:
         config = kwargs['config']
         inputdict = kwargs['inputdict']
 
+def modify_acl(sdata, **kwargs):
+    uri = sdata.getRcPath()
+    uri_list = uri.split('/', 5)
+    url = '/'.join(uri_list[0:4])
+    inputdict = kwargs['inputdict']
+    access_list_name = inputdict['access_list_name']
+    if inputdict['operation'] == 'CREATE' and inputdict['update_acl_in_profile'] == 'true':
+        url = url + "/access-lists/access-list=" + str(access_list_name)
+        acl_sequence_num = '' if util.isEmpty(inputdict['acl_sequence_num']) else inputdict['acl_sequence_num']
+        rule_name = '' if util.isEmpty(inputdict['rule_name']) else inputdict['rule_name']
+        action = '' if util.isEmpty(inputdict['action']) else inputdict['action']
+        protocol = '' if util.isEmpty(inputdict['protocol']) else inputdict['protocol']
+        service_obj_name = '' if util.isEmpty(inputdict['service_obj_name']) else inputdict['service_obj_name']
+        source_condition = '' if util.isEmpty(inputdict['source_condition']) else inputdict['source_condition']
+        source_object = '' if util.isEmpty(inputdict['source_object']) else inputdict['source_object']
+        source_object_group = '' if util.isEmpty(inputdict['source_object_group']) else inputdict['source_object_group']
+        destination_condition = '' if util.isEmpty(inputdict['destination_condition']) else inputdict['destination_condition']
+        destination_object = '' if util.isEmpty(inputdict['destination_object']) else inputdict['destination_object']
+        destination_object_group = '' if util.isEmpty(inputdict['destination_object_group']) else inputdict['destination_object_group']
+        port_number = '' if util.isEmpty(inputdict['port_number']) else inputdict['port_number']
+        match_packets = '' if util.isEmpty(inputdict['match_packets']) else inputdict['match_packets']
+        precedence = '' if util.isEmpty(inputdict['precedence']) else inputdict['precedence']
+        dscp = '' if util.isEmpty(inputdict['dscp']) else inputdict['dscp']
+        source_port = '' if util.isEmpty(inputdict['source_port']) else inputdict['source_port']
+        dest_port_operator = '' if util.isEmpty(inputdict['dest_port_operator']) else inputdict['dest_port_operator']
+        source_port_operator = '' if util.isEmpty(inputdict['source_port_operator']) else inputdict['source_port_operator']
+        payload = '''
+                    <access-list-rules>
+                    <name>'''+rule_name+'''</name>
+                    <action>'''+action+'''</action>
+                    <protocol>'''+protocol+'''</protocol>
+                    <acl-sequence-num>'''+acl_sequence_num+'''</acl-sequence-num>
+                    <service-obj-name>'''+service_obj_name+'''</service-obj-name>
+                    <source-condition>'''+source_condition+'''</source-condition>
+                    <source-object>'''+source_object+'''</source-object>
+                    <source-object-group>'''+source_object_group+'''</source-object-group>
+                    <destination-condition>'''+destination_condition+'''</destination-condition>
+                    <destination-object>'''+destination_object+'''</destination-object>
+                    <destination-object-group>'''+destination_object_group+'''</destination-object-group>
+                    <match-packets>'''+match_packets+'''</match-packets>
+                    <dscp>'''+dscp+'''</dscp>
+                    <precedence>'''+precedence+'''</precedence>
+                    <port-number>'''+port_number+'''</port-number>
+                    <dest-port-operator>'''+dest_port_operator+'''</dest-port-operator>
+                    <source-port>'''+source_port+'''</source-port>
+                    <source-port-operator>'''+source_port_operator+'''</source-port-operator>
+                    </access-list-rules>
+                  '''
+        yang.Sdk.createData(url, payload, sdata.getSession(), False)
+
+        uri_add_acl = sdata.getRcPath()
+        add_acl_output = yang.Sdk.getData(uri_add_acl, '', sdata.getTaskId())
+        add_acl_obj = util.parseXmlString(add_acl_output)
+
+        if hasattr(add_acl_obj.update_access_list, 'additional_acl_entry'):
+            add_acl_list = util.convert_to_list(add_acl_obj.update_access_list.additional_acl_entry)
+
+            for add_rule in add_acl_list:
+                add_acl_sequence_num = add_rule.acl_sequence_number if hasattr(add_rule, 'acl_sequence_number') and util.isNotEmpty(add_rule.acl_sequence_number) else ''
+                add_rule_name = add_rule.rule_name if hasattr(add_rule, 'rule_name') and util.isNotEmpty(add_rule.rule_name) else ''
+                add_action = add_rule.action if hasattr(add_rule, 'action') and util.isNotEmpty(add_rule.action) else ''
+                add_protocol = add_rule.protocol if hasattr(add_rule, 'protocol') and util.isNotEmpty(add_rule.protocol) else ''
+                add_service_obj_name = add_rule.service_obj_name if hasattr(add_rule, 'service_obj_name') and util.isNotEmpty(add_rule.service_obj_name) else ''
+                add_source_condition = add_rule.source_condition if hasattr(add_rule, 'source_condition') and util.isNotEmpty(add_rule.source_condition) else ''
+                add_source_object = add_rule.source_object if hasattr(add_rule, 'source_object') and util.isNotEmpty(add_rule.source_object) else ''
+                add_source_object_group = add_rule.source_object_group if hasattr(add_rule, 'source_object_group') and util.isNotEmpty(add_rule.source_object_group) else ''
+                add_destination_condition = add_rule.destination_condition if hasattr(add_rule, 'destination_condition') and util.isNotEmpty(add_rule.destination_condition) else ''
+                add_destination_object = add_rule.destination_object if hasattr(add_rule, 'destination_object') and util.isNotEmpty(add_rule.destination_object) else ''
+                add_destination_object_group = add_rule.destination_object_grouptin if hasattr(add_rule, 'destination_object_group') and  util.isNotEmpty(add_rule.destination_object_group) else ''
+                add_port_number = add_rule.port_number if hasattr(add_rule, 'port_number') and util.isNotEmpty(add_rule.port_number) else ''
+                add_match_packets = add_rule.match_packets if hasattr(add_rule, 'match_packet') and util.isNotEmpty(add_rule.match_packets) else ''
+                add_precedence = add_rule.precedence if hasattr(add_rule, 'precedence') and util.isNotEmpty(add_rule.precedence) else ''
+                add_dscp = add_rule.dscp if hasattr(add_rule, 'dscp') and util.isNotEmpty(ad_rule.dscp) else ''
+                add_source_port = add_rule.source_port if hasattr(add_rule, 'source_port') and util.isNotEmpty(add_rule.source_port) else ''
+                add_dest_port_operator = add_rule.dest_port_operator if hasattr(add_rule, 'dest_port_operator') and util.isNotEmpty(add_rule.dest_port_operator) else ''
+                add_source_port_operator = add_rule.source_port_operator if hasattr(add_rule, 'source_port_operator') and util.isNotEmpty(add_rule.source_port_operator) else ''
+                add_payload = '''
+                    <access-list-rules>
+                    <name>'''+add_rule_name+'''</name>
+                    <action>'''+add_action+'''</action>
+                    <protocol>'''+add_protocol+'''</protocol>
+                    <acl-sequence-num>'''+add_acl_sequence_num+'''</acl-sequence-num>
+                    <service-obj-name>'''+add_service_obj_name+'''</service-obj-name>
+                    <source-condition>'''+add_source_condition+'''</source-condition>
+                    <source-object>'''+add_source_object+'''</source-object>
+                    <source-object-group>'''+add_source_object_group+'''</source-object-group>
+                    <destination-condition>'''+add_destination_condition+'''</destination-condition>
+                    <destination-object>'''+add_destination_object+'''</destination-object>
+                    <destination-object-group>'''+add_destination_object_group+'''</destination-object-group>
+                    <match-packets>'''+add_match_packets+'''</match-packets>
+                    <dscp>'''+add_dscp+'''</dscp>
+                    <precedence>'''+add_precedence+'''</precedence>
+                    <port-number>'''+add_port_number+'''</port-number>
+                    <dest-port-operator>'''+add_dest_port_operator+'''</dest-port-operator>
+                    <source-port>'''+add_source_port+'''</source-port>
+                    <source-port-operator>'''+add_source_port_operator+'''</source-port-operator>
+                    </access-list-rules>
+                  '''
+                yang.Sdk.createData(url, add_payload, sdata.getSession(), False)
+
+    if inputdict['operation'] == 'DELETE' and inputdict['update_acl_in_profile'] == 'true':
+        acl_name = '' if util.isEmpty(inputdict['acl_name']) else inputdict['acl_name']
+        action = '' if util.isEmpty(inputdict['action']) else inputdict['action']
+        url = url + "/access-lists/access-list=" + str(access_list_name) + "/access-list-rules=" + str(acl_name) + "," +str(action)
+        yang.Sdk.deleteData(url, '', sdata.getTaskId(), sdata.getSession())
 
 def object_group_def(source_object_group, dev, sdata):
     uri = sdata.getRcPath()
@@ -477,9 +596,12 @@ def create_acl(entity, conf, sdata, **kwargs):
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_secondary.device_ip)
     elif entity == 'cpe_tertiary_triple':
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_tertiary.device_ip)
+    else:
+        device = devicemgr.getDeviceById(entity)
 
     inputdict = kwargs['inputdict']
     access_list_name = inputdict['access_list_name']
+    rule_name = inputdict['rule_name']
     access_list_entry = inputdict['access_list_entry']
     acl_sequence_num = inputdict['acl_sequence_num']
     operation = inputdict['operation']

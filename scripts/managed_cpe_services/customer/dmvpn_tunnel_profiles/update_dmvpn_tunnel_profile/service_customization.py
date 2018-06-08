@@ -49,7 +49,8 @@ from servicemodel import util
 from servicemodel import yang
 from servicemodel import devicemgr
 from servicemodel.controller.devices.device import dmvpntunnels
-
+from servicemodel.controller.devices.device.dmvpntunnels import dmvpntunnel
+from servicemodel.controller.devices.device.dmvpntunnels.dmvpntunnel import nhrp_maps
 from cpedeployment.cpedeployment_lib import getLocalObject
 from cpedeployment.cpedeployment_lib import getDeviceObject
 from cpedeployment.cpedeployment_lib import getCurrentObjectConfig
@@ -249,7 +250,20 @@ class ServiceDataCustomization:
                             delete_dmvpn(entity, conf, sdata, **kwargs)
                         elif inputdict['operation'] == 'CREATE':
                             create_dmvpn(entity, conf, sdata, smodelctx, **kwargs)
-
+                            
+            if util.isNotEmpty(inputdict['device_group']):
+                dev_group_output = yang.Sdk.invokeRpc('controller:apply-data-grouping', '''<input><group-name>'''+ inputdict['device_group'] + '''</group-name></input>''')
+                dev_group_obj = util.parseXmlString(dev_group_output)
+                if hasattr(dev_group_obj, 'output'):
+                    if hasattr(dev_group_obj.output, 'result'):
+                        for each_dev in util.convert_to_list(dev_group_obj.output.result):
+                            if hasattr(each_dev, 'device'):
+                                if hasattr(each_dev.device, 'id'):
+                                    if inputdict['operation'] == 'DELETE':
+                                        delete_dmvpn(each_dev.device.id, None, sdata, **kwargs)
+                                    elif inputdict['operation'] == 'CREATE':
+                                        create_dmvpn(each_dev.device.id, None, sdata, **kwargs)
+            modify_dmvpn(sdata, **kwargs)
     @staticmethod
     def process_service_device_bindings(smodelctx, sdata, dev, **kwargs):
       """ Custom API to modify the device bindings or Call the Business Login Handlers"""
@@ -289,6 +303,85 @@ class ServiceDataCustomization:
         config = kwargs['config']
         inputdict = kwargs['inputdict']
 
+def modify_dmvpn(sdata, **kwargs):
+    uri = sdata.getRcPath()
+    uri_list = uri.split('/', 5)
+    url = '/'.join(uri_list[0:4])
+    inputdict = kwargs['inputdict']
+    name = ''
+    tunnel_id = inputdict['tunnel_id']
+    dmvpn_output = yang.Sdk.getData(url+"/dmvpn-tunnel-profiles", '', sdata.getTaskId())
+    conf = util.parseXmlString(dmvpn_output)
+    if hasattr(conf.dmvpn_tunnel_profiles, 'dmvpn_tunnel_profile'):
+        conf.dmvpn_tunnel_profiles.dmvpn_tunnel_profile = util.convert_to_list(conf.dmvpn_tunnel_profiles.dmvpn_tunnel_profile)
+        for tunnel in conf.dmvpn_tunnel_profiles.dmvpn_tunnel_profile:
+            if tunnel.tunnel_id == tunnel_id:
+                name = tunnel.name
+    if inputdict['operation'] == 'CREATE' and inputdict['update_profile'] == 'true':
+        url = url + "/dmvpn-tunnel-profiles/dmvpn-tunnel-profile=" +str(name)
+        if util.isNotEmpty(inputdict['nhrp_nw_id']):
+            payload = '''
+                            <dmvpn-tunnel-profile>
+                                <name>'''+name+'''</name>
+                                <nhrp-nw-id>'''+inputdict['nhrp_nw_id']+'''</nhrp-nw-id>
+                            </dmvpn-tunnel-profile>
+                      '''
+            yang.Sdk.patchData(url, payload, sdata, add_reference=False)
+        if util.isNotEmpty(inputdict['tunnel_key']):
+            payload = '''
+                            <dmvpn-tunnel-profile>
+                                <name>'''+name+'''</name>
+                                <tunnel-key>'''+inputdict['tunnel_key']+'''</tunnel-key>
+                            </dmvpn-tunnel-profile>
+                      '''
+            yang.Sdk.patchData(url, payload, sdata, add_reference=False)
+        if util.isNotEmpty(inputdict['nhrp_authentication_key']):
+            payload = '''
+                            <dmvpn-tunnel-profile>
+                                <name>'''+name+'''</name>
+                                <nhrp-authentication-key>'''+inputdict['nhrp_authentication_key']+'''</nhrp-authentication-key>
+                            </dmvpn-tunnel-profile>
+                      '''
+            yang.Sdk.patchData(url, payload, sdata, add_reference=False)
+        if util.isNotEmpty(inputdict['mtu']):
+            payload = '''
+                            <dmvpn-tunnel-profile>
+                                <name>'''+name+'''</name>
+                                <mtu>'''+inputdict['mtu']+'''</mtu>
+                            </dmvpn-tunnel-profile>
+                      '''
+            yang.Sdk.patchData(url, payload, sdata, add_reference=False)
+        if util.isNotEmpty(inputdict['tcp_adjust_mss']):
+            payload = '''
+                            <dmvpn-tunnel-profile>
+                                <name>'''+name+'''</name>
+                                <tcp-adjust-mss>'''+inputdict['tcp_adjust_mss']+'''</tcp-adjust-mss>
+                            </dmvpn-tunnel-profile>
+                      '''
+            yang.Sdk.patchData(url, payload, sdata, add_reference=False)
+        if util.isNotEmpty(inputdict['ipsec_profile']):
+            payload = '''
+                            <dmvpn-tunnel-profile>
+                                <name>'''+name+'''</name>
+                                <ipsec-profile>'''+inputdict['ipsec_profile']+'''</ipsec-profile>
+                            </dmvpn-tunnel-profile>
+                      '''
+            yang.Sdk.patchData(url, payload, sdata, add_reference=False)
+        if util.isNotEmpty(inputdict['wan_tunnel_ip']) and util.isNotEmpty(inputdict['wan_public_ip']):
+            payload = '''
+                            <nhrp-maps>
+                                <wan-tunnel-ip>'''+inputdict['wan_tunnel_ip']+'''</wan-tunnel-ip>
+                                <wan-public-ip>'''+inputdict['wan_public_ip']+'''</wan-public-ip>
+                            </nhrp-maps>
+                      '''
+            yang.Sdk.createData(url, payload, sdata.getSession(), False)
+
+    if inputdict['operation'] == 'DELETE' and inputdict['update_profile'] == 'true':
+        if util.isNotEmpty(inputdict['wan_tunnel_ip']) and util.isNotEmpty(inputdict['wan_public_ip']):
+            url = url + "/dmvpn-tunnel-profiles/dmvpn-tunnel-profile=" +str(name) + "/nhrp-maps=" + str(inputdict['wan_tunnel_ip']) + "," + str(inputdict['wan_public_ip'])
+            if yang.Sdk.dataExists(url):
+                yang.Sdk.deleteData(url, '', sdata.getTaskId(), sdata.getSession())
+
 
 def delete_dmvpn(entity, conf, sdata, **kwargs):
     if entity == 'cpe':
@@ -309,6 +402,8 @@ def delete_dmvpn(entity, conf, sdata, **kwargs):
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_secondary.device_ip)
     elif entity == 'cpe_tertiary_triple':
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_tertiary.device_ip)
+    else:
+        device = devicemgr.getDeviceById(entity)
 
     inputdict = kwargs['inputdict']
     tunnel_id = inputdict['tunnel_id']
@@ -347,7 +442,7 @@ def delete_dmvpn(entity, conf, sdata, **kwargs):
                     #device_tunnel_nhrp.append(nhrp.sourceip)
             device_tunnel_nhrp = [nhrp.sourceip for nhrp in conf_tunnel_nhrp.dmvpntunnel.nhrp_maps if nhrp.sourceip == wan_tunnel_ip and nhrp.destip == wan_public_ip]
             if wan_tunnel_ip in device_tunnel_nhrp:
-                dmvpn_obj_nhrp = dmvpntunnels.dmvpntunnel.nhrp_maps.nhrp_maps()
+                dmvpn_obj_nhrp = nhrp_maps.nhrp_maps()
                 dmvpn_obj_nhrp.sourceip = wan_tunnel_ip
                 dmvpn_obj_nhrp.nhrp_type = 'nhs'
                 dmvpn_obj_nhrp.destip = wan_public_ip
@@ -474,9 +569,11 @@ def create_dmvpn(entity, conf, sdata, smodelctx, **kwargs):
             obj1 = util.parseXmlString(xml_output)
             dmvpn_obj.shared = obj1.ipsec_profile.get_field_value('shared')
         if util.isNotEmpty(wan_tunnel_ip) and util.isNotEmpty(wan_public_ip):
-            nhrp_maps_obj_2 = dmvpn_obj.nhrp_maps.add(sourceip=wan_tunnel_ip, destip=wan_public_ip)
+            nhrp_maps_obj_2 = nhrp_maps.nhrp_maps()
+            nhrp_maps_obj_2.sourceip = wan_tunnel_ip
+            nhrp_maps_obj_2.destip = wan_public_ip
             nhrp_maps_obj_2.nhrp_type = 'nhs'
-        yang.Sdk.patchData(device.url+'/dmvpn:dmvpntunnels/dmvpntunnel=%s' % tunnel_id, dmvpn_obj.getxml(filter=True), sdata, add_reference=False)
+            yang.Sdk.patchData(device.url+'/dmvpn:dmvpntunnels/dmvpntunnel=%s' % tunnel_id, dmvpn_obj.getxml(filter=True), sdata, add_reference=False)
     else:
         yang.Sdk.append_taskdetail(sdata.getTaskId(), "DMVPN Tunnel Interface ID " + str(tunnel_id) + " not found on device " + str(device.device.id) + ". Skipping this device")         
    

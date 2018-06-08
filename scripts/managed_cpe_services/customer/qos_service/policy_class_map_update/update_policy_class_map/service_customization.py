@@ -114,6 +114,7 @@ class ServiceDataCustomization:
                     else:
                         site = inputdict['dual_cpe_dual_wan_sites']
                         update_percentage_dual_dual(site, sdata, **kwargs)
+            modify_policy_class(sdata, **kwargs)
 
     @staticmethod
     def process_service_device_bindings(smodelctx, sdata, dev, **kwargs):
@@ -145,6 +146,50 @@ class ServiceDataCustomization:
         for key, value in kwargs.iteritems():
           log("%s == %s" %(key,value))
 
+def modify_policy_class(sdata, **kwargs):
+    uri = sdata.getRcPath()
+    uri_list = uri.split('/', 5)
+    url = '/'.join(uri_list[0:4])
+    inputdict = kwargs['inputdict']
+    name = inputdict['name']
+    policy_name = inputdict['policy_name']
+    class1 = inputdict['class1']
+    packet_handling = inputdict['packet_handling']
+    percentage = inputdict['percentage']
+    queue_limit = '' if util.isEmpty(inputdict['queue_limit']) else inputdict['queue_limit']
+    packets = '' if util.isEmpty(inputdict['packets']) else inputdict['packets']
+    qos_group = '' if util.isEmpty(inputdict['qos_group']) else inputdict['qos_group']
+
+    if inputdict['update_profile'] == 'true':
+        url = url + "/qos-service/policies/policy="+ str(policy_name) + "/classes"
+        if packet_handling == 'bandwidth':
+            payload = '''
+                        <class-name>
+                            <packet-handling>
+                                <bandwidth>
+                                    <percentage>'''+percentage+'''</percentage>
+                                </bandwidth>
+                            </packet-handling>'''
+        elif packet_handling == 'priority':
+            payload = '''
+                        <class-name>
+                            <packet-handling>
+                                <priority>
+                                    <percentage>'''+percentage+'''</percentage>
+                                </priority>
+                            </packet-handling>'''
+
+        payload = payload + '''<queue-limit>
+                            <queue-limit>'''+queue_limit+'''</queue-limit>
+                            <packets>'''+packets+'''</packets>
+                        </queue-limit>
+                        <qos-group>
+                            <qos-group>'''+qos_group+'''</qos-group>
+                        </qos-group>
+                        <name>'''+class1+'''</name>
+                    </class-name>
+                  '''
+        yang.Sdk.createData(url, payload, sdata.getSession(), False)
 
 def update_percentage(site, sdata, **kwargs):
     uri = sdata.getRcPath()

@@ -61,8 +61,8 @@ from cpedeployment.cpedeployment_lib import getPreviousObjectConfig
 from cpedeployment.cpedeployment_lib import ServiceModelContext
 from cpedeployment.cpedeployment_lib import getParentObject 
 from cpedeployment.cpedeployment_lib import log
-from servicemodel.controller.devices.device import vrfs
-from servicemodel.controller.devices.device import interfaces
+from servicemodel.controller.devices.device import control_plane
+
 
 
 class ServiceDataCustomization:
@@ -135,185 +135,560 @@ class ServiceDataCustomization:
 
 def fail_fall(smodelctx, sdata, **kwargs):
     inputdict = kwargs['inputdict']
-    device = inputdict['device']
-    dev = devicemgr.getDeviceById(device)
-    cpe_primary_mpls_wan_neighbor = inputdict['cpe_primary_mpls_wan_ebgp_neighbor']
-    cpe_primary_inet_wan_neighbor = inputdict['cpe_primary_inet_wan_ebgp_neighbor']
-    cpe_secondary_mpls_wan_neighbor = inputdict['cpe_secondary_mpls_wan_ebgp_neighbor']
-    cpe_secondary_inet_wan_neighbor = inputdict['cpe_secondary_inet_wan_ebgp_neighbor']
-    dps_tunnel_id = inputdict['dps_tunnel_id']
-    failover_dps = inputdict['failover_dps']
-    fallback_dps = inputdict['fallback_dps']
-    failover_wan = inputdict['failover_wan']
-    fallback_wan = inputdict['fallback_wan']
-    failover_b2b = inputdict['failover_b2b']
-    fallback_b2b = inputdict['fallback_b2b']
-    failover_lan = inputdict['failover_lan']
-    fallback_lan = inputdict['fallback_lan']
-
-    vrf = None
     obj_prim = getLocalObject(sdata, 'dual-cpe-dual-wan-site-services=')
-    if device == obj_prim.dual_cpe_dual_wan_site_services.cpe_primary.device_ip:
-        if hasattr(obj_prim.dual_cpe_dual_wan_site_services.cpe_primary_mpls_wan, 'end_points'):
-            endpoints = util.convert_to_list(obj_prim.dual_cpe_dual_wan_site_services.cpe_primary_mpls_wan.end_points)
-            for endpoint in endpoints:
+    pri_device = obj_prim.dual_cpe_dual_wan_site_services.cpe_primary.device_ip
+    pri_dev = devicemgr.getDeviceById(pri_device)
+    sec_device = obj_prim.dual_cpe_dual_wan_site_services.cpe_secondary.device_ip
+    sec_dev = devicemgr.getDeviceById(sec_device)
+    failover_state = obj_prim.dual_cpe_dual_wan_site_services.failover_state
+    operation_type = inputdict['operation_type']
+    selective_failover = inputdict['selective_failover']
 
-                if hasattr(endpoint, 'ivrf'):
-                    vrf = endpoint.ivrf
-                if hasattr(endpoint, 'vrf'):
-                    vrf = endpoint.vrf
-                if vrf is None:
-                    vrf = "GLOBAL"
-                if hasattr(endpoint, 'bgp_peers'):
-                    bgppeers = util.convert_to_list(endpoint.bgp_peers)
-                    for bgppeer in bgppeers:
-                        if cpe_primary_mpls_wan_neighbor == bgppeer.peer_ip:
-                            primobj = vrfs.vrf.router_bgp.neighbor.neighbor()
-                            primobj.ip_address = cpe_primary_mpls_wan_neighbor
-                            if failover_wan == 'true':
-                                primobj.shut = "true"
-                            if fallback_wan == 'true':
-                                primobj.shut = "false"
-                            router_bgp_neighbor_url = dev.url + '/l3features:vrfs/vrf=%s/router-bgp' % (vrf)
-                            yang.Sdk.createData(router_bgp_neighbor_url, primobj.getxml(filter=True), sdata.getSession(), False)
+    pri_vrf = None
+    sec_vrf = None
 
-    vrf = None
-    if device == obj_prim.dual_cpe_dual_wan_site_services.cpe_secondary.device_ip:
-        if hasattr(obj_prim.dual_cpe_dual_wan_site_services.cpe_secondary_mpls_wan, 'end_points'):
-            endpoints = util.convert_to_list(obj_prim.dual_cpe_dual_wan_site_services.cpe_secondary_mpls_wan.end_points)
-            for endpoint in endpoints:
+    if pri_dev.device.status == "OFFLINE":
+        raise Exception("Device " + str(pri_dev.device.id) + " is currently offline. Cannot proceed with operation.")
+    if sec_dev.device.status == "OFFLINE":
+        raise Exception("Device " + str(sec_dev.device.id) + " is currently offline. Cannot proceed with operation.")
 
-                if hasattr(endpoint, 'ivrf'):
-                    vrf = endpoint.ivrf
-                if hasattr(endpoint, 'vrf'):
-                    vrf = endpoint.vrf
-                if vrf is None:
-                    vrf = "GLOBAL"
-                if hasattr(endpoint, 'bgp_peers'):
-                    bgppeers = util.convert_to_list(endpoint.bgp_peers)
-                    for bgppeer in bgppeers:
-                        if cpe_secondary_mpls_wan_neighbor == bgppeer.peer_ip:
-                            primobj = vrfs.vrf.router_bgp.neighbor.neighbor()
-                            primobj.ip_address = cpe_secondary_mpls_wan_neighbor
-                            if failover_wan == 'true':
-                                primobj.shut = "true"
-                            if fallback_wan == 'true':
-                                primobj.shut = "false"
-                            router_bgp_neighbor_url = dev.url + '/l3features:vrfs/vrf=%s/router-bgp' % (vrf)
-                            yang.Sdk.createData(router_bgp_neighbor_url, primobj.getxml(filter=True), sdata.getSession(), False)
+    if operation_type == "failover":
+        if failover_state != "false":
+            raise Exception("Site Failover State is not clean. Restore state by selecting fallback/switch-on-dps")
 
-    vrf = None
-    obj_prim = getLocalObject(sdata, 'dual-cpe-dual-wan-site-services=')
-    if device == obj_prim.dual_cpe_dual_wan_site_services.cpe_primary.device_ip:
-        if hasattr(obj_prim.dual_cpe_dual_wan_site_services.cpe_primary_inet_wan, 'end_points'):
-            endpoints = util.convert_to_list(obj_prim.dual_cpe_dual_wan_site_services.cpe_primary_inet_wan.end_points)
-            for endpoint in endpoints:
+            # Apply Failover Policy outside the loop
+            prefix_list_url = pri_dev.url + '/l3features:ip-prefixlist-list'
 
-                if hasattr(endpoint, 'ivrf'):
-                    vrf = endpoint.ivrf
-                if hasattr(endpoint, 'vrf'):
-                    vrf = endpoint.vrf
-                if vrf is None:
-                    vrf = "GLOBAL"
-                if hasattr(endpoint, 'bgp_peers'):
-                    bgppeers = util.convert_to_list(endpoint.bgp_peers)
-                    for bgppeer in bgppeers:
-                        if cpe_primary_inet_wan_neighbor == bgppeer.peer_ip:
-                            primobj = vrfs.vrf.router_bgp.neighbor.neighbor()
-                            primobj.ip_address = cpe_primary_inet_wan_neighbor
-                            if failover_wan == 'true':
-                                primobj.shut = "true"
-                            if fallback_wan == 'true':
-                                primobj.shut = "false"
-                            router_bgp_neighbor_url = dev.url + '/l3features:vrfs/vrf=%s/router-bgp' % (vrf)
-                            yang.Sdk.createData(router_bgp_neighbor_url, primobj.getxml(filter=True), sdata.getSession(), False)
+            mgmt_prefix_list_payload =  '''
+                                                    <ip-prefixlist>
+                                                    <name>FAILOVER-MGMT-PREFIX-LIST</name>
+                                                    <ip-prefixlist-entries>
+                                                        <ip-prefixlist-entry>
+                                                            <subnet>121.244.196.0/24</subnet>
+                                                            <condition>permit</condition>
+                                                            <rule-num>5</rule-num>
+                                                            <compare>le</compare>
+                                                            <num>32</num>
+                                                        </ip-prefixlist-entry>
+                                                        <ip-prefixlist-entry>
+                                                            <subnet>121.244.180.0/24</subnet>
+                                                            <condition>permit</condition>
+                                                            <rule-num>10</rule-num>
+                                                            <compare>le</compare>
+                                                            <num>32</num>
+                                                        </ip-prefixlist-entry>
+                                                        <ip-prefixlist-entry>
+                                                            <subnet>115.114.221.0/24</subnet>
+                                                            <condition>permit</condition>
+                                                            <rule-num>15</rule-num>
+                                                            <compare>le</compare>
+                                                            <num>32</num>
+                                                        </ip-prefixlist-entry>
+                                                        <ip-prefixlist-entry>
+                                                            <subnet>115.114.227.0/24</subnet>
+                                                            <condition>permit</condition>
+                                                            <rule-num>20</rule-num>
+                                                            <compare>le</compare>
+                                                            <num>32</num>
+                                                        </ip-prefixlist-entry>
+                                                        <ip-prefixlist-entry>
+                                                            <subnet>115.110.222.0/24</subnet>
+                                                            <condition>permit</condition>
+                                                            <rule-num>25</rule-num>
+                                                            <compare>le</compare>
+                                                            <num>32</num>
+                                                        </ip-prefixlist-entry>
+                                                        </ip-prefixlist-entries>
+                                                        </ip-prefixlist>
+                                                        '''
 
-    vrf = None
-    if device == obj_prim.dual_cpe_dual_wan_site_services.cpe_secondary.device_ip:
-        if hasattr(obj_prim.dual_cpe_dual_wan_site_services.cpe_secondary_inet_wan, 'end_points'):
-            endpoints = util.convert_to_list(obj_prim.dual_cpe_dual_wan_site_services.cpe_secondary_inet_wan.end_points)
-            for endpoint in endpoints:
+            yang.Sdk.createData(pri_dev.url + '/l3features:ip-prefixlist-list', mgmt_prefix_list_payload, sdata.getSession(), False)
 
-                if hasattr(endpoint, 'ivrf'):
-                    vrf = endpoint.ivrf
-                if hasattr(endpoint, 'vrf'):
-                    vrf = endpoint.vrf
-                if vrf is None:
-                    vrf = "GLOBAL"
-                if hasattr(endpoint, 'bgp_peers'):
-                    bgppeers = util.convert_to_list(endpoint.bgp_peers)
-                    for bgppeer in bgppeers:
-                        if cpe_secondary_inet_wan_neighbor == bgppeer.peer_ip:
-                            primobj = vrfs.vrf.router_bgp.neighbor.neighbor()
-                            primobj.ip_address = cpe_secondary_inet_wan_neighbor
-                            if failover_wan == 'true':
-                                primobj.shut = "true"
-                            if fallback_wan == 'true':
-                                primobj.shut = "false"
-                            router_bgp_neighbor_url = dev.url + '/l3features:vrfs/vrf=%s/router-bgp' % (vrf)
-                            yang.Sdk.createData(router_bgp_neighbor_url, primobj.getxml(filter=True), sdata.getSession(), False)
+            route_map_url = pri_dev.url + '/l3features:route-maps'
 
-    obj = getLocalObject(sdata, 'dual-cpe-dual-wan-site-services=')
-    if hasattr(obj.dual_cpe_dual_wan_site_services.cpe_primary_cpe_secondary_ic, 'end_points'):
-        endpoints = util.convert_to_list(obj.dual_cpe_dual_wan_site_services.cpe_primary_cpe_secondary_ic.end_points)
-        for endpoint in endpoints:
-            if device == endpoint.device_ip:
-                if endpoint.interface_type == 'Physical':
-                    interface_name = endpoint.interface_name
-                elif endpoint.interface_type == 'Sub-Interface':
-                    interface_name = endpoint.interface_name + '.' + str(endpoint.vlan_id)
-                if failover_b2b == 'true':
-                    failobj = interfaces.interface.interface()
-                    failobj.name = interface_name
-                    failobj.long_name = interface_name
-                    failobj.admin_state = 'DOWN'
-                    yang.Sdk.createData(dev.url + '/interface:interfaces', failobj.getxml(filter=True), sdata.getSession(), False)
+            in_failover_route_map = '''
+                                    <route-map>
+                                    <name>FAILOVER-INBOUND-POLICY</name>
+                                    <route-map-entries>
+                                        <seq>5</seq>
+                                        <action>permit</action>
+                                        <match-condition>
+                                            <condition-type>prefix-list</condition-type>
+                                            <value>FAILOVER-MGMT-PREFIX-LIST</value>
+                                        </match-condition>
+                                        <set-action>
+                                            <set-type>weight</set-type>
+                                            <value>65000</value>
+                                        </set-action>
+                                        </route-map-entries>
+                                    </route-map>
+                                    '''
 
-                if fallback_b2b == 'true':
-                    fallobj = interfaces.interface.interface()
-                    fallobj.name = interface_name
-                    fallobj.long_name = interface_name
-                    fallobj.admin_state = 'UP'
-                    yang.Sdk.createData(dev.url + '/interface:interfaces', fallobj.getxml(filter=True), sdata.getSession(), False)
+            yang.Sdk.createData(pri_dev.url + '/l3features:route-maps', in_failover_route_map, sdata.getSession(), False)
 
-    obj = getLocalObject(sdata, 'dual-cpe-dual-wan-site-services=')
-    if hasattr(obj.dual_cpe_dual_wan_site_services.cpe_lan, 'end_points'):
-        endpoints = util.convert_to_list(obj.dual_cpe_dual_wan_site_services.cpe_lan.end_points)
-        for endpoint in endpoints:
-            if device == endpoint.device_ip:
-                if endpoint.interface_type == 'Physical':
-                    interface_name = endpoint.interface_name
-                elif endpoint.interface_type == 'Sub-Interface':
-                    interface_name = endpoint.interface_name + '.' + str(endpoint.vlan_id)
-                if failover_lan == 'true':
-                    failobj = interfaces.interface.interface()
-                    failobj.name = interface_name
-                    failobj.long_name = interface_name
-                    failobj.admin_state = 'DOWN'
-                    yang.Sdk.createData(dev.url + '/interface:interfaces', failobj.getxml(filter=True), sdata.getSession(), False)
 
-                if fallback_lan == 'true':
-                    fallobj = interfaces.interface.interface()
-                    fallobj.name = interface_name
-                    fallobj.long_name = interface_name
-                    fallobj.admin_state = 'UP'
-                    yang.Sdk.createData(dev.url + '/interface:interfaces', fallobj.getxml(filter=True), sdata.getSession(), False)
+            if yang.Sdk.dataExists(pri_dev.url + '/interface:interfaces/interface=Loopback0'):
+                loopback_output = yang.Sdk.getData(pri_dev.url + '/interface:interfaces/interface=Loopback0', '', sdata.getTaskId())
+                loopback_obj = util.parseXmlString(loopback_output)
+                if hasattr(loopback_obj, 'interface'):
+                    if util.isNotEmpty(loopback_obj.interface.ip_address):
+                        loopback_ip = loopback_obj.interface.ip_address
 
-    #Failover/Fallback DMVPN DPS Tunnel
-    if failover_dps == 'true':
-        failobj = interfaces.interface.interface()
-        failobj.name = dps_tunnel_id
-        failobj.long_name = dps_tunnel_id
-        failobj.admin_state = 'DOWN'
-        yang.Sdk.createData(dev.url + '/interface:interfaces', failobj.getxml(filter=True), sdata.getSession(), False)
+                        loopback_prefix_payload = '''
+                                                   <ip-prefixlist>
+                                                    <name>FAILOVER-LOOPBACK-PREFIX-LIST</name>
+                                                    <ip-prefixlist-entries>
+                                                        <ip-prefixlist-entry>
+                                                            <subnet>''' + loopback_ip +'''/32</subnet>
+                                                            <condition>permit</condition>
+                                                            <rule-num>5</rule-num>
+                                                        </ip-prefixlist-entry>
+                                                    </ip-prefixlist-entries>
+                                                    </ip-prefixlist>
+                                                  '''
+                        yang.Sdk.createData(pri_dev.url + '/l3features:ip-prefixlist-list', loopback_prefix_payload, sdata.getSession(), False)
 
-    if fallback_dps == 'true':
-        fallobj = interfaces.interface.interface()
-        fallobj.name = dps_tunnel_id
-        fallobj.long_name = dps_tunnel_id
-        fallobj.admin_state = 'UP'
-        yang.Sdk.createData(dev.url + '/interface:interfaces', fallobj.getxml(filter=True), sdata.getSession(), False)
-    
+                        out_failover_route_map = '''
+                                                <route-map>
+                                                <name>FAILOVER-OUTBOUND-POLICY</name>
+                                                <route-map-entries>
+                                                    <seq>5</seq>
+                                                    <action>permit</action>
+                                                    <match-condition>
+                                                        <condition-type>prefix-list</condition-type>
+                                                        <value>FAILOVER-LOOPBACK-PREFIX-LIST</value>
+                                                    </match-condition>
+                                                </route-map-entries>
+                                                </route-map>
+                                                '''
+
+                        yang.Sdk.createData(pri_dev.url + '/l3features:route-maps', out_failover_route_map, sdata.getSession(), False)
+                    else:
+                        raise Exception("No IP Address found on Loopback0 on device. Cannot proceed with failover.")
+
+            else:
+                raise Exception("No Mgmt Loopback0 Found on device. Cannot proceed with failover.")
+
+        if selective_failover == "primary-cpe-primary-wan-link":
+
+            if hasattr(obj_prim.dual_cpe_dual_wan_site_services.cpe_primary_mpls_wan, 'end_points'):
+
+                pri_endpoints = util.convert_to_list(obj_prim.dual_cpe_dual_wan_site_services.cpe_primary_mpls_wan.end_points)
+
+                for pri_endpoint in pri_endpoints:
+                    if hasattr(pri_endpoint, 'ivrf'):
+                        pri_vrf = pri_endpoint.ivrf
+                    if hasattr(pri_endpoint, 'vrf'):
+                        pri_vrf = pri_endpoint.vrf
+                    if pri_vrf is None:
+                        pri_vrf = "GLOBAL"
+                    if hasattr(pri_endpoint, 'bgp_peers'):
+                        pri_bgp_peers = util.convert_to_list(pri_endpoint.bgp_peers)
+                        for pri_peer in pri_bgp_peers:
+                            
+                                bgp_peer_url = pri_dev.url + '/l3features:vrfs/vrf=%s/router-bgp/neighbor=%s' % (pri_vrf, pri_peer.peer_ip)
+
+                                bgp_peer_payload = '''
+                                                    <neighbor>
+                                                    <ip-address>''' + pri_peer.peer_ip + '''</ip-address>
+                                                    <in-route-map>FAILOVER-INBOUND-POLICY</in-route-map>
+                                                    <out-route-map>FAILOVER-OUTBOUND-POLICY</out-route-map>
+                                                    </neighbor>
+                                                   '''
+                                if yang.Sdk.dataExists(bgp_peer_url):
+                                    yang.Sdk.patchData(bgp_peer_url, bgp_peer_payload, sdata, add_reference=False)
+                                else:
+                                    yang.Sdk.append_taskdetail(sdata.getTaskId(), "eBGP Peer " + str(pri_peer.peer_ip) + " not found on device but configured in service. Skipping it.")
+
+        elif selective_failover == "primary-cpe-secondary-wan-link":
+
+            if hasattr(obj_prim.dual_cpe_dual_wan_site_services.cpe_primary_inet_wan, 'end_points'):
+
+                sec_endpoints = util.convert_to_list(obj_prim.dual_cpe_dual_wan_site_services.cpe_primary_inet_wan.end_points)
+
+                for sec_endpoint in sec_endpoints:
+                    if hasattr(sec_endpoint, 'ivrf'):
+                        sec_vrf = sec_endpoint.ivrf
+                    if hasattr(sec_endpoint, 'vrf'):
+                        sec_vrf = sec_endpoint.vrf
+                    if sec_vrf is None:
+                        sec_vrf = "GLOBAL"
+                    if hasattr(sec_endpoint, 'bgp_peers'):
+                        sec_bgp_peers = util.convert_to_list(sec_endpoint.bgp_peers)
+                        for sec_peer in sec_bgp_peers:
+                            
+                                bgp_peer_url = pri_dev.url + '/l3features:vrfs/vrf=%s/router-bgp/neighbor=%s' % (sec_vrf, sec_peer.peer_ip)
+
+                                bgp_peer_payload = '''
+                                                    <neighbor>
+                                                    <ip-address>''' + sec_peer.peer_ip + '''</ip-address>
+                                                    <in-route-map>FAILOVER-INBOUND-POLICY</in-route-map>
+                                                    <out-route-map>FAILOVER-OUTBOUND-POLICY</out-route-map>
+                                                    </neighbor>
+                                                   '''
+                                if yang.Sdk.dataExists(bgp_peer_url):
+                                    yang.Sdk.patchData(bgp_peer_url, bgp_peer_payload, sdata, add_reference=False)
+                                else:
+                                    yang.Sdk.append_taskdetail(sdata.getTaskId(), "eBGP Peer " + str(sec_peer.peer_ip) + " not found on device but configured in service. Skipping it.")
+        
+        else:
+
+            if hasattr(obj_prim.dual_cpe_dual_wan_site_services.cpe_primary_mpls_wan, 'end_points'):
+
+                pri_endpoints = util.convert_to_list(obj_prim.dual_cpe_dual_wan_site_services.cpe_primary_mpls_wan.end_points)
+
+                for pri_endpoint in pri_endpoints:
+                    if hasattr(pri_endpoint, 'ivrf'):
+                        pri_vrf = pri_endpoint.ivrf
+                    if hasattr(pri_endpoint, 'vrf'):
+                        pri_vrf = pri_endpoint.vrf
+                    if pri_vrf is None:
+                        pri_vrf = "GLOBAL"
+                    if hasattr(pri_endpoint, 'bgp_peers'):
+                        pri_bgp_peers = util.convert_to_list(pri_endpoint.bgp_peers)
+                        for pri_peer in pri_bgp_peers:
+                            
+                                bgp_peer_url = pri_dev.url + '/l3features:vrfs/vrf=%s/router-bgp/neighbor=%s' % (pri_vrf, pri_peer.peer_ip)
+
+                                bgp_peer_payload = '''
+                                                    <neighbor>
+                                                    <ip-address>''' + pri_peer.peer_ip + '''</ip-address>
+                                                    <in-route-map>FAILOVER-INBOUND-POLICY</in-route-map>
+                                                    <out-route-map>FAILOVER-OUTBOUND-POLICY</out-route-map>
+                                                    </neighbor>
+                                                   '''
+                                if yang.Sdk.dataExists(bgp_peer_url):
+                                    yang.Sdk.patchData(bgp_peer_url, bgp_peer_payload, sdata, add_reference=False)
+                                else:
+                                    yang.Sdk.append_taskdetail(sdata.getTaskId(), "eBGP Peer " + str(pri_peer.peer_ip) + " not found on device but configured in service. Skipping it.")
+
+            if hasattr(obj_prim.dual_cpe_dual_wan_site_services.cpe_primary_inet_wan, 'end_points'):
+
+                sec_endpoints = util.convert_to_list(obj_prim.dual_cpe_dual_wan_site_services.cpe_primary_inet_wan.end_points)
+
+                for sec_endpoint in sec_endpoints:
+                    if hasattr(sec_endpoint, 'ivrf'):
+                        sec_vrf = sec_endpoint.ivrf
+                    if hasattr(sec_endpoint, 'vrf'):
+                        sec_vrf = sec_endpoint.vrf
+                    if sec_vrf is None:
+                        sec_vrf = "GLOBAL"
+                    if hasattr(sec_endpoint, 'bgp_peers'):
+                        sec_bgp_peers = util.convert_to_list(sec_endpoint.bgp_peers)
+                        for sec_peer in sec_bgp_peers:
+                            
+                                bgp_peer_url = pri_dev.url + '/l3features:vrfs/vrf=%s/router-bgp/neighbor=%s' % (sec_vrf, sec_peer.peer_ip)
+
+                                bgp_peer_payload = '''
+                                                    <neighbor>
+                                                    <ip-address>''' + sec_peer.peer_ip + '''</ip-address>
+                                                    <in-route-map>FAILOVER-INBOUND-POLICY</in-route-map>
+                                                    <out-route-map>FAILOVER-OUTBOUND-POLICY</out-route-map>
+                                                    </neighbor>
+                                                   '''
+                                if yang.Sdk.dataExists(bgp_peer_url):
+                                    yang.Sdk.patchData(bgp_peer_url, bgp_peer_payload, sdata, add_reference=False)
+                                else:
+                                    yang.Sdk.append_taskdetail(sdata.getTaskId(), "eBGP Peer " + str(sec_peer.peer_ip) + " not found on device but configured in service. Skipping it.")
+
+        uri = sdata.getRcPath()
+        uri_list = uri.split('/',6)
+        site_url = '/'.join(uri_list[0:6])
+
+        site_payload = '''
+                        <failover-state>true</failover-state>
+                        '''
+        yang.Sdk.createData(site_url, site_payload, sdata.getSession(), False)
+                        
+    elif operation_type == "fallback":
+        if failover_state == "true":
+
+            if hasattr(obj_prim.dual_cpe_dual_wan_site_services.cpe_primary_mpls_wan, 'end_points'):
+                pri_endpoints = util.convert_to_list(obj_prim.dual_cpe_dual_wan_site_services.cpe_primary_mpls_wan.end_points)
+                for pri_endpoint in pri_endpoints:
+                    if hasattr(pri_endpoint, 'ivrf'):
+                        pri_vrf = pri_endpoint.ivrf
+                    if hasattr(pri_endpoint, 'vrf'):
+                        pri_vrf = endpoint.vrf
+                    if pri_vrf is None:
+                        pri_vrf = "GLOBAL"
+                    if hasattr(pri_endpoint, 'bgp_peers'):
+                        pri_bgp_peers = util.convert_to_list(pri_endpoint.bgp_peers)
+                        for pri_peer in pri_bgp_peers:
+                            
+                                if hasattr(pri_peer, 'import_route_map'):
+                                    if util.isNotEmpty(pri_peer.import_route_map):
+                                        svc_peer_in_route_map = pri_peer.import_route_map
+                                    else:
+                                        svc_peer_in_route_map = ''
+                                else:
+                                    svc_peer_in_route_map = ''
+
+                                if hasattr(pri_peer, 'export_route_map'):
+                                    if util.isNotEmpty(pri_peer.export_route_map):
+                                        svc_peer_out_route_map = pri_peer.export_route_map
+                                    else:
+                                        svc_peer_out_route_map = ''
+                                else:
+                                    svc_peer_out_route_map = ''
+
+                                bgp_peer_payload = '''
+                                                    <neighbor>
+                                                    <ip-address>''' + pri_peer.peer_ip + '''</ip-address>
+                                                    <in-route-map>''' + svc_peer_in_route_map + '''</in-route-map>
+                                                    <out-route-map>''' + svc_peer_out_route_map + '''</out-route-map>
+                                                    </neighbor>
+                                                   '''
+
+                                bgp_peer_url = pri_dev.url + '/l3features:vrfs/vrf=%s/router-bgp/neighbor=%s' % (pri_vrf, pri_peer.peer_ip)          
+                                if yang.Sdk.dataExists(bgp_peer_url):
+                                    yang.Sdk.patchData(bgp_peer_url, bgp_peer_payload, sdata, add_reference=False)
+                                else:
+                                    yang.Sdk.append_taskdetail(sdata.getTaskId(), "eBGP Peer " + str(pri_peer.peer_ip) + " not found on device but configured in service. Skipping it.")
+
+            if hasattr(obj_prim.dual_cpe_dual_wan_site_services.cpe_primary_inet_wan, 'end_points'):
+                sec_endpoints = util.convert_to_list(obj_prim.dual_cpe_dual_wan_site_services.cpe_primary_inet_wan.end_points)
+                for sec_endpoint in sec_endpoints:
+                    if hasattr(sec_endpoint, 'ivrf'):
+                        sec_vrf = sec_endpoint.ivrf
+                    if hasattr(sec_endpoint, 'vrf'):
+                        sec_vrf = endpoint.vrf
+                    if sec_vrf is None:
+                        sec_vrf = "GLOBAL"
+                    if hasattr(sec_endpoint, 'bgp_peers'):
+                        sec_bgp_peers = util.convert_to_list(sec_endpoint.bgp_peers)
+                        for sec_peer in sec_bgp_peers:
+                            
+                                if hasattr(sec_peer, 'import_route_map'):
+                                    if util.isNotEmpty(sec_peer.import_route_map):
+                                        svc_peer_in_route_map = sec_peer.import_route_map
+                                    else:
+                                        svc_peer_in_route_map = ''
+                                else:
+                                    svc_peer_in_route_map = ''
+
+                                if hasattr(sec_peer, 'export_route_map'):
+                                    if util.isNotEmpty(sec_peer.export_route_map):
+                                        svc_peer_out_route_map = sec_peer.export_route_map
+                                    else:
+                                        svc_peer_out_route_map = ''
+                                else:
+                                    svc_peer_out_route_map = ''
+
+                                bgp_peer_payload = '''
+                                                    <neighbor>
+                                                    <ip-address>''' + sec_peer.peer_ip + '''</ip-address>
+                                                    <in-route-map>''' + svc_peer_in_route_map + '''</in-route-map>
+                                                    <out-route-map>''' + svc_peer_out_route_map + '''</out-route-map>
+                                                    </neighbor>
+                                                   '''
+
+                                bgp_peer_url = pri_dev.url + '/l3features:vrfs/vrf=%s/router-bgp/neighbor=%s' % (sec_vrf, sec_peer.peer_ip)          
+                                if yang.Sdk.dataExists(bgp_peer_url):
+                                    yang.Sdk.patchData(bgp_peer_url, bgp_peer_payload, sdata, add_reference=False)
+                                else:
+                                    yang.Sdk.append_taskdetail(sdata.getTaskId(), "eBGP Peer " + str(sec_peer.peer_ip) + " not found on device but configured in service. Skipping it.")
+
+            if yang.Sdk.dataExists(pri_dev.url + '/l3features:route-maps/route-map=FAILOVER-INBOUND-POLICY'):
+                yang.Sdk.deleteData(pri_dev.url + '/l3features:route-maps/route-map=FAILOVER-INBOUND-POLICY', '', sdata.getTaskId(), sdata.getSession())
+
+            else:
+                 yang.Sdk.append_taskdetail(sdata.getTaskId(), "No Route-Map FAILOVER-INBOUND-POLICY entity found in device model")
+
+            if yang.Sdk.dataExists(pri_dev.url + '/l3features:route-maps/route-map=FAILOVER-OUTBOUND-POLICY'):
+                yang.Sdk.deleteData(pri_dev.url + '/l3features:route-maps/route-map=FAILOVER-OUTBOUND-POLICY', '', sdata.getTaskId(), sdata.getSession())
+
+            else:
+                 yang.Sdk.append_taskdetail(sdata.getTaskId(), "No Route-Map FAILOVER-OUTBOUND-POLICY entity found in device model")
+
+            if yang.Sdk.dataExists(pri_dev.url + '/l3features:ip-prefixlist-list/ip-prefixlist=FAILOVER-LOOPBACK-PREFIX-LIST'):
+                yang.Sdk.deleteData(pri_dev.url + '/l3features:ip-prefixlist-list/ip-prefixlist=FAILOVER-LOOPBACK-PREFIX-LIST', '', sdata.getTaskId(), sdata.getSession())
+
+            else:
+                 yang.Sdk.append_taskdetail(sdata.getTaskId(), "No IP Prefix-List FAILOVER-LOOPBACK-PREFIX-LIST entity found in device model")
+
+            if yang.Sdk.dataExists(pri_dev.url + '/l3features:ip-prefixlist-list/ip-prefixlist=FAILOVER-MGMT-PREFIX-LIST'):
+                yang.Sdk.deleteData(pri_dev.url + '/l3features:ip-prefixlist-list/ip-prefixlist=FAILOVER-MGMT-PREFIX-LIST', '', sdata.getTaskId(), sdata.getSession())
+
+            else:
+                 yang.Sdk.append_taskdetail(sdata.getTaskId(), "No IP Prefix-List FAILOVER-MGMT-PREFIX-LIST entity found in device model")
+
+            uri = sdata.getRcPath()
+            uri_list = uri.split('/',6)
+            site_url = '/'.join(uri_list[0:6])
+
+            site_payload = '''
+                           <failover-state>false</failover-state>
+                           '''
+            yang.Sdk.createData(site_url, site_payload, sdata.getSession(), False)
+        else:
+            raise Exception("Site Service failover state is not active. No need to fallback again.")
+
+    elif operation_type == "switch-on-dps":
+        if failover_state == "dps-off":
+
+            control_plane_obj = control_plane.control_plane()
+            control_plane_obj.input_service_policy._empty_tag = True
+            control_plane_obj.output_service_policy._empty_tag = True
+
+            if yang.Sdk.dataExists(sec_dev.url + '/l3features:control-plane'):
+                yang.Sdk.patchData(sec_dev.url + '/l3features:control-plane', control_plane_obj.getxml(filter=True), sdata, add_reference=False)
+            else:
+                yang.Sdk.append_taskdetail(sdata.getTaskId(), "No Control-Plane entity found in device model")
+
+            if yang.Sdk.dataExists(sec_dev.url + '/acl:access-lists/access-list=COPP-ACL'):
+                yang.Sdk.deleteData(sec_dev.url + '/acl:access-lists/access-list=COPP-ACL', '', sdata.getTaskId(), sdata.getSession())
+
+            else:
+                 yang.Sdk.append_taskdetail(sdata.getTaskId(), "No ACL COPP-ACL entity found in device model")
+
+            if yang.Sdk.dataExists(sec_dev.url + '/qos:policy-maps/policy-map=COPP-POLICY'):
+                yang.Sdk.deleteData(sec_dev.url + '/qos:policy-maps/policy-map=COPP-POLICY', '', sdata.getTaskId(), sdata.getSession())
+
+            else:
+                 yang.Sdk.append_taskdetail(sdata.getTaskId(), "No Policy-Map COPP-POLICY entity found in device model")
+
+            if yang.Sdk.dataExists(sec_dev.url + '/qos:class-maps/class-map=COPP-CLASS'):
+                yang.Sdk.deleteData(sec_dev.url + '/qos:class-maps/class-map=COPP-CLASS', '', sdata.getTaskId(), sdata.getSession())
+
+            else:
+                 yang.Sdk.append_taskdetail(sdata.getTaskId(), "No Class-Map COPP-CLASS entity found in device model")
+
+
+            uri = sdata.getRcPath()
+            uri_list = uri.split('/',6)
+            site_url = '/'.join(uri_list[0:6])
+
+            site_payload = '''
+                           <failover-state>false</failover-state>
+                           '''
+            yang.Sdk.createData(site_url, site_payload, sdata.getSession(), False)
+        else:
+            raise Exception("Site Service failover state is not dps-off. Cannot proceed with DPS Switch Off.")
+
+    elif operation_type == "switch-off-dps":
+        if failover_state != "false":
+            raise Exception("Site failover state is already active. Restore failover state by selecting appropriate operation-type.")
+        if yang.Sdk.dataExists(sec_dev.url + '/dmvpn:dmvpntunnels/dmvpntunnel=100'):
+            dps_tunnel_output = yang.Sdk.getData(sec_dev.url + '/dmvpn:dmvpntunnels/dmvpntunnel=100', '', sdata.getTaskId())
+            dps_tunnel_obj = util.parseXmlString(dps_tunnel_output)
+            if hasattr(dps_tunnel_obj, 'dmvpntunnel'):
+                if hasattr(dps_tunnel_obj.dmvpntunnel, 'vrf_name'):
+                    if util.isNotEmpty(dps_tunnel_obj.dmvpntunnel.vrf_name) and dps_tunnel_obj.dmvpntunnel.vrf_name != "DPS":
+                        raise Exception("No Valid DPS Tunnel100 found on device. Cannot Proceed with DPS switch off.")
+                    elif util.isEmpty(dps_tunnel_obj.dmvpntunnel.vrf_name):
+                        raise Exception("No Valid DPS Tunnel100 found on device. Cannot Proceed with DPS switch off.")
+                if hasattr(dps_tunnel_obj.dmvpntunnel, 'ipaddress'):
+                    if util.isNotEmpty(dps_tunnel_obj.dmvpntunnel.ipaddress):
+                        from cpedeployment import ipaddr_lib
+                        dps_tunnel_ip = dps_tunnel_obj.dmvpntunnel.ipaddress
+                        dps_tunnel_mask = dps_tunnel_obj.dmvpntunnel.netmask
+                        dps_tunnel_subnet = str(ipaddr_lib.IPv4Network(unicode(dps_tunnel_ip + '/' + dps_tunnel_mask), strict=False).network)
+                        dps_tunnel_wildcard = str(ipaddr_lib.IPv4Network(unicode(dps_tunnel_ip + '/' + dps_tunnel_mask), strict=False).hostmask)
+
+                        acl_url = sec_dev.url + '/acl:access-lists'
+
+                        acl_payload = '''
+                                      <access-list>
+                                      <name>COPP-ACL</name>
+                                      <acl-type>extended</acl-type>
+                                      <acl-rules>
+                                      <acl-rule>
+                                        <name>permit ospf host ''' + dps_tunnel_ip  + ''' any</name>
+                                        <action>permit</action>
+                                        <layer4protocol>ospf</layer4protocol>
+                                        <source-condition-type>host</source-condition-type>
+                                        <source-ip>'''+ dps_tunnel_ip +'''</source-ip>
+                                        <dest-condition-type>any</dest-condition-type>
+                                        
+                                    </acl-rule>
+                                    <acl-rule>
+                                        <name>permit ospf ''' + dps_tunnel_subnet + ' '  + dps_tunnel_wildcard + ''' any</name>
+                                        <action>permit</action>
+                                        <layer4protocol>ospf</layer4protocol>
+                                        <source-condition-type>cidr</source-condition-type>
+                                        <source-ip>''' + dps_tunnel_subnet + '''</source-ip>
+                                        <source-mask>''' + dps_tunnel_wildcard + '''</source-mask>
+                                        <dest-condition-type>any</dest-condition-type>
+                                       
+                                    </acl-rule>
+                                    </acl-rules>
+                                    </access-list>
+                                     '''
+
+                        yang.Sdk.createData(acl_url, acl_payload, sdata.getSession(), False)
+
+                        class_map_url = sec_dev.url + '/qos:class-maps'
+
+                        class_map_payload = '''
+                                             
+                                            <class-map>
+                                                <name>COPP-CLASS</name>
+                                                <match-type>match-any</match-type>
+                                                <class-match-condition>
+                                                    <match-value>COPP-ACL</match-value>
+                                                    <condition-type>access-group</condition-type>
+                                                </class-match-condition>
+                                            </class-map>
+                                       
+                                            '''
+
+                        yang.Sdk.createData(class_map_url, class_map_payload, sdata.getSession(), False)
+
+                        policy_map_url = sec_dev.url + '/qos:policy-maps'
+
+                        policy_map_payload = '''
+                                           
+                                            <policy-map>
+                                                <name>COPP-POLICY</name>
+                                                <class-entry>
+                                                    <class-name>COPP-CLASS</class-name>
+                                                    <cir-rate>8000</cir-rate>
+                                                    <police-conform-action>drop</police-conform-action>
+                                                </class-entry>
+                                                <class-entry>
+                                                    <class-name>class-default</class-name>
+                                                </class-entry>
+                                            </policy-map>
+                                        
+                                             '''
+                        yang.Sdk.createData(policy_map_url, policy_map_payload, sdata.getSession(), False)
+
+                        control_plane_obj = control_plane.control_plane()
+
+                        control_plane_obj.input_service_policy = "COPP-POLICY"
+                        control_plane_obj.output_service_policy = "COPP-POLICY"
+
+                        yang.Sdk.createData(sec_dev.url, control_plane_obj.getxml(filter=True), sdata.getSession(), False)
+
+                        uri = sdata.getRcPath()
+                        uri_list = uri.split('/',6)
+                        site_url = '/'.join(uri_list[0:6])
+
+                        site_payload = '''
+                                        <failover-state>dps-off</failover-state>
+                                       '''
+                        yang.Sdk.createData(site_url, site_payload, sdata.getSession(), False)
+                    else:
+                        raise Exception("No IP Address found on DPS Tunnel100. Cannot Proceed with DPS switch off.")
+        else:
+            raise Exception("No Overlay Tunnel100 interface found on device. Cannot Proceed with DPS switch off.")
+
+    now = time.strftime("%Y-%b-%d %I:%M %p %Z", time.localtime())
+    payload_time = '<created-on>' + now + '</created-on>'
+        
+    yang.Sdk.createData(sdata.getRcPath(), payload_time, sdata.getSession(), False)
+
+    taskid = sdata.getTaskId()
+
+    output = yang.Sdk.invokeRpc('tasks:get-basic-task-detail', '<taskId>' + str(taskid) + '</taskId>')
+    basic_task_details_out = util.parseXmlString(output)
+    if hasattr(basic_task_details_out, 'taskDetail'):
+        if hasattr(basic_task_details_out.taskDetail, 'userName'):
+          taskuser = basic_task_details_out.taskDetail.userName
+
+          payload_user = '<created-by>' + str(taskuser) + '</created-by>'
+          yang.Sdk.createData(sdata.getRcPath(), payload_user, sdata.getSession(), False)
 
 class DeletePreProcessor(yang.SessionPreProcessor):
     def processBeforeReserve(self, session):

@@ -75,6 +75,10 @@ class UpdateDmvpnTunnelProfile(yang.AbstractYangServiceHandler):
         # START OF FETCHING THE LEAF PARAMETERS
         inputdict['id'] = config.get_field_value('id')
         inputdict['tunnel_id'] = config.get_field_value('tunnel_id')
+        inputdict['update_profile'] = config.get_field_value('update_profile')
+        inputdict['apply_to_sites'] = config.get_field_value('apply_to_sites')
+        inputdict['apply_to_device_group'] = config.get_field_value('apply_to_device_group')
+        inputdict['device_group'] = config.get_field_value('device_group')
         inputdict['operation'] = config.get_field_value('operation')
         inputdict['nhrp_nw_id'] = config.get_field_value('nhrp_nw_id')
         inputdict['tunnel_key'] = config.get_field_value('tunnel_key')

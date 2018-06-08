@@ -84,8 +84,9 @@ class Vrf(yang.AbstractYangServiceHandler):
           inputdict['name'] = 'vrf'
         inputdict['vrf_name'] = config.get_field_value('vrf_name')
         inputdict['bgp_community_new'] = config.get_field_value('bgp_community_new')
+        inputdict['peer_groups'] = config.get_field_value('peer_group')
         inputdict['peer_group'] = config.get_field_value('peer_group')
-        inputdict['listen_cidr'] = config.get_field_value('listen_cidr')
+        # inputdict['listen_cidr'] = config.get_field_value('listen_cidr')
         inputdict['bgp_router_id'] = config.get_field_value('bgp_router_id')
         inputdict['bgp_distance'] = config.get_field_value('bgp_distance')
         inputdict['bgp_distance_external'] = config.get_field_value('bgp_distance_external')
@@ -149,8 +150,9 @@ class Vrf(yang.AbstractYangServiceHandler):
           inputdict['name'] = 'vrf'
         inputdict['vrf_name'] = config.get_field_value('vrf_name')
         inputdict['bgp_community_new'] = config.get_field_value('bgp_community_new')
+        inputdict['peer_groups'] = config.get_field_value('peer_group')
         inputdict['peer_group'] = config.get_field_value('peer_group')
-        inputdict['listen_cidr'] = config.get_field_value('listen_cidr')
+        # inputdict['listen_cidr'] = config.get_field_value('listen_cidr')
         inputdict['bgp_router_id'] = config.get_field_value('bgp_router_id')
         inputdict['bgp_distance'] = config.get_field_value('bgp_distance')
         inputdict['bgp_distance_external'] = config.get_field_value('bgp_distance_external')
@@ -206,8 +208,9 @@ class Vrf(yang.AbstractYangServiceHandler):
           inputdict['name'] = 'vrf'
         inputdict['vrf_name'] = config.get_field_value('vrf_name')
         inputdict['bgp_community_new'] = config.get_field_value('bgp_community_new')
+        inputdict['peer_groups'] = config.get_field_value('peer_group')
         inputdict['peer_group'] = config.get_field_value('peer_group')
-        inputdict['listen_cidr'] = config.get_field_value('listen_cidr')
+        # inputdict['listen_cidr'] = config.get_field_value('listen_cidr')
         inputdict['bgp_router_id'] = config.get_field_value('bgp_router_id')
         inputdict['bgp_distance'] = config.get_field_value('bgp_distance')
         inputdict['bgp_distance_external'] = config.get_field_value('bgp_distance_external')

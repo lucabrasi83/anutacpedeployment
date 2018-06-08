@@ -174,6 +174,7 @@ class CreatePreProcessor(yang.SessionPreProcessor):
         log('operations: %s' % (operations))
         yang.moveOperations(operations, ['CreateInterface', 'UpdateInterface'], ['CreateQPolicyMap'], True)
         yang.moveOperations(operations, ['CreateInterfaceOspf', 'CreateInterfaceHSRP'], ['CreateInterface', 'UpdateInterface'], True)
+        yang.moveOperations(operations, ['CreateRouterBGPPeerGroup'], ['CreateBGPListenRange'], True)
         util.log_debug('pass00: operations: %s' % (operations))
         # yang.moveOperations(operations, ['CreateInterface'], ['UpdateVrf'], True)
         # print 'pass01: operations: %s' % (operations)

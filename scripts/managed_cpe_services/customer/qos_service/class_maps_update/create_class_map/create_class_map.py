@@ -73,6 +73,11 @@ class CreateClassMap(yang.AbstractYangServiceHandler):
         # START OF FETCHING THE LEAF PARAMETERS
         inputdict['name'] = config.get_field_value('name')
         inputdict['description'] = config.get_field_value('description')
+        inputdict['update_profile'] = config.get_field_value('update_profile')
+        inputdict['apply_to_sites'] = config.get_field_value('apply_to_sites')
+        inputdict['apply_to_device_group'] = config.get_field_value('apply_to_device_group')
+        inputdict['device_group'] = config.get_field_value('device_group')
+        inputdict['http_url'] = config.get_field_value('http_url')
         inputdict['match_type'] = config.get_field_value('match_type')
         if inputdict['match_type'] is None:
           inputdict['match_type'] = 'match-any'
@@ -81,6 +86,7 @@ class CreateClassMap(yang.AbstractYangServiceHandler):
           inputdict['dscp'] = []
         inputdict['access_group'] = config.get_field_value('access_group')
         inputdict['qos_group'] = config.get_field_value('qos_group')
+        inputdict['custom_nbar'] = config.get_field_value('custom_nbar')
         inputdict['protocol'] = config.get_field_value('protocol')
         if inputdict['protocol'] is None:
           inputdict['protocol'] = []

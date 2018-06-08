@@ -201,7 +201,18 @@ class ServiceDataCustomization:
                         create_route_map(entity, conf, sdata, **kwargs)
                         entity = 'cpe_secondary_dual'
                         create_route_map(entity, conf, sdata, **kwargs)
-                        
+
+            if util.isNotEmpty(inputdict['device_group']):
+                dev_group_output = yang.Sdk.invokeRpc('controller:apply-data-grouping', '''<input><group-name>'''+ inputdict['device_group'] + '''</group-name></input>''')
+                dev_group_obj = util.parseXmlString(dev_group_output)
+                if hasattr(dev_group_obj, 'output'):
+                    if hasattr(dev_group_obj.output, 'result'):
+                        for each_dev in util.convert_to_list(dev_group_obj.output.result):
+                            if hasattr(each_dev, 'device'):
+                                if hasattr(each_dev.device, 'id'):
+                                    create_route_map(each_dev.device.id, None, sdata, **kwargs)
+                                   
+            modify_route(sdata, **kwargs)            
     @staticmethod
     def process_service_device_bindings(smodelctx, sdata, dev, **kwargs):
         """ Custom API to modify the device bindings or Call the Business Login Handlers"""
@@ -232,6 +243,51 @@ class ServiceDataCustomization:
         for key, value in kwargs.iteritems():
           log("%s == %s" %(key,value))
 
+def modify_route(sdata, **kwargs):
+    uri = sdata.getRcPath()
+    uri_list = uri.split('/', 5)
+    url = '/'.join(uri_list[0:4])
+    inputdict = kwargs['inputdict']
+    route_map_name = inputdict['route_map_name']
+    if inputdict['update_profile'] == 'true':
+        url = url + "/route-maps/route-map=" + str(route_map_name)
+        url_route = url
+        sequence_number = '' if util.isEmpty(inputdict['sequence_number']) else inputdict['sequence_number']
+        action = '' if util.isEmpty(inputdict['action']) else inputdict['action']
+        entry = '' if util.isEmpty(inputdict['entry']) else inputdict['entry']
+        condition_type = '' if util.isEmpty(inputdict['condition_type']) else inputdict['condition_type']
+        value = '' if util.isEmpty(inputdict['value']) else inputdict['value']
+        set_type = '' if util.isEmpty(inputdict['set_type']) else inputdict['set_type']
+        ip = '' if util.isEmpty(inputdict['ip']) else inputdict['ip']
+        set_value = '' if util.isEmpty(inputdict['set_value']) else inputdict['set_value']
+
+        url = url + "/route-map-entries=" + str(sequence_number)
+        if not yang.Sdk.dataExists(url):
+            payload = '''
+                        <route-map-entries>
+                            <action>'''+action+'''</action>
+                            <sequence-number>'''+sequence_number+'''</sequence-number>
+                        </route-map-entries>
+                      '''
+            yang.Sdk.createData(url_route, payload, sdata.getSession(), False)
+        if entry == 'match-condition':
+            payload = '''
+                        <match-condition>
+                            <condition-type>'''+condition_type+'''</condition-type>
+                            <value>'''+value+'''</value>
+                        </match-condition>
+                      '''
+        elif entry == 'set-action':
+            payload = '''
+                        <set-action>
+                            <set-type>'''+set_type+'''</set-type>
+                            <value>'''+set_value+'''</value>
+                            <ip>'''+ip+'''</ip>
+                        </set-action>
+                      '''
+        if yang.Sdk.dataExists(url):
+            yang.Sdk.createData(url, payload, sdata.getSession(), False)
+
 
 def create_route_map(entity, conf, sdata, **kwargs):
     if entity == 'cpe':
@@ -252,6 +308,8 @@ def create_route_map(entity, conf, sdata, **kwargs):
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_secondary.device_ip)
     elif entity == 'cpe_tertiary_triple':
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_tertiary.device_ip)
+    else:
+        device = devicemgr.getDeviceById(entity)
 
     inputdict = kwargs['inputdict']
     route_map_name = inputdict['route_map_name']
@@ -298,6 +356,63 @@ def create_route_map(entity, conf, sdata, **kwargs):
                     matchcondition_obj.condition_type = condition_type
                 if condition_value is not None:
                     matchcondition_obj.value = condition_value
+
+                # Added for SQS 01/06/2018
+                if condition_value == 'SQS-OSPF-TAG' and condition_type == 'tag':
+                    # Construct dotted-decimal tag value from local Loopback0 IP
+                    site_name = None
+                    sqs_loopback0_base_url = None
+                    sqs_ospf_tag_base_uri = sdata.getRcPath()
+                    sqs_ospf_tag_base_uri_list = sqs_ospf_tag_base_uri.split('/',5)
+                    sqs_ospf_tag_base_url = '/'.join(sqs_ospf_tag_base_uri_list[0:4])
+
+                    # For SQS - Tag Value should always be primary-cpe loopback IP in case of dual/triple CPE sites
+                    if entity == 'cpe':
+                        site_name = conf.single_cpe_site_services.site_name
+                        sqs_loopback0_base_url = sqs_ospf_tag_base_url + "/single-cpe-site/single-cpe-site-services=" + str(site_name) + "/cpe"
+                    elif entity == 'cpe_primary':
+                        site_name = conf.dual_cpe_site_services.site_name
+                        sqs_loopback0_base_url = sqs_ospf_tag_base_url + "/dual-cpe-site/dual-cpe-site-services=" + str(site_name) + "/cpe-primary"
+                    elif entity == 'cpe_secondary':
+                        site_name = conf.dual_cpe_site_services.site_name
+                        sqs_loopback0_base_url = sqs_ospf_tag_base_url + "/dual-cpe-site/dual-cpe-site-services=" + str(site_name) + "/cpe-primary"
+                    elif entity == 'cpe_dual':
+                        site_name = conf.single_cpe_dual_wan_site_services.site_name
+                        sqs_loopback0_base_url = sqs_ospf_tag_base_url + "/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services=" + str(site_name) + "/cpe"
+                        
+                    elif entity == 'cpe_primary_dual':
+                        site_name = conf.dual_cpe_dual_wan_site_services.site_name
+                        sqs_loopback0_base_url = sqs_ospf_tag_base_url + "/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services=" + str(site_name) + "/cpe-primary"
+                    elif entity == 'cpe_secondary_dual':
+                        site_name = conf.dual_cpe_dual_wan_site_services.site_name
+                        sqs_loopback0_base_url = sqs_ospf_tag_base_url + "/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services=" + str(site_name) + "/cpe-primary"
+                    elif entity == 'cpe_primary_triple':
+                        site_name = conf.triple_cpe_site_services.site_name
+                        sqs_loopback0_base_url = sqs_ospf_tag_base_url + "/triple-cpe-site/triple-cpe-site-services=" + str(site_name) + "/cpe-primary"
+                        
+                    elif entity == 'cpe_secondary_triple':
+                        site_name = conf.triple_cpe_site_services.site_name
+                        sqs_loopback0_base_url = sqs_ospf_tag_base_url + "/triple-cpe-site/triple-cpe-site-services=" + str(site_name) + "/cpe-primary"
+                    elif entity == 'cpe_tertiary_triple':
+                        site_name = conf.triple_cpe_site_services.site_name
+                        sqs_loopback0_base_url = sqs_ospf_tag_base_url + "/triple-cpe-site/triple-cpe-site-services=" + str(site_name) + "/cpe-primary"
+                    
+                    mgmt_loopback_url = sqs_loopback0_base_url + '/loopback/loopback=0'
+                    if yang.Sdk.dataExists(mgmt_loopback_url):
+                        loopback_output = yang.Sdk.getData(mgmt_loopback_url, '', sdata.getTaskId())
+                        loopback_obj = util.parseXmlString(loopback_output)
+                        
+                        if hasattr(loopback_obj, 'loopback'):
+                            if hasattr(loopback_obj.loopback, 'ip'):
+                                if util.isNotEmpty(loopback_obj.loopback.ip):
+                                    matchcondition_obj.value = loopback_obj.loopback.ip
+                                else:
+                                    raise Exception("No Valid IP Address found in Loopback0. Cannot proceed with OSPF TAG dotted-decimal generation.")
+                    else:
+                        raise Exception("No Loopback0 interface found in site service. Cannot proceed with OSPF TAG dotted-decimal generation.")
+
+                else:
+                    matchcondition_obj.value = condition_value
                 if condition_type == 'as-path' and condition_value is not None:
                     as_path_acl(condition_value, device, sdata)
                 if condition_type == 'community' and condition_value is not None:
@@ -341,6 +456,63 @@ def create_route_map(entity, conf, sdata, **kwargs):
                     matchcondition_obj.condition_type = condition_type
                 if condition_value is not None:
                     matchcondition_obj.value = condition_value
+                 # Added for SQS 01/06/2018
+                if condition_value == 'SQS-OSPF-TAG' and condition_type == 'tag':
+                    # Construct dotted-decimal tag value from local Loopback0 IP
+                    site_name = None
+                    sqs_loopback0_base_url = None
+                    sqs_ospf_tag_base_uri = sdata.getRcPath()
+                    sqs_ospf_tag_base_uri_list = sqs_ospf_tag_base_uri.split('/',5)
+                    sqs_ospf_tag_base_url = '/'.join(sqs_ospf_tag_base_uri_list[0:4])
+
+                    # For SQS - Tag Value should always be primary-cpe loopback IP in case of dual/triple CPE sites
+                    if entity == 'cpe':
+                        site_name = conf.single_cpe_site_services.site_name
+                        sqs_loopback0_base_url = sqs_ospf_tag_base_url + "/single-cpe-site/single-cpe-site-services=" + str(site_name) + "/cpe"
+                    elif entity == 'cpe_primary':
+                        site_name = conf.dual_cpe_site_services.site_name
+                        sqs_loopback0_base_url = sqs_ospf_tag_base_url + "/dual-cpe-site/dual-cpe-site-services=" + str(site_name) + "/cpe-primary"
+                    elif entity == 'cpe_secondary':
+                        site_name = conf.dual_cpe_site_services.site_name
+                        sqs_loopback0_base_url = sqs_ospf_tag_base_url + "/dual-cpe-site/dual-cpe-site-services=" + str(site_name) + "/cpe-primary"
+                    elif entity == 'cpe_dual':
+                        site_name = conf.single_cpe_dual_wan_site_services.site_name
+                        sqs_loopback0_base_url = sqs_ospf_tag_base_url + "/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services=" + str(site_name) + "/cpe"
+                        
+                    elif entity == 'cpe_primary_dual':
+                        site_name = conf.dual_cpe_dual_wan_site_services.site_name
+                        sqs_loopback0_base_url = sqs_ospf_tag_base_url + "/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services=" + str(site_name) + "/cpe-primary"
+                    elif entity == 'cpe_secondary_dual':
+                        site_name = conf.dual_cpe_dual_wan_site_services.site_name
+                        sqs_loopback0_base_url = sqs_ospf_tag_base_url + "/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services=" + str(site_name) + "/cpe-primary"
+                    elif entity == 'cpe_primary_triple':
+                        site_name = conf.triple_cpe_site_services.site_name
+                        sqs_loopback0_base_url = sqs_ospf_tag_base_url + "/triple-cpe-site/triple-cpe-site-services=" + str(site_name) + "/cpe-primary"
+                        
+                    elif entity == 'cpe_secondary_triple':
+                        site_name = conf.triple_cpe_site_services.site_name
+                        sqs_loopback0_base_url = sqs_ospf_tag_base_url + "/triple-cpe-site/triple-cpe-site-services=" + str(site_name) + "/cpe-primary"
+                    elif entity == 'cpe_tertiary_triple':
+                        site_name = conf.triple_cpe_site_services.site_name
+                        sqs_loopback0_base_url = sqs_ospf_tag_base_url + "/triple-cpe-site/triple-cpe-site-services=" + str(site_name) + "/cpe-primary"
+                    
+                    mgmt_loopback_url = sqs_loopback0_base_url + '/loopback/loopback=0'
+                    if yang.Sdk.dataExists(mgmt_loopback_url):
+                        loopback_output = yang.Sdk.getData(mgmt_loopback_url, '', sdata.getTaskId())
+                        loopback_obj = util.parseXmlString(loopback_output)
+                        
+                        if hasattr(loopback_obj, 'loopback'):
+                            if hasattr(loopback_obj.loopback, 'ip'):
+                                if util.isNotEmpty(loopback_obj.loopback.ip):
+                                    matchcondition_obj.value = loopback_obj.loopback.ip
+                                else:
+                                    raise Exception("No Valid IP Address found in Loopback0. Cannot proceed with OSPF TAG dotted-decimal generation.")
+                    else:
+                        raise Exception("No Loopback0 interface found in site service. Cannot proceed with OSPF TAG dotted-decimal generation.")
+
+                else:
+                    matchcondition_obj.value = condition_value
+                    
                 if condition_type == 'as-path' and condition_value is not None:
                     as_path_acl(condition_value, device, sdata)
                 if condition_type == 'community' and condition_value is not None:

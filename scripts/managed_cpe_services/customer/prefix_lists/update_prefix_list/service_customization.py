@@ -252,6 +252,20 @@ class ServiceDataCustomization:
                             delete_prefix(entity, conf, sdata, **kwargs)
                         elif inputdict['operation'] == 'CREATE':
                             create_prefix(entity, conf, sdata, **kwargs)
+                            
+            if util.isNotEmpty(inputdict['device_group']):
+                dev_group_output = yang.Sdk.invokeRpc('controller:apply-data-grouping', '''<input><group-name>'''+ inputdict['device_group'] + '''</group-name></input>''')
+                dev_group_obj = util.parseXmlString(dev_group_output)
+                if hasattr(dev_group_obj, 'output'):
+                    if hasattr(dev_group_obj.output, 'result'):
+                        for each_dev in util.convert_to_list(dev_group_obj.output.result):
+                            if hasattr(each_dev, 'device'):
+                                if hasattr(each_dev.device, 'id'):
+                                    if inputdict['operation'] == 'DELETE':
+                                        delete_prefix(each_dev.device.id, None, sdata, **kwargs)
+                                    elif inputdict['operation'] == 'CREATE':
+                                        create_prefix(each_dev.device.id, None, sdata, **kwargs)
+            modify_prefix(sdata, **kwargs)
 
     @staticmethod
     def process_service_device_bindings(smodelctx, sdata, dev, **kwargs):
@@ -291,6 +305,39 @@ class ServiceDataCustomization:
         config = kwargs['config']
         inputdict = kwargs['inputdict']
 
+def modify_prefix(sdata, **kwargs):
+    uri = sdata.getRcPath()
+    uri_list = uri.split('/', 5)
+    url = '/'.join(uri_list[0:4])
+    inputdict = kwargs['inputdict']
+    prefix_list_name = inputdict['prefix_list_name']
+    if inputdict['operation'] == 'CREATE' and inputdict['update_profile'] == 'true':
+        url = url + "/prefix-lists/prefix-list=" + str(prefix_list_name)
+        prefix_name = '' if util.isEmpty(inputdict['prefix_name']) else inputdict['prefix_name']
+        rule_num = '' if util.isEmpty(inputdict['rule_num']) else inputdict['rule_num']
+        ipv4_prefix = '' if util.isEmpty(inputdict['ipv4_prefix']) else inputdict['ipv4_prefix']
+        condition = '' if util.isEmpty(inputdict['condition']) else inputdict['condition']
+        exact_matching_prefix_length = '' if util.isEmpty(inputdict['exact_matching_prefix_length']) else inputdict['exact_matching_prefix_length']
+        minimum_matching_prefix_length = '' if util.isEmpty(inputdict['minimum_matching_prefix_length']) else inputdict['minimum_matching_prefix_length']
+        maximum_matching_prefix_length = '' if util.isEmpty(inputdict['maximum_matching_prefix_length']) else inputdict['maximum_matching_prefix_length']
+
+        payload = '''
+                    <prefix>
+                        <rule-num>'''+rule_num+'''</rule-num>
+                        <prefix-name>'''+prefix_name+'''</prefix-name>
+                        <ipv4-prefix>'''+ipv4_prefix+'''</ipv4-prefix>
+                        <condition>'''+condition+'''</condition>
+                        <exact-matching-prefix-length>'''+exact_matching_prefix_length+'''</exact-matching-prefix-length>
+                        <minimum-matching-prefix-length>'''+minimum_matching_prefix_length+'''</minimum-matching-prefix-length>
+                        <maximum-matching-prefix-length>'''+maximum_matching_prefix_length+'''</maximum-matching-prefix-length>
+                    </prefix>
+                  '''
+        yang.Sdk.createData(url, payload, sdata.getSession(), False)
+
+    if inputdict['operation'] == 'DELETE' and inputdict['update_profile'] == 'true':
+        rule_num = '' if util.isEmpty(inputdict['rule_num']) else inputdict['rule_num']
+        url = url + "/prefix-lists/prefix-list=" + str(prefix_list_name) + "/prefix=" + str(rule_num)
+        yang.Sdk.deleteData(url, '', sdata.getTaskId(), sdata.getSession())
 
 def delete_prefix(entity, conf, sdata, **kwargs):
     if entity == 'cpe':
@@ -311,6 +358,8 @@ def delete_prefix(entity, conf, sdata, **kwargs):
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_secondary.device_ip)
     elif entity == 'cpe_tertiary_triple':
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_tertiary.device_ip)
+    else:
+        device = devicemgr.getDeviceById(entity)
 
     inputdict = kwargs['inputdict']
     prefix_list_name = inputdict['prefix_list_name']

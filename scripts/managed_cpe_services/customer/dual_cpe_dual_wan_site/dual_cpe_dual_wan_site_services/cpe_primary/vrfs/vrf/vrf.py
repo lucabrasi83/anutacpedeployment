@@ -91,8 +91,9 @@ class Vrf(yang.AbstractYangServiceHandler):
         inputdict['bgp_holdtime_timer'] = config.get_field_value('bgp_holdtime_timer')
         inputdict['default_information_originate'] = config.get_field_value('default_information_originate')
         inputdict['bgp_community_new'] = config.get_field_value('bgp_community_new')
+        inputdict['peer_groups'] = config.get_field_value('peer_group')
         inputdict['peer_group'] = config.get_field_value('peer_group')
-        inputdict['listen_cidr'] = config.get_field_value('listen_cidr')
+        # inputdict['listen_cidr'] = config.get_field_value('listen_cidr')
         inputdict['redistribute_connected'] = config.get_field_value('redistribute_connected')
         if inputdict.get('redistribute_connected') is None:
           inputdict['redistribute_connected'] = 'True'
@@ -154,8 +155,9 @@ class Vrf(yang.AbstractYangServiceHandler):
         inputdict['bgp_holdtime_timer'] = config.get_field_value('bgp_holdtime_timer')
         inputdict['default_information_originate'] = config.get_field_value('default_information_originate')
         inputdict['bgp_community_new'] = config.get_field_value('bgp_community_new')
+        inputdict['peer_groups'] = config.get_field_value('peer_group')
         inputdict['peer_group'] = config.get_field_value('peer_group')
-        inputdict['listen_cidr'] = config.get_field_value('listen_cidr')
+        # inputdict['listen_cidr'] = config.get_field_value('listen_cidr')
         inputdict['redistribute_connected'] = config.get_field_value('redistribute_connected')
         if inputdict.get('redistribute_connected') is None:
           inputdict['redistribute_connected'] = 'True'
@@ -209,8 +211,9 @@ class Vrf(yang.AbstractYangServiceHandler):
         inputdict['bgp_holdtime_timer'] = config.get_field_value('bgp_holdtime_timer')
         inputdict['default_information_originate'] = config.get_field_value('default_information_originate')
         inputdict['bgp_community_new'] = config.get_field_value('bgp_community_new')
+        inputdict['peer_groups'] = config.get_field_value('peer_group')
         inputdict['peer_group'] = config.get_field_value('peer_group')
-        inputdict['listen_cidr'] = config.get_field_value('listen_cidr')
+        # inputdict['listen_cidr'] = config.get_field_value('listen_cidr')
         inputdict['redistribute_connected'] = config.get_field_value('redistribute_connected')
         if inputdict.get('redistribute_connected') is None:
           inputdict['redistribute_connected'] = 'True'

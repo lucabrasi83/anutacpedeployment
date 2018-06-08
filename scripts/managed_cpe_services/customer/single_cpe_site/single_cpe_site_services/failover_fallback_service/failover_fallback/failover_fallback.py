@@ -80,10 +80,11 @@ class FailoverFallback(yang.AbstractYangServiceHandler):
         inputdict['sequence_number'] = config.get_field_value('sequence_number')
         if inputdict.get('sequence_number') is None:
           inputdict['sequence_number'] = '88'
-        inputdict['name'] = config.get_field_value('name')
-        inputdict['cpe_primary_wan_ebgp_neighbor'] = config.get_field_value('cpe_primary_wan_ebgp_neighbor')
-        inputdict['cpe_secondary_wan_ebgp_neighbor'] = config.get_field_value('cpe_secondary_wan_ebgp_neighbor')
-        inputdict['swap_bgp_route_maps'] = config.get_field_value('swap_bgp_route_maps')
+        inputdict['transaction_id'] = config.get_field_value('transaction_id')
+        inputdict['operation_type'] = config.get_field_value('operation_type')
+        inputdict['wan_ebgp_neighbor'] = config.get_field_value('wan_ebgp_neighbor')
+        inputdict['created_by'] = config.get_field_value('created_by')
+        inputdict['created_on'] = config.get_field_value('created_on')
         # END OF FETCHING THE LEAF PARAMETERS
 
         # START OF FETCHING THE PARENT KEY LEAF PARAMETERS
@@ -118,10 +119,11 @@ class FailoverFallback(yang.AbstractYangServiceHandler):
         inputdict['sequence_number'] = config.get_field_value('sequence_number')
         if inputdict.get('sequence_number') is None:
           inputdict['sequence_number'] = '88'
-        inputdict['name'] = config.get_field_value('name')
-        inputdict['cpe_primary_wan_ebgp_neighbor'] = config.get_field_value('cpe_primary_wan_ebgp_neighbor')
-        inputdict['cpe_secondary_wan_ebgp_neighbor'] = config.get_field_value('cpe_secondary_wan_ebgp_neighbor')
-        inputdict['swap_bgp_route_maps'] = config.get_field_value('swap_bgp_route_maps')
+        inputdict['transaction_id'] = config.get_field_value('transaction_id')
+        inputdict['operation_type'] = config.get_field_value('operation_type')
+        inputdict['wan_ebgp_neighbor'] = config.get_field_value('wan_ebgp_neighbor')
+        inputdict['created_by'] = config.get_field_value('created_by')
+        inputdict['created_on'] = config.get_field_value('created_on')
         # END OF FETCHING THE LEAF PARAMETERS
 
         pinputdict = {}
@@ -130,10 +132,11 @@ class FailoverFallback(yang.AbstractYangServiceHandler):
         pinputdict['sequence_number'] = pconfig.get_field_value('sequence_number')
         if pinputdict.get('sequence_number') is None:
           pinputdict['sequence_number'] = '88'
-        pinputdict['name'] = pconfig.get_field_value('name')
-        pinputdict['cpe_primary_wan_ebgp_neighbor'] = pconfig.get_field_value('cpe_primary_wan_ebgp_neighbor')
-        pinputdict['cpe_secondary_wan_ebgp_neighbor'] = pconfig.get_field_value('cpe_secondary_wan_ebgp_neighbor')
-        pinputdict['swap_bgp_route_maps'] = pconfig.get_field_value('swap_bgp_route_maps')
+        pinputdict['transaction_id'] = pconfig.get_field_value('transaction_id')
+        pinputdict['operation_type'] = pconfig.get_field_value('operation_type')
+        pinputdict['wan_ebgp_neighbor'] = pconfig.get_field_value('wan_ebgp_neighbor')
+        pinputdict['created_by'] = pconfig.get_field_value('created_by')
+        pinputdict['created_on'] = pconfig.get_field_value('created_on')
         dev = []
         #Use the custom method to process the data
         service_customization.ServiceDataCustomization.process_service_update_data(smodelctx, sdata, id=id, dev=dev, parentobj=parentobj, config=config, pconfig=pconfig, hopaque=opaque_args, inputdict=inputdict, pinputdict=pinputdict)
@@ -162,9 +165,11 @@ class FailoverFallback(yang.AbstractYangServiceHandler):
         if inputdict.get('sequence_number') is None:
           inputdict['sequence_number'] = '88'
         inputdict['name'] = config.get_field_value('name')
-        inputdict['cpe_primary_wan_ebgp_neighbor'] = config.get_field_value('cpe_primary_wan_ebgp_neighbor')
-        inputdict['cpe_secondary_wan_ebgp_neighbor'] = config.get_field_value('cpe_secondary_wan_ebgp_neighbor')
-        inputdict['swap_bgp_route_maps'] = config.get_field_value('swap_bgp_route_maps')
+        inputdict['transaction_id'] = config.get_field_value('transaction_id')
+        inputdict['operation_type'] = config.get_field_value('operation_type')
+        inputdict['wan_ebgp_neighbor'] = config.get_field_value('wan_ebgp_neighbor')
+        inputdict['created_by'] = config.get_field_value('created_by')
+        inputdict['created_on'] = config.get_field_value('created_on')
         # END OF FETCHING THE LEAF PARAMETERS
 
         dev = []

@@ -104,6 +104,8 @@ class BgpPeers(yang.AbstractYangServiceHandler):
         if inputdict.get('holdtime') is None:
           inputdict['holdtime'] = '30'
         inputdict['bfd_fall_over'] = config.get_field_value('bfd_fall_over')
+        inputdict['ebgp_multihop'] = config.get_field_value('ebgp_multihop')
+        inputdict['update_source'] = config.get_field_value('update_source')
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'end-points')
@@ -169,6 +171,8 @@ class BgpPeers(yang.AbstractYangServiceHandler):
         if inputdict.get('holdtime') is None:
           inputdict['holdtime'] = '30'
         inputdict['bfd_fall_over'] = config.get_field_value('bfd_fall_over')
+        inputdict['ebgp_multihop'] = config.get_field_value('ebgp_multihop')
+        inputdict['update_source'] = config.get_field_value('update_source')
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'end-points')
@@ -225,6 +229,8 @@ class BgpPeers(yang.AbstractYangServiceHandler):
         if inputdict.get('holdtime') is None:
           inputdict['holdtime'] = '30'
         inputdict['bfd_fall_over'] = config.get_field_value('bfd_fall_over')
+        inputdict['ebgp_multihop'] = config.get_field_value('ebgp_multihop')
+        inputdict['update_source'] = config.get_field_value('update_source')
         # END OF FETCHING THE LEAF PARAMETERS
 
         _Gen_obj = getLocalObject(sdata, 'end-points')

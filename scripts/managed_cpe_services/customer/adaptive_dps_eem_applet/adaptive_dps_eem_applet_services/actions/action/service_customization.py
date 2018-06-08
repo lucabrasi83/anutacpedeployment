@@ -235,7 +235,7 @@ def adaptive_dps_actions_action_def(entity, conf, sdata,**kwargs):
     	applet_action_obj.snmp_trap_type = inputdict['snmp_trap_type']
     	applet_action_obj.snmp_trap_data = inputdict['snmp_trap_data']
     if inputdict['action_statement'] == "syslog":
-    	applet_action_obj.syslog = inputdict['syslog']
+    	applet_action_obj.syslog = inputdict['syslog_type']
     	applet_action_obj.syslog_priority = inputdict['syslog_priority']
     	applet_action_obj.syslog_msg = inputdict['syslog_msg']
 

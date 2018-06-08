@@ -75,6 +75,8 @@ from servicemodel import devicemgr
 from servicemodel.controller.devices.device import vrfs
 from servicemodel.controller.devices.device import interfaces
 from servicemodel.controller.devices.device import dmvpntunnels
+from servicemodel.controller.devices.device.dmvpntunnels import dmvpntunnel
+from servicemodel.controller.devices.device.dmvpntunnels.dmvpntunnel import nhrp_maps
 from servicemodel.controller.devices.device import policy_maps
 from servicemodel.controller.devices.device import class_maps
 
@@ -940,6 +942,8 @@ def dps(entity, conf, sdata, **kwargs):
                             b2b_interface_name = endpoint.interface_name
                         if endpoint.interface_type == 'Sub-Interface':
                             b2b_interface_name = endpoint.interface_name
+                        if endpoint.interface_type == 'SVI':
+                            b2b_interface_name = 'Vlan'
         elif entity == 'cpe_secondary':
             obj = util.convert_to_list(conf.dual_cpe_site_services.cpe_primary_cpe_secondary_ic.end_points)
             for endpoint in obj:
@@ -949,6 +953,8 @@ def dps(entity, conf, sdata, **kwargs):
                             b2b_interface_name = endpoint.interface_name
                         if endpoint.interface_type == 'Sub-Interface':
                             b2b_interface_name = endpoint.interface_name
+                        if endpoint.interface_type == 'SVI':
+                            b2b_interface_name = 'Vlan'
         elif entity == 'cpe_primary_dual':
             if lan_vrf is not None:
                 vrf = lan_vrf
@@ -960,6 +966,8 @@ def dps(entity, conf, sdata, **kwargs):
                             b2b_interface_name = endpoint.interface_name
                         if endpoint.interface_type == 'Sub-Interface':
                             b2b_interface_name = endpoint.interface_name
+                        if endpoint.interface_type == 'SVI':
+                            b2b_interface_name = 'Vlan'
         elif entity == 'cpe_secondary_dual':
             obj = util.convert_to_list(conf.dual_cpe_dual_wan_site_services.cpe_primary_cpe_secondary_ic.end_points)
             for endpoint in obj:
@@ -969,6 +977,8 @@ def dps(entity, conf, sdata, **kwargs):
                             b2b_interface_name = endpoint.interface_name
                         if endpoint.interface_type == 'Sub-Interface':
                             b2b_interface_name = endpoint.interface_name
+                        if endpoint.interface_type == 'SVI':
+                            b2b_interface_name = 'Vlan'
         elif entity == 'cpe_primary_triple':
             obj = util.convert_to_list(conf.triple_cpe_site_services.cpe_primary_cpe_secondary_ic.end_points)
             for endpoint in obj:
@@ -978,6 +988,8 @@ def dps(entity, conf, sdata, **kwargs):
                             b2b_interface_name = endpoint.interface_name
                         if endpoint.interface_type == 'Sub-Interface':
                             b2b_interface_name = endpoint.interface_name
+                        if endpoint.interface_type == 'SVI':
+                            b2b_interface_name = 'Vlan'
         elif entity == 'cpe_secondary_triple':
             obj = util.convert_to_list(conf.triple_cpe_site_services.cpe_primary_cpe_secondary_ic.end_points)
             for endpoint in obj:
@@ -987,11 +999,18 @@ def dps(entity, conf, sdata, **kwargs):
                             b2b_interface_name = endpoint.interface_name
                         if endpoint.interface_type == 'Sub-Interface':
                             b2b_interface_name = endpoint.interface_name
+                        if endpoint.interface_type == 'SVI':
+                            b2b_interface_name = 'Vlan'
 
         if util.isEmpty(b2b_interface_name) or b2b_interface_name is None:
             raise Exception('Please check DPS flag is checked on Site Service B2B interface')
-        mode = 'sub-interface'
-        b2b_interface_name = b2b_interface_name + '.' + str(inputdict['vlan_id'])
+
+        if b2b_interface_name == 'Vlan':
+            mode = 'vlan'
+            b2b_interface_name = b2b_interface_name + str(inputdict['vlan_id'])
+        else:
+            mode = 'sub-interface'
+            b2b_interface_name = b2b_interface_name + '.' + str(inputdict['vlan_id'])
         cidr = inputdict['cidr']
         interface_ip = inputdict['interface_ip']
         ip_addr = IpamPoolID(sdata.getTaskId(), sdata, cidr)
@@ -1249,6 +1268,9 @@ def dps(entity, conf, sdata, **kwargs):
         if delay is not None:
             dmvpn_obj.delay = delay
 
+        # NCX 6.0.5 - Set qos-pre-clasify by default
+        dmvpn_obj.qos_pre_classify = "true"
+        
         if hasattr(obj_dmvpn.dmvpn_tunnel_profile, 'no_nhrp_route_watch'):
             no_nhrp_route_watch = obj_dmvpn.dmvpn_tunnel_profile.no_nhrp_route_watch
         else:
@@ -1393,17 +1415,17 @@ def dps(entity, conf, sdata, **kwargs):
         yang.Sdk.createData(device.url+'/interface:interfaces', intf_obj_tun.getxml(filter=True), sdata.getSession(), True)
         '''
         if inputdict['hub'] != 'true':
-            dmvpn_obj_nhrp = dmvpntunnels.dmvpntunnel.nhrp_maps.nhrp_maps()
+            dmvpn_obj_nhrp = nhrp_maps.nhrp_maps()
             dmvpn_obj_nhrp.sourceip = obj_dmvpn.dmvpn_tunnel_profile.wan_tunnel_ip
             dmvpn_obj_nhrp.nhrp_type = 'nhs'
             dmvpn_obj_nhrp.destip = obj_dmvpn.dmvpn_tunnel_profile.wan_public_ip
             yang.Sdk.createData(device.url+'/dmvpn:dmvpntunnels/dmvpntunnel=%s' % (obj_dmvpn.dmvpn_tunnel_profile.tunnel_id), dmvpn_obj_nhrp.getxml(filter=True), sdata.getSession())
             if hasattr(obj_dmvpn.dmvpn_tunnel_profile, 'nhrp_maps'):
                 obj_dmvpn.dmvpn_tunnel_profile.nhrp_maps = util.convert_to_list(obj_dmvpn.dmvpn_tunnel_profile.nhrp_maps)
-                for nhrpmaps in obj_dmvpn.dmvpn_tunnel_profile.nhrp_maps:
-                    dmvpn_obj_nhrp.sourceip = nhrpmaps.wan_tunnel_ip
+                for local_nhrpmaps in obj_dmvpn.dmvpn_tunnel_profile.nhrp_maps:
+                    dmvpn_obj_nhrp.sourceip = local_nhrpmaps.wan_tunnel_ip
                     dmvpn_obj_nhrp.nhrp_type = 'nhs'
-                    dmvpn_obj_nhrp.destip = nhrpmaps.wan_public_ip
+                    dmvpn_obj_nhrp.destip = local_nhrpmaps.wan_public_ip
                     yang.Sdk.createData(device.url+'/dmvpn:dmvpntunnels/dmvpntunnel=%s' % (obj_dmvpn.dmvpn_tunnel_profile.tunnel_id), dmvpn_obj_nhrp.getxml(filter=True), sdata.getSession())
 
 def hierarchical_policy_class(entity, hierarchical_policy, device, sdata):

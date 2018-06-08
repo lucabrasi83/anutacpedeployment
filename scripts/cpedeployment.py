@@ -24,6 +24,7 @@ import managed_cpe_services.customer.ipsec.crypto_profiles.crypto_profile.crypto
 import managed_cpe_services.customer.ipsec.transform_sets.transform_set.transform_set
 import managed_cpe_services.customer.ipsec.ipsec_profiles.ipsec_profile.ipsec_profile
 import managed_cpe_services.customer.qos_service.class_maps.class_map.class_map
+import managed_cpe_services.customer.qos_service.custom_nbar.nbar_signatures.nbar_signatures
 import managed_cpe_services.customer.qos_service.policies.policy.policy
 import managed_cpe_services.customer.qos_service.policies.policy.classes.class_name.class_name
 import managed_cpe_services.customer.qos_service.policies.policy.classes.class_name.packet_handling.packet_handling
@@ -179,7 +180,6 @@ import managed_cpe_services.customer.dps.dps_services.cpe_name.community_lists.c
 import managed_cpe_services.customer.dps.dps_services.cpe_name.prefix_lists.prefix_list.prefix_list
 import managed_cpe_services.customer.route_maps.update_route_maps.update_route_maps
 import managed_cpe_services.customer.route_maps.delete_route_maps.delete_route_maps
-import managed_cpe_services.customer.route_maps.reapply_route_map.reapply_route_map
 import managed_cpe_services.customer.single_cpe_site.single_cpe_site_services.cpe.ospfs.router_ospf.router_ospf
 import managed_cpe_services.customer.single_cpe_site.single_cpe_site_services.cpe.ospfs.router_ospf.redistribute.redistribute
 import managed_cpe_services.customer.single_cpe_site.single_cpe_site_services.cpe.ospfs.router_ospf.redistribute.redistribute_on_ospf.redistribute_on_ospf
@@ -875,6 +875,7 @@ class CPEDEPLOYMENTService(yang.AbstractYangServiceHandler):
             'cpedeployment:managed-cpe-services/customer/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services/cpe-lan/end-points/dhcp-helper-addresses': managed_cpe_services.customer.single_cpe_dual_wan_site.single_cpe_dual_wan_site_services.cpe_lan.end_points.dhcp_helper_addresses.dhcp_helper_addresses.DhcpHelperAddresses.getInstance(),
             'cpedeployment:managed-cpe-services/customer/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services/service-validations/ping': managed_cpe_services.customer.single_cpe_dual_wan_site.single_cpe_dual_wan_site_services.service_validations.ping.ping.Ping.getInstance(),
             'cpedeployment:managed-cpe-services/customer/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services/service-validations/interface-status': managed_cpe_services.customer.single_cpe_dual_wan_site.single_cpe_dual_wan_site_services.service_validations.interface_status.interface_status.InterfaceStatus.getInstance(),
+            'cpedeployment:managed-cpe-services/customer/qos-service/custom-nbar/nbar-signatures': managed_cpe_services.customer.qos_service.custom_nbar.nbar_signatures.nbar_signatures.NbarSignatures.getInstance(),
             # 'cpedeployment:managed-cpe-services/customer': managed_cpe_services.customer.customer.Customer.getInstance(),
             # 'cpedeployment:managed-cpe-services/customer/dmvpn-tunnel-profiles/dmvpn-tunnel-profile': managed_cpe_services.customer.dmvpn_tunnel_profiles.dmvpn_tunnel_profile.dmvpn_tunnel_profile.DmvpnTunnelProfile.getInstance(),
             # 'cpedeployment:managed-cpe-services/customer/ipsec/crypto-profiles/crypto-profile': managed_cpe_services.customer.ipsec.crypto_profiles.crypto_profile.crypto_profile.CryptoProfile.getInstance(),
@@ -955,7 +956,6 @@ class CPEDEPLOYMENTService(yang.AbstractYangServiceHandler):
             'cpedeployment:managed-cpe-services/customer/dps/dps-services/cpe-name/prefix-lists/prefix-list': managed_cpe_services.customer.dps.dps_services.cpe_name.prefix_lists.prefix_list.prefix_list.PrefixList.getInstance(),
             'cpedeployment:managed-cpe-services/customer/route-maps/update-route-maps': managed_cpe_services.customer.route_maps.update_route_maps.update_route_maps.UpdateRouteMaps.getInstance(),
             'cpedeployment:managed-cpe-services/customer/route-maps/delete-route-maps': managed_cpe_services.customer.route_maps.delete_route_maps.delete_route_maps.DeleteRouteMaps.getInstance(),
-            'cpedeployment:managed-cpe-services/customer/route-maps/reapply-route-map': managed_cpe_services.customer.route_maps.reapply_route_map.reapply_route_map.ReapplyRouteMap.getInstance(),
             'cpedeployment:managed-cpe-services/customer/single-cpe-site/single-cpe-site-services/cpe/ospfs/router-ospf': managed_cpe_services.customer.single_cpe_site.single_cpe_site_services.cpe.ospfs.router_ospf.router_ospf.RouterOspf.getInstance(),
             'cpedeployment:managed-cpe-services/customer/single-cpe-site/single-cpe-site-services/cpe/ospfs/router-ospf/redistribute': managed_cpe_services.customer.single_cpe_site.single_cpe_site_services.cpe.ospfs.router_ospf.redistribute.redistribute.Redistribute.getInstance(),
             'cpedeployment:managed-cpe-services/customer/single-cpe-site/single-cpe-site-services/cpe/ospfs/router-ospf/redistribute/redistribute-on-ospf': managed_cpe_services.customer.single_cpe_site.single_cpe_site_services.cpe.ospfs.router_ospf.redistribute.redistribute_on_ospf.redistribute_on_ospf.RedistributeOnOspf.getInstance(),
