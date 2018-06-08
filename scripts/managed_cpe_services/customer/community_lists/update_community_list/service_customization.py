@@ -251,6 +251,20 @@ class ServiceDataCustomization:
                             delete_community(entity, conf, sdata, **kwargs)
                         elif inputdict['operation'] == 'CREATE':
                             create_community(entity, conf, sdata, **kwargs)
+                            
+            if util.isNotEmpty(inputdict['device_group']):
+                dev_group_output = yang.Sdk.invokeRpc('controller:apply-data-grouping', '''<input><group-name>'''+ inputdict['device_group'] + '''</group-name></input>''')
+                dev_group_obj = util.parseXmlString(dev_group_output)
+                if hasattr(dev_group_obj, 'output'):
+                    if hasattr(dev_group_obj.output, 'result'):
+                        for each_dev in util.convert_to_list(dev_group_obj.output.result):
+                            if hasattr(each_dev, 'device'):
+                                if hasattr(each_dev.device, 'id'):
+                                    if inputdict['operation'] == 'DELETE':
+                                        delete_community(each_dev.device.id, None, sdata, **kwargs)
+                                    elif inputdict['operation'] == 'CREATE':
+                                        create_community(each_dev.device.id, None, sdata, **kwargs)
+            modify_community(sdata, **kwargs)
 
     @staticmethod
     def process_service_device_bindings(smodelctx, sdata, dev, **kwargs):
@@ -290,7 +304,40 @@ class ServiceDataCustomization:
         config = kwargs['config']
         inputdict = kwargs['inputdict']
 
+def modify_community(sdata, **kwargs):
+    uri = sdata.getRcPath()
+    uri_list = uri.split('/', 5)
+    url = '/'.join(uri_list[0:4])
+    inputdict = kwargs['inputdict']
+    community_list_name = inputdict['community_list_name']
+    if inputdict['operation'] == 'CREATE' and inputdict['update_profile'] == 'true':
+        url = url + "/community-lists"
+        community_list_entry = '' if util.isEmpty(inputdict['community_list_entry']) else inputdict['community_list_entry']
+        extcommunity = '' if util.isEmpty(inputdict['extcommunity']) else inputdict['extcommunity']
+        extcomm = '' if util.isEmpty(inputdict['extcomm']) else inputdict['extcomm']
+        condition = '' if util.isEmpty(inputdict['condition']) else inputdict['condition']
+        value = '' if util.isEmpty(inputdict['value']) else inputdict['value']
+        payload = '''
+                        <community-list>
+                            <extcommunity>'''+extcommunity+'''</extcommunity>
+                            <community-list-name>'''+community_list_name+'''</community-list-name>
+                            <condition>'''+condition+'''</condition>
+                            <community-list-entry>'''+community_list_entry+'''</community-list-entry>
+                            <value>'''+value+'''</value>
+                  '''
+        if extcommunity == 'true':
+            payload = payload + '''<extcomm>'''+extcomm+''''</extcomm></community-list>'''
+        else:
+            payload = payload + '''</community-list>'''
+        yang.Sdk.createData(url, payload, sdata.getSession(), False)
 
+    if inputdict['operation'] == 'DELETE' and inputdict['update_profile'] == 'true':
+        community_list_name = inputdict['community_list_name']
+        value = '' if util.isEmpty(inputdict['value']) else inputdict['value']
+        value = value.replace(':', '%3A')
+        url = url + "/community-lists/community-list=" + str(community_list_name) + "," +str(value)
+        yang.Sdk.deleteData(url, '', sdata.getTaskId(), sdata.getSession())
+        
 def delete_community(entity, conf, sdata, **kwargs):
     if entity == 'cpe':
         device = devicemgr.getDeviceById(conf.single_cpe_site_services.cpe.device_ip)
@@ -310,6 +357,8 @@ def delete_community(entity, conf, sdata, **kwargs):
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_secondary.device_ip)
     elif entity == 'cpe_tertiary_triple':
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_tertiary.device_ip)
+    else:
+        device = devicemgr.getDeviceById(entity)
 
     inputdict = kwargs['inputdict']
     community_list_name = inputdict['community_list_name']

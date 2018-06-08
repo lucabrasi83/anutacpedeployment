@@ -73,6 +73,7 @@ class AdaptiveDps(yang.AbstractYangServiceHandler):
         opaque_args = self.opaque_args
 
         # START OF FETCHING THE LEAF PARAMETERS
+        inputdict['transaction_id'] = config.get_field_value('transaction_id')
         inputdict['applet_name'] = config.get_field_value('applet_name')
         inputdict['description'] = config.get_field_value('description')
 #        inputdict['device_ip'] = config.get_field_value('device_ip')
@@ -107,6 +108,7 @@ class AdaptiveDps(yang.AbstractYangServiceHandler):
         opaque_args = self.opaque_args
 
         # START OF FETCHING THE LEAF PARAMETERS
+        inputdict['transaction_id'] = config.get_field_value('transaction_id')
         inputdict['applet_name'] = config.get_field_value('applet_name')
         inputdict['description'] = config.get_field_value('description')
         # END OF FETCHING THE LEAF PARAMETERS
@@ -139,6 +141,7 @@ class AdaptiveDps(yang.AbstractYangServiceHandler):
         opaque_args = self.opaque_args
 
         # START OF FETCHING THE LEAF PARAMETERS
+        inputdict['transaction_id'] = config.get_field_value('transaction_id')
         inputdict['applet_name'] = config.get_field_value('applet_name')
         inputdict['description'] = config.get_field_value('description')
         # END OF FETCHING THE LEAF PARAMETERS

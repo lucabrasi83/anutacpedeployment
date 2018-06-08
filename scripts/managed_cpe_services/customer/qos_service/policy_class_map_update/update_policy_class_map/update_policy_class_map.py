@@ -73,6 +73,10 @@ class UpdatePolicyClassMap(yang.AbstractYangServiceHandler):
         # START OF FETCHING THE LEAF PARAMETERS
         inputdict['name'] = config.get_field_value('name')
         inputdict['policy_name'] = config.get_field_value('policy_name')
+        inputdict['update_profile'] = config.get_field_value('update_profile')
+        inputdict['apply_to_sites'] = config.get_field_value('apply_to_sites')
+        inputdict['apply_to_device_group'] = config.get_field_value('apply_to_device_group')
+        inputdict['device_group'] = config.get_field_value('device_group')
         inputdict['class1'] = config.get_field_value('class')
         inputdict['packet_handling'] = config.get_field_value('packet_handling')
         inputdict['percentage'] = config.get_field_value('percentage')

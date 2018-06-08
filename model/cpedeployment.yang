@@ -125,6 +125,13 @@ module cpedeployment {
     }
   }
 
+  typedef peer-group {
+    type leafref {
+      //path "../../../../../../bgp-peer-groups/bgp-peer-group/peer-group";
+      path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../../name]/bgp-peer-groups/bgp-peer-group/peer-group";
+    }
+  }
+
   typedef route-map-condition-types {
     type enumeration {
       enum "interface";
@@ -694,10 +701,12 @@ module cpedeployment {
       enum "ms-lync-media";
       enum "ms-lync-audio";
       enum "ms-lync-video";
-      enum "ms-office-webapps";
+      enum "ms-office-web-apps";
       enum "rtp";
       enum "rtp video";
       enum "rtp audio";
+      enum "rtp-audio";
+      enum "rtp-video";
       enum "ms-update";
       enum "ms-office-365";
       enum "sap";
@@ -1290,6 +1299,13 @@ module cpedeployment {
                 description
                   "0..255";
               }
+              leaf police-cir-rate {
+                type uint64 {
+                  range "8000..10000000000";
+                }
+                description
+                  "8000..10000000000";
+              }
               container actions {
                 description
                   "actions";
@@ -1368,6 +1384,13 @@ module cpedeployment {
             }
             description
               "1..100";
+          }
+          leaf shape-average-bw {
+            type uint64 {
+              range "8000..10000000000";
+            }
+            description
+              "8000..10000000000";
           }
           leaf bits-sustained {
             type uint64 {
@@ -1503,6 +1526,12 @@ module cpedeployment {
 
   grouping qos-def {
     container qos-service {
+      container custom-nbar {
+        list nbar-signatures {
+          key "name";
+          uses custom-nbar-def;
+        }
+      }
       //n-ext:ignore-for-brownfield;
       container class-maps {
         list class-map {
@@ -1689,11 +1718,37 @@ module cpedeployment {
               "Max Length 200 character";
             //n-ext:maps-to "/ac:devices/device/qos:class-maps/class-map/description";
           }
+          leaf update-profile {
+            type boolean;
+            description
+              "Check to update customer template";
+          }
           uses class-map-def1;
+          leaf apply-to-sites {
+            type boolean;
+            description
+              "Check if you want to perform bulk update operation on individual sites";
+            when "../apply-to-device-group = 'false'";
+          }
+          leaf apply-to-device-group {
+            type boolean;
+            description
+              "Check if you want to perform bulk update operation on device group";
+            when "../apply-to-sites = 'false'";
+          }
+          leaf device-group {
+            type leafref {
+              path "/ac:data-grouping/ac:definition/ac:name";
+            }
+            description
+              "device-group";
+            when "../apply-to-device-group = 'true'";
+          }
           leaf single-cpe-site {
             type boolean;
             description
               "single-cpe-site: True/False";
+            when "../apply-to-sites = 'true'";
           }
           leaf-list single-cpe-sites {
             type leafref {
@@ -1708,6 +1763,7 @@ module cpedeployment {
             type boolean;
             description
               "dual-cpe-site: True/False";
+            when "../apply-to-sites = 'true'";
           }
           leaf-list dual-cpe-sites {
             type leafref {
@@ -1722,6 +1778,7 @@ module cpedeployment {
             type boolean;
             description
               "single-cpe-dual-wan-site: True/False";
+            when "../apply-to-sites = 'true'";
           }
           leaf-list single-cpe-dual-wan-sites {
             type leafref {
@@ -1736,6 +1793,7 @@ module cpedeployment {
             type boolean;
             description
               "dual-cpe-dual-wan-site: True/False";
+            when "../apply-to-sites = 'true'";
           }
           leaf-list dual-cpe-dual-wan-sites {
             type leafref {
@@ -1750,6 +1808,7 @@ module cpedeployment {
             type boolean;
             description
               "triple-cpe-site: True/False";
+            when "../apply-to-sites = 'true'";
           }
           leaf-list triple-cpe-sites {
             type leafref {
@@ -1784,15 +1843,41 @@ module cpedeployment {
             //n-ext:maps-to "/ac:devices/device/qos:class-maps/class-map[name=current()/../name]/description";
             config false;
           }
+          leaf update-profile {
+            type boolean;
+            description
+              "Check to update customer template";
+          }
           uses class-map-def1 {
             refine "match-type" {
               config false;
             }
           }
+          leaf apply-to-sites {
+            type boolean;
+            description
+              "Check if you want to perform bulk update operation on individual sites";
+            when "../apply-to-device-group = 'false'";
+          }
+          leaf apply-to-device-group {
+            type boolean;
+            description
+              "Check if you want to perform bulk update operation on device group";
+            when "../apply-to-sites = 'false'";
+          }
+          leaf device-group {
+            type leafref {
+              path "/ac:data-grouping/ac:definition/ac:name";
+            }
+            description
+              "device-group";
+            when "../apply-to-device-group = 'true'";
+          }
           leaf single-cpe-site {
             type boolean;
             description
               "single-cpe-site: True/False";
+            when "../apply-to-sites = 'true'";
           }
           leaf-list single-cpe-sites {
             type leafref {
@@ -1807,6 +1892,7 @@ module cpedeployment {
             type boolean;
             description
               "dual-cpe-site: True/False";
+            when "../apply-to-sites = 'true'";
           }
           leaf-list dual-cpe-sites {
             type leafref {
@@ -1821,6 +1907,7 @@ module cpedeployment {
             type boolean;
             description
               "single-cpe-dual-wan-site: True/False";
+            when "../apply-to-sites = 'true'";
           }
           leaf-list single-cpe-dual-wan-sites {
             type leafref {
@@ -1835,6 +1922,7 @@ module cpedeployment {
             type boolean;
             description
               "dual-cpe-dual-wan-site: True/False";
+            when "../apply-to-sites = 'true'";
           }
           leaf-list dual-cpe-dual-wan-sites {
             type leafref {
@@ -1849,6 +1937,7 @@ module cpedeployment {
             type boolean;
             description
               "triple-cpe-site: True/False";
+            when "../apply-to-sites = 'true'";
           }
           leaf-list triple-cpe-sites {
             type leafref {
@@ -1883,15 +1972,41 @@ module cpedeployment {
             //n-ext:maps-to "/ac:devices/device/qos:class-maps/class-map[name=current()/../name]/description";
             config false;
           }
+          leaf update-profile {
+            type boolean;
+            description
+              "Check to update customer template";
+          }
           uses class-map-def1 {
             refine "match-type" {
               config false;
             }
           }
+          leaf apply-to-sites {
+            type boolean;
+            description
+              "Check if you want to perform bulk update operation on individual sites";
+            when "../apply-to-device-group = 'false'";
+          }
+          leaf apply-to-device-group {
+            type boolean;
+            description
+              "Check if you want to perform bulk update operation on device group";
+            when "../apply-to-sites = 'false'";
+          }
+          leaf device-group {
+            type leafref {
+              path "/ac:data-grouping/ac:definition/ac:name";
+            }
+            description
+              "device-group";
+            when "../apply-to-device-group = 'true'";
+          }
           leaf single-cpe-site {
             type boolean;
             description
               "single-cpe-site: True/False";
+            when "../apply-to-sites = 'true'";
           }
           leaf-list single-cpe-sites {
             type leafref {
@@ -1906,6 +2021,7 @@ module cpedeployment {
             type boolean;
             description
               "dual-cpe-site: True/False";
+            when "../apply-to-sites = 'true'";
           }
           leaf-list dual-cpe-sites {
             type leafref {
@@ -1920,6 +2036,7 @@ module cpedeployment {
             type boolean;
             description
               "single-cpe-dual-wan-site: True/False";
+            when "../apply-to-sites = 'true'";
           }
           leaf-list single-cpe-dual-wan-sites {
             type leafref {
@@ -1934,6 +2051,7 @@ module cpedeployment {
             type boolean;
             description
               "dual-cpe-dual-wan-site: True/False";
+            when "../apply-to-sites = 'true'";
           }
           leaf-list dual-cpe-dual-wan-sites {
             type leafref {
@@ -1948,6 +2066,7 @@ module cpedeployment {
             type boolean;
             description
               "triple-cpe-site: True/False";
+            when "../apply-to-sites = 'true'";
           }
           leaf-list triple-cpe-sites {
             type leafref {
@@ -1976,6 +2095,11 @@ module cpedeployment {
             description
               "policy-name";
             mandatory true;
+          }
+          leaf update-profile {
+            type boolean;
+            description
+              "Check to update customer template";
           }
           leaf class {
             type leafref {
@@ -2021,10 +2145,31 @@ module cpedeployment {
             description
               "Enter QoS Group Value";
           }
+          leaf apply-to-sites {
+            type boolean;
+            description
+              "Check if you want to perform bulk update operation on individual sites";
+            when "../apply-to-device-group = 'false'";
+          }
+          leaf apply-to-device-group {
+            type boolean;
+            description
+              "Check if you want to perform bulk update operation on device group";
+            when "../apply-to-sites = 'false'";
+          }
+          leaf device-group {
+            type leafref {
+              path "/ac:data-grouping/ac:definition/ac:name";
+            }
+            description
+              "device-group";
+            when "../apply-to-device-group = 'true'";
+          }
           leaf single-cpe-site {
             type boolean;
             description
               "single-cpe-site: True/False";
+            when "../apply-to-sites = 'true'";
           }
           leaf-list single-cpe-sites {
             type leafref {
@@ -2039,6 +2184,7 @@ module cpedeployment {
             type boolean;
             description
               "dual-cpe-site: True/False";
+            when "../apply-to-sites = 'true'";
           }
           leaf-list dual-cpe-sites {
             type leafref {
@@ -2053,6 +2199,7 @@ module cpedeployment {
             type boolean;
             description
               "single-cpe-dual-wan-site: True/False";
+            when "../apply-to-sites = 'true'";
           }
           leaf-list single-cpe-dual-wan-sites {
             type leafref {
@@ -2067,6 +2214,7 @@ module cpedeployment {
             type boolean;
             description
               "dual-cpe-dual-wan-site: True/False";
+            when "../apply-to-sites = 'true'";
           }
           leaf-list dual-cpe-dual-wan-sites {
             type leafref {
@@ -2081,6 +2229,7 @@ module cpedeployment {
             type boolean;
             description
               "triple-cpe-site: True/False";
+            when "../apply-to-sites = 'true'";
           }
           leaf-list triple-cpe-sites {
             type leafref {
@@ -2133,6 +2282,14 @@ module cpedeployment {
       description
         "Select NBAR Signature(s) to match";
     }
+    leaf-list custom-nbar {
+      type leafref {
+        path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../name]/qos-service/custom-nbar/nbar-signatures/name";
+        require-instance false;
+      }
+      description
+        "Select Custom NBAR Signatures to match";
+    }
     leaf-list http-url {
       type string-no-space;
       description
@@ -2184,6 +2341,14 @@ module cpedeployment {
       description
         "Select NBAR Signature(s)";
       n-ext:maps-to "/ac:devices/ac:device/qos:class-maps/class-map[name=current()/../name]/class-match-condition[condition-type=protocol]/match-value";
+    }
+    leaf-list custom-nbar {
+      type leafref {
+        path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../name]/qos-service/custom-nbar/nbar-signatures/name";
+        require-instance false;
+      }
+      description
+        "Select Custom NBAR Signatures to match";
     }
     leaf-list http-url {
       type string-no-space;
@@ -2724,6 +2889,11 @@ module cpedeployment {
             "route-map-name";
           mandatory true;
         }
+        leaf update-profile {
+          type boolean;
+          description
+            "Check to update customer template";
+        }
         leaf sequence-number {
           type union {
             type leafref {
@@ -2738,11 +2908,14 @@ module cpedeployment {
           mandatory true;
         }
         leaf action {
-          type leafref {
-            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../name]/route-maps/route-map[route-map-name=current()/../route-map-name]/route-map-entries[sequence-number=current()/../sequence-number]/action";
+          type union {
+            type leafref {
+              path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../name]/route-maps/route-map[route-map-name=current()/../route-map-name]/route-map-entries[sequence-number=current()/../sequence-number]/action";
+            }
+            type string-no-space;
           }
           description
-            "action";
+            "Enter Route-Map Sequence Action: Permit/Deny";
           mandatory true;
         }
         leaf entry {
@@ -2808,10 +2981,31 @@ module cpedeployment {
             "string";
           when " ../entry = 'set-action' ";
         }
+        leaf apply-to-sites {
+          type boolean;
+          description
+            "Check if you want to perform bulk update operation on individual sites";
+          when "../apply-to-device-group = 'false'";
+        }
+        leaf apply-to-device-group {
+          type boolean;
+          description
+            "Check if you want to perform bulk update operation on device group";
+          when "../apply-to-sites = 'false'";
+        }
+        leaf device-group {
+          type leafref {
+            path "/ac:data-grouping/ac:definition/ac:name";
+          }
+          description
+            "device-group";
+          when "../apply-to-device-group = 'true'";
+        }
         leaf single-cpe-site {
           type boolean;
           description
             "single-cpe-site: True/False";
+          when "../apply-to-sites = 'true'";
         }
         leaf-list single-cpe-sites {
           type leafref {
@@ -2826,6 +3020,7 @@ module cpedeployment {
           type boolean;
           description
             "dual-cpe-site: True/False";
+          when "../apply-to-sites = 'true'";
         }
         leaf-list dual-cpe-sites {
           type leafref {
@@ -2840,6 +3035,7 @@ module cpedeployment {
           type boolean;
           description
             "single-cpe-dual-wan-site: True/False";
+          when "../apply-to-sites = 'true'";
         }
         leaf-list single-cpe-dual-wan-sites {
           type leafref {
@@ -2854,6 +3050,7 @@ module cpedeployment {
           type boolean;
           description
             "dual-cpe-dual-wan-site: True/False";
+          when "../apply-to-sites = 'true'";
         }
         leaf-list dual-cpe-dual-wan-sites {
           type leafref {
@@ -2868,6 +3065,7 @@ module cpedeployment {
           type boolean;
           description
             "triple-cpe-site: True/False";
+          when "../apply-to-sites = 'true'";
         }
         leaf-list triple-cpe-sites {
           type leafref {
@@ -2879,94 +3077,6 @@ module cpedeployment {
           when " ../triple-cpe-site = 'true' ";
         }
       }
-      /*list reapply-route-map {
-        n-ext:ignore-for-brownfield;
-        key "id";
-        leaf id {
-          type string-no-space;
-          description
-            "Enter Transaction Name
-             This is an internal field for Anuta NCX";
-        }
-        leaf route-map-name {
-          type leafref {
-            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../name]/route-maps/route-map/route-map-name";
-          }
-          description
-            "Select Route-Map Template";
-          mandatory true;
-        }
-        leaf single-cpe-site {
-          type boolean;
-          description
-            "single-cpe-site: True/False";
-        }
-        leaf-list single-cpe-sites {
-          type leafref {
-            path "../../../single-cpe-site/single-cpe-site-services/site-name";
-            require-instance false;
-          }
-          description
-            "single-sites";
-          when " ../single-cpe-site = 'true' ";
-        }
-        leaf dual-cpe-site {
-          type boolean;
-          description
-            "dual-cpe-site: True/False";
-        }
-        leaf-list dual-cpe-sites {
-          type leafref {
-            path "../../../dual-cpe-site/dual-cpe-site-services/site-name";
-            require-instance false;
-          }
-          description
-            "dual-sites";
-          when " ../dual-cpe-site = 'true' ";
-        }
-        leaf single-cpe-dual-wan-site {
-          type boolean;
-          description
-            "single-cpe-dual-wan-site: True/False";
-        }
-        leaf-list single-cpe-dual-wan-sites {
-          type leafref {
-            path "../../../single-cpe-dual-wan-site/single-cpe-dual-wan-site-services/site-name";
-            require-instance false;
-          }
-          description
-            "single-sites";
-          when " ../single-cpe-dual-wan-site = 'true' ";
-        }
-        leaf dual-cpe-dual-wan-site {
-          type boolean;
-          description
-            "dual-cpe-dual-wan-site: True/False";
-        }
-        leaf-list dual-cpe-dual-wan-sites {
-          type leafref {
-            path "../../../dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services/site-name";
-            require-instance false;
-          }
-          description
-            "dual-sites";
-          when " ../dual-cpe-dual-wan-site = 'true' ";
-        }
-        leaf triple-cpe-site {
-          type boolean;
-          description
-            "triple-cpe-site: True/False";
-        }
-        leaf-list triple-cpe-sites {
-          type leafref {
-            path "../../../triple-cpe-site/triple-cpe-site-services/site-name";
-            require-instance false;
-          }
-          description
-            "single-sites";
-          when " ../triple-cpe-site = 'true' ";
-        }
-      }*/
       list delete-route-maps {
         n-ext:ignore-for-brownfield;
         key "id";
@@ -2992,6 +3102,11 @@ module cpedeployment {
           description
             "sequence-number";
           mandatory true;
+        }
+        leaf update-profile {
+          type boolean;
+          description
+            "Check to update customer template";
         }
         leaf action {
           type leafref {
@@ -3065,10 +3180,31 @@ module cpedeployment {
             "string";
           when " ../entry = 'set-action' ";
         }
+        leaf apply-to-sites {
+          type boolean;
+          description
+            "Check if you want to perform bulk update operation on individual sites";
+          when "../apply-to-device-group = 'false'";
+        }
+        leaf apply-to-device-group {
+          type boolean;
+          description
+            "Check if you want to perform bulk update operation on device group";
+          when "../apply-to-sites = 'false'";
+        }
+        leaf device-group {
+          type leafref {
+            path "/ac:data-grouping/ac:definition/ac:name";
+          }
+          description
+            "device-group";
+          when "../apply-to-device-group = 'true'";
+        }
         leaf single-cpe-site {
           type boolean;
           description
             "single-cpe-site: True/False";
+          when "../apply-to-sites = 'true'";
         }
         leaf-list single-cpe-sites {
           type leafref {
@@ -3083,6 +3219,7 @@ module cpedeployment {
           type boolean;
           description
             "dual-cpe-site: True/False";
+          when "../apply-to-sites = 'true'";
         }
         leaf-list dual-cpe-sites {
           type leafref {
@@ -3097,6 +3234,7 @@ module cpedeployment {
           type boolean;
           description
             "single-cpe-dual-wan-site: True/False";
+          when "../apply-to-sites = 'true'";
         }
         leaf-list single-cpe-dual-wan-sites {
           type leafref {
@@ -3111,6 +3249,7 @@ module cpedeployment {
           type boolean;
           description
             "dual-cpe-dual-wan-site: True/False";
+          when "../apply-to-sites = 'true'";
         }
         leaf-list dual-cpe-dual-wan-sites {
           type leafref {
@@ -3125,6 +3264,7 @@ module cpedeployment {
           type boolean;
           description
             "triple-cpe-site: True/False";
+          when "../apply-to-sites = 'true'";
         }
         leaf-list triple-cpe-sites {
           type leafref {
@@ -3756,21 +3896,30 @@ module cpedeployment {
       n-ext:maps-to "/ac:devices/device[ac:id=current()/../../../device-ip]/basicDeviceConfigs:bgp/bgp-community-new";
       when " ../bgp-settings = 'true' ";
     }
-    leaf peer-group {
-      type leafref {
+    leaf peer-groups {
+      type boolean;
+      description
+        "peer-groups: True/False";
+      when "../bgp-settings = 'true' ";
+    }
+    // Change 22/05/2018: Make peer-group a leaf-list and move listen-cidr at peer-group customer level
+    leaf-list peer-group {
+      /*type leafref {
         //path "../../../../../../bgp-peer-groups/bgp-peer-group/peer-group";
         path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../../name]/bgp-peer-groups/bgp-peer-group/peer-group";
-      }
+      }*/
+      type peer-group;
       description
         "string";
       n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3:vrfs/vrf[name=current()/../vrf-name]/router-bgp/peer-group/name";
       n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3:vrfs/vrf[name=GLOBAL]/router-bgp/listen-range/name";
-      when " ../bgp-settings = 'true' ";
+      when " ../bgp-settings = 'true' and ../peer-groups = 'true'";
     }
     leaf listen-cidr {
       type inet:ipv4-prefix;
       description
         "Valid IPv4 Prefix (A.B.C.D/Z for e.x: 172.16.1.0/24)";
+      config false;
       n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3:vrfs/vrf[name=current()/../vrf-name]/router-bgp/listen-range/cidr";
       when " ../bgp-settings = 'true' ";
     }
@@ -4163,7 +4312,7 @@ module cpedeployment {
           //path "../../../../../../../route-maps/route-map/route-map-name";
           path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../../../name]/route-maps/route-map/route-map-name";
         }
-        n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3:vrfs/vrf[name=current()/../../vrf-name]/router-eigrp/eigrp[process-id=current()/../../process-id]/redistribute[protocol=eigrp]/route-map";
+        n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../../device-ip]/l3features:vrfs/vrf[name=current()/../../vrf-name]/router-bgp/redistribute[protocol=eigrp]/route-map";
         description
           "Select Redistribute Route-Map";
         when "../redistribute-eigrp-on-bgp = 'true'";
@@ -4894,6 +5043,114 @@ module cpedeployment {
     }
   }
 
+  grouping custom-nbar-def {
+    leaf name {
+      type string-no-space;
+      description
+        "Enter NBAR Custom Signature App Name";
+    }
+    leaf id {
+      type uint16;
+      description
+        "Enter NBAR Custom Signature Unique ID";
+      config false;
+    }
+    leaf direction {
+      type enumeration {
+        enum "any";
+        enum "source";
+        enum "destination";
+      }
+      description
+        "Select Traffic Direction to match";
+    }
+    leaf custom-nbar-type {
+      type enumeration {
+        enum "transport";
+        enum "http";
+        enum "ssl";
+      }
+      description
+        "Select NBAR Custom Signature Type";
+    }
+    leaf http-url {
+      type string-no-space;
+      description
+        "Enter HTTP URL";
+      when "../custom-nbar-type = 'http'";
+    }
+    leaf ssl-sni {
+      type string-no-space;
+      description
+        "SSL Server Name Indication (SNI) or Common Name (CN)";
+      when "../custom-nbar-type = 'ssl'";
+    }
+    leaf transport-type {
+      type enumeration {
+        enum "tcp";
+        enum "udp";
+        enum "tcp-udp";
+      }
+      description
+        "Select Transport Type";
+      when "../custom-nbar-type = 'transport'";
+    }
+    leaf ip-type {
+      type enumeration {
+        enum "ip-address";
+        enum "subnet";
+      }
+      description
+        "Select the type of IP object to match (individual addresses or subnet)";
+      when "../custom-nbar-type = 'transport'";
+    }
+    leaf-list ip-address {
+      type string;
+      description
+        "Valid IPv4 Address (A.B.C.D for e.x: 172.16.1.1)";
+      when "../ip-type = 'ip-address'";
+    }
+    leaf subnet-address {
+      type inet:ipv4-address;
+      description
+        "Enter Subnet Address (eg: 192.168.1.0, 10.128.0.0)";
+      when "../ip-type = 'subnet'";
+    }
+    leaf subnet-length {
+      type uint8;
+      description
+        "Enter Subnet Length";
+      when "../ip-type = 'subnet'";
+    }
+    leaf port-type {
+      type enumeration {
+        enum "single-port";
+        enum "port-range";
+      }
+      description
+        "Select whether you want to configure individual TCP/UDP ports or range of ports";
+      when "../custom-nbar-type = 'transport'";
+    }
+    leaf-list port-number {
+      type string;
+      description
+        "Enter Port Number";
+      when "../port-type = 'single-port'";
+    }
+    leaf start-port {
+      type uint16;
+      description
+        "Enter TCP/UDP start port number from the range";
+      when "../port-type = 'port-range'";
+    }
+    leaf end-port {
+      type uint16;
+      description
+        "Enter TCP/UDP end port number from the range";
+      when "../port-type = 'port-range'";
+    }
+  }
+
   grouping ospf-redistribute {
     leaf sequence-number {
       type string;
@@ -5030,6 +5287,11 @@ module cpedeployment {
           //n-ext:maps-to "/ac:devices/device/l3features:community-lists/community-list[community-list-entry=current()/../community-list-entry]/community-list-name";
           //n-ext:maps-to "/ac:devices/device/l3features:extcommunity-lists/extcommunity-list[extcommunity-list-entry=current()/../extcommunity-list-entry]/extcommunity-list-name";
         }
+        leaf update-profile {
+          type boolean;
+          description
+            "Check to update customer template";
+        }
         leaf operation {
           type operation-def;
           description
@@ -5081,10 +5343,31 @@ module cpedeployment {
           when " ../community-list-entry = 'standard' and ../extcommunity = 'true'";
           //n-ext:maps-to "/ac:devices/device/l3features:extcommunity-lists/extcommunity-list[extcommunity-list-name=current()/../extcommunity-list-name]/extcomm";
         }
+        leaf apply-to-sites {
+          type boolean;
+          description
+            "Check if you want to perform bulk update operation on individual sites";
+          when "../apply-to-device-group = 'false'";
+        }
+        leaf apply-to-device-group {
+          type boolean;
+          description
+            "Check if you want to perform bulk update operation on device group";
+          when "../apply-to-sites = 'false'";
+        }
+        leaf device-group {
+          type leafref {
+            path "/ac:data-grouping/ac:definition/ac:name";
+          }
+          description
+            "device-group";
+          when "../apply-to-device-group = 'true'";
+        }
         leaf single-cpe-site {
           type boolean;
           description
             "single-cpe-site: True/False";
+          when "../apply-to-sites = 'true'";
         }
         leaf-list single-cpe-sites {
           type leafref {
@@ -5099,6 +5382,7 @@ module cpedeployment {
           type boolean;
           description
             "dual-cpe-site: True/False";
+          when "../apply-to-sites = 'true'";
         }
         leaf-list dual-cpe-sites {
           type leafref {
@@ -5113,6 +5397,7 @@ module cpedeployment {
           type boolean;
           description
             "single-cpe-dual-wan-site: True/False";
+          when "../apply-to-sites = 'true'";
         }
         leaf-list single-cpe-dual-wan-sites {
           type leafref {
@@ -5127,6 +5412,7 @@ module cpedeployment {
           type boolean;
           description
             "dual-cpe-dual-wan-site: True/False";
+          when "../apply-to-sites = 'true'";
         }
         leaf-list dual-cpe-dual-wan-sites {
           type leafref {
@@ -5141,6 +5427,7 @@ module cpedeployment {
           type boolean;
           description
             "triple-cpe-site: True/False";
+          when "../apply-to-sites = 'true'";
         }
         leaf-list triple-cpe-sites {
           type leafref {
@@ -5273,6 +5560,22 @@ module cpedeployment {
       n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../device-ip]/l3:vrfs/vrf[name=current()/../../ivrf]/router-bgp/neighbor[ip-address=current()/../peer-ip]/default-originate";
       //n-ext:maps-to "/ac:devices/device[id=current()/../../device-ip]/l3:vrfs/vrf/router-bgp/peer-group/default-originate";
     }
+    leaf ebgp-multihop {
+      type uint8;
+      description
+        "Enter eBGP Multi-Hop Value";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../device-ip]/l3:vrfs/vrf[name=current()/../../vrf]/router-bgp/neighbor[ip-address=current()/../peer-ip]/ebgp-multihop";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../device-ip]/l3:vrfs/vrf[name=GLOBAL]/router-bgp/neighbor[ip-address=current()/../peer-ip]/ebgp-multihop";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../device-ip]/l3:vrfs/vrf[name=current()/../../ivrf]/router-bgp/neighbor[ip-address=current()/../peer-ip]/ebgp-multihop";
+    }
+    leaf update-source {
+      type string-no-lead-trail-space;
+      description
+        "Enter eBGP Peering Source Interface";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../device-ip]/l3:vrfs/vrf[name=current()/../../vrf]/router-bgp/neighbor[ip-address=current()/../peer-ip]/local-interface";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../device-ip]/l3:vrfs/vrf[name=GLOBAL]/router-bgp/neighbor[ip-address=current()/../peer-ip]/local-interface";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../device-ip]/l3:vrfs/vrf[name=current()/../../ivrf]/router-bgp/neighbor[ip-address=current()/../peer-ip]/local-interface";
+    }
     leaf default-originate-route-map {
       type leafref {
         //path "../../../../../../route-maps/route-map/route-map-name";
@@ -5368,13 +5671,18 @@ module cpedeployment {
       type string-no-space;
       description
         "peer-group";
-      n-ext:maps-to "/ac:devices/device/l3:vrfs/vrf/router-bgp/peer-group/name";
+      //n-ext:maps-to "/ac:devices/device/l3:vrfs/vrf/router-bgp/peer-group/name";
     }
     leaf peer-description {
       type string;
       description
         "string";
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/description";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/description";
+    }
+    leaf listen-range {
+      type inet:ipv4-prefix;
+      description
+        "Listen Range Prefix";
     }
     leaf remote-as {
       type inet:as-number;
@@ -5382,14 +5690,14 @@ module cpedeployment {
       description
         "string";
       //n-ext:maps-to "/ac:devices/device/l3:vrfs/vrf/router-bgp/neighbor/as-number";
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/remote-as";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/remote-as";
     }
     leaf password {
       type string-no-space;
       description
         "string";
       //n-ext:maps-to "/ac:devices/device/l3:vrfs/vrf/router-bgp/neighbor/password";
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/password";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/password";
     }
     leaf import-route-map {
       type leafref {
@@ -5399,7 +5707,7 @@ module cpedeployment {
       description
         "import-route-map";
       //n-ext:maps-to "/ac:devices/device/l3:vrfs/vrf/router-bgp/neighbor/inbound-routepolicy";
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/in-route-map";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/in-route-map";
     }
     leaf export-route-map {
       type leafref {
@@ -5409,28 +5717,28 @@ module cpedeployment {
       description
         "export-route-map";
       //n-ext:maps-to "/ac:devices/device/l3:vrfs/vrf/router-bgp/neighbor/outbound-routepolicy";
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/out-route-map";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/out-route-map";
     }
     leaf next-hop-self {
       type boolean;
       description
         "next-hop-self: True/False";
       //n-ext:maps-to "/ac:devices/device/l3:vrfs/vrf/router-bgp/neighbor/next-hop-self";
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/next-hop-self";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/next-hop-self";
     }
     leaf soft-reconfiguration {
       type boolean;
       description
         "soft-reconfiguration: True/False";
       //n-ext:maps-to "/ac:devices/device/l3:vrfs/vrf/router-bgp/neighbor/soft-reconfiguration";
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/soft-reconfiguration";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/soft-reconfiguration";
     }
     leaf default-originate {
       type boolean;
       description
         "default-originate: True/False";
       //n-ext:maps-to "/ac:devices/device/l3:vrfs/vrf/router-bgp/neighbor/default-originate";
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/default-originate";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/default-originate";
     }
     leaf default-originate-route-map {
       type leafref {
@@ -5441,28 +5749,33 @@ module cpedeployment {
         "default-originate-route-map";
       when "../default-originate = 'true'";
       //n-ext:maps-to "/ac:devices/device/l3:vrfs/vrf/router-bgp/neighbor/def-originate-route-map";
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/def-originate-route-map";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/def-originate-route-map";
     }
     leaf send-community {
       type boolean;
       description
         "send-community: True/False";
       //n-ext:maps-to "/ac:devices/device/l3:vrfs/vrf/router-bgp/neighbor/send-community";
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/send-community";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/send-community";
+    }
+    leaf as-override {
+      type boolean;
+      description
+        "Check to enable as-override";
     }
     leaf encrypted-password {
       type boolean;
       description
         "encrypted-password: True/False";
       //n-ext:maps-to "/ac:devices/device/l3:vrfs/vrf/router-bgp/neighbor/encryption";
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/encryption";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/encryption";
       config false;
     }
     leaf advertisement-interval {
       type boolean;
       description
         "advertisement-interval: True/False";
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/advertisement-interval";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/advertisement-interval";
     }
     leaf time-in-sec {
       type uint16 {
@@ -5482,7 +5795,7 @@ module cpedeployment {
       type uint16 {
         range "0..65535";
       }
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/keepalive-interval";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/keepalive-interval";
       description
         "0..65535";
       default "10";
@@ -5492,11 +5805,21 @@ module cpedeployment {
       type uint16 {
         range "0..65535";
       }
-      n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/holdtime";
+      //n-ext:maps-to "/ac:devices/ac:device/l3:vrfs/vrf/router-bgp/peer-group[name=current()/../peer-group]/holdtime";
       description
         "0..65535";
       default "30";
       when "../timers = 'true'";
+    }
+    leaf ebgp-multihop {
+      type uint8;
+      description
+        "Enter eBGP Multi-Hop Value";
+    }
+    leaf update-source {
+      type string-no-lead-trail-space;
+      description
+        "Enter eBGP Peering Source Interface";
     }
   }
 
@@ -5668,7 +5991,10 @@ module cpedeployment {
       when "../ospf = 'true'";
     }
     leaf area {
-      type uint32;
+      type union {
+        type uint32;
+        type inet:ipv4-address;
+      }
       description
         "Enter OSPF Area ID";
       //n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/ospf/area";
@@ -5735,6 +6061,16 @@ module cpedeployment {
       description
         "Check to configure interface as NAT outside direction";
       when "../interface-type =  'Physical' or ../interface-type =  'Sub-Interface' or ../interface-type =  'Tunnel' or ../interface-type =  'SVI'";
+    }
+    leaf nbar-discovery {
+      type enumeration {
+        enum "protocol-discovery";
+        enum "protocol-discovery ipv4";
+        enum "protocol-discovery ipv6";
+      }
+      description
+        "Enable NBAR Protocol Discovery";
+      n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/if-ext:protocol-discovery";
     }
     leaf delay {
       type uint32 {
@@ -5827,7 +6163,7 @@ module cpedeployment {
         path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/vrfs/vrf/vrf-name";
       }
       n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/vrf";
-      when "../interface-type =  'Physical' or ../interface-type =  'Sub-Interface'";
+      when "../interface-type =  'Physical' or ../interface-type =  'Sub-Interface' or ../interface-type = 'SVI'";
     }
     leaf interface-type {
       type interface-type;
@@ -7221,6 +7557,15 @@ module cpedeployment {
           when "../interface-type = 'Physical' or ../interface-type = 'SVI' or ../interface-type = 'Sub-Interface'";
           default "false";
         }
+        leaf inbound-qos-policy {
+          type leafref {
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/qos-service/policies/policy/name";
+          }
+          description
+            "Select Inbound QoS Policy-Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/inbound-qos";
+          when "../endpoint-level-qos = 'true'";
+        }
         leaf hierarchical-outbound-qos {
           type boolean;
           description
@@ -7518,6 +7863,15 @@ module cpedeployment {
             "Check this option if you want to overwrite QoS policy specified in cpe-wan parent container";
           when "../interface-type = 'Physical' or ../interface-type = 'SVI' or ../interface-type = 'Sub-Interface'";
           default "false";
+        }
+        leaf inbound-qos-policy {
+          type leafref {
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/qos-service/policies/policy/name";
+          }
+          description
+            "Select Inbound QoS Policy-Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/inbound-qos";
+          when "../endpoint-level-qos = 'true'";
         }
         leaf hierarchical-outbound-qos {
           type boolean;
@@ -8169,7 +8523,7 @@ module cpedeployment {
   grouping failover-fallback-dual-def {
     container failover-fallback-service {
       list failover-fallback {
-        key "name";
+        key "transaction-id";
         leaf sequence-number {
           type string;
           default "89";
@@ -8177,33 +8531,44 @@ module cpedeployment {
             "sequence-number";
           config false;
         }
-        leaf name {
+        leaf transaction-id {
           type string-no-space;
           description
             "Enter Transaction Name
              This is an internal field for Anuta NCX";
         }
-        leaf cpe-primary-wan-ebgp-neighbor {
-          type leafref {
-            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/dual-cpe-site/dual-cpe-site-services[site-name=current()/../../../site-name]/cpe-primary-wan/end-points/bgp-peers/peer-ip";
+        leaf operation-type {
+          type enumeration {
+            enum "failover";
+            enum "fallback";
+            enum "switch-off-dps";
+            enum "switch-on-dps";
           }
-          description
-            "Select WAN eBGP peer under container cpe-primary-wan on which to perform failover/fallback operation";
           mandatory true;
-        }
-        leaf cpe-secondary-wan-ebgp-neighbor {
-          type leafref {
-            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/dual-cpe-site/dual-cpe-site-services[site-name=current()/../../../site-name]/cpe-secondary-wan/end-points/bgp-peers/peer-ip";
-          }
           description
-            "Select WAN eBGP peer under container cpe-secondary-wan on which to perform failover/fallback operation";
-          mandatory true;
+            "Select operation type:
+             - Failover: Apply policy on WAN eBGP peer(s) configured under cpe-primary-wan
+             - Fallback: Restore original policy on WAN eBGP peer(s) configured under cpe-primary-wan
+             - Switch-Off-DPS: Apply CoPP policy to disable OSPF adjancecy on Tunnel100
+             - Switch-On-DPS:  Remove CoPP policy to re-enable OSPF adjacency on Tunnel100";
         }
-        leaf swap-bgp-route-maps {
+        leaf failover-lan-and-b2b {
           type boolean;
           description
-            "Check to Switch eBGP Peer Route-Maps between primary/secondary peers";
-          default "true";
+            "If you enable this checkbox, CoPP policy will be applied to failover any IGP/FHRP/BGP protocols running on LAN and B2B";
+          when "../operation-type = 'failover'";
+        }
+        leaf created-by {
+          type string;
+          description
+            "string";
+          config false;
+        }
+        leaf created-on {
+          type string;
+          description
+            "string";
+          config false;
         }
       }
     }
@@ -8314,6 +8679,17 @@ module cpedeployment {
           description
             "Check if this is a Zero Touch Provsioning Site";
         }
+        leaf failover-state {
+          type enumeration {
+            enum "true";
+            enum "false";
+            enum "dps-off";
+          }
+          default "false";
+          description
+            "failover-state: True/False";
+          config false;
+        }
         leaf show-topology {
           type boolean;
           description
@@ -8372,6 +8748,17 @@ module cpedeployment {
           type boolean;
           description
             "Check if this is a Zero Touch Provisioning Site";
+        }
+        leaf failover-state {
+          type enumeration {
+            enum "true";
+            enum "false";
+            enum "dps-off";
+          }
+          default "false";
+          description
+            "failover-state: True/False";
+          config false;
         }
         leaf show-topology {
           type boolean;
@@ -9446,6 +9833,15 @@ module cpedeployment {
           when "../interface-type = 'Physical' or ../interface-type = 'SVI' or ../interface-type = 'Sub-Interface'";
           default "false";
         }
+        leaf inbound-qos-policy {
+          type leafref {
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/qos-service/policies/policy/name";
+          }
+          description
+            "Select Inbound QoS Policy-Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/inbound-qos";
+          when "../endpoint-level-qos = 'true'";
+        }
         leaf hierarchical-outbound-qos {
           type boolean;
           description
@@ -9744,6 +10140,15 @@ module cpedeployment {
           when "../interface-type = 'Physical' or ../interface-type = 'SVI' or ../interface-type = 'Sub-Interface'";
           default "false";
         }
+        leaf inbound-qos-policy {
+          type leafref {
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/qos-service/policies/policy/name";
+          }
+          description
+            "Select Inbound QoS Policy-Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/inbound-qos";
+          when "../endpoint-level-qos = 'true'";
+        }
         leaf hierarchical-outbound-qos {
           type boolean;
           description
@@ -10037,6 +10442,15 @@ module cpedeployment {
             "Check this option if you want to overwrite QoS policy specified in cpe-wan parent container";
           when "../interface-type = 'Physical' or ../interface-type = 'SVI' or ../interface-type = 'Sub-Interface'";
           default "false";
+        }
+        leaf inbound-qos-policy {
+          type leafref {
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/qos-service/policies/policy/name";
+          }
+          description
+            "Select Inbound QoS Policy-Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/inbound-qos";
+          when "../endpoint-level-qos = 'true'";
         }
         leaf hierarchical-outbound-qos {
           type boolean;
@@ -10336,6 +10750,15 @@ module cpedeployment {
           when "../interface-type = 'Physical' or ../interface-type = 'SVI' or ../interface-type = 'Sub-Interface'";
           default "false";
         }
+        leaf inbound-qos-policy {
+          type leafref {
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/qos-service/policies/policy/name";
+          }
+          description
+            "Select Inbound QoS Policy-Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/inbound-qos";
+          when "../endpoint-level-qos = 'true'";
+        }
         leaf hierarchical-outbound-qos {
           type boolean;
           description
@@ -10632,6 +11055,15 @@ module cpedeployment {
             "Check this option if you want to overwrite QoS policy specified in cpe-wan parent container";
           when "../interface-type = 'Physical' or ../interface-type = 'SVI' or ../interface-type = 'Sub-Interface'";
           default "false";
+        }
+        leaf inbound-qos-policy {
+          type leafref {
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/qos-service/policies/policy/name";
+          }
+          description
+            "Select Inbound QoS Policy-Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/inbound-qos";
+          when "../endpoint-level-qos = 'true'";
         }
         leaf hierarchical-outbound-qos {
           type boolean;
@@ -10930,6 +11362,15 @@ module cpedeployment {
             "Check this option if you want to overwrite QoS policy specified in cpe-wan parent container";
           when "../interface-type = 'Physical' or ../interface-type = 'SVI' or ../interface-type = 'Sub-Interface'";
           default "false";
+        }
+        leaf inbound-qos-policy {
+          type leafref {
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/qos-service/policies/policy/name";
+          }
+          description
+            "Select Inbound QoS Policy-Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/inbound-qos";
+          when "../endpoint-level-qos = 'true'";
         }
         leaf hierarchical-outbound-qos {
           type boolean;
@@ -11603,7 +12044,7 @@ module cpedeployment {
   grouping failover-fallback-triple-def {
     container failover-fallback-service {
       list failover-fallback {
-        key "name";
+        key "transaction-id";
         leaf sequence-number {
           type string;
           default "89";
@@ -11611,127 +12052,38 @@ module cpedeployment {
             "sequence-number";
           config false;
         }
-        leaf name {
+        leaf transaction-id {
           type string-no-space;
           description
             "Enter Transaction Name
-             This is an internal field used for Anuta NCX";
+             This is an internal field for Anuta NCX";
         }
-        leaf device {
-          type leafref {
-            path "/rp:resource-pools/rp:resource-pool[rp:name=current()/../../../resource-pool]/rp:device/rp:id";
+        leaf operation-type {
+          type enumeration {
+            enum "failover";
+            enum "fallback";
+            enum "switch-off-dps";
+            enum "switch-on-dps";
           }
+          mandatory true;
           description
-            "Select Device Name";
+            "Select operation type:
+             - Failover: Apply policy on WAN eBGP peer(s) configured under cpe-primary-wan & cpe-secondary-wan
+             - Fallback: Restore original policy on WAN eBGP peer(s) configured under cpe-primary-wan & cpe-secondary-wan
+             - Switch-Off-DPS: Apply CoPP policy to disable OSPF adjancecy on Tunnel100
+             - Switch-On-DPS:  Remove CoPP policy to re-enable OSPF adjacency on Tunnel100";
         }
-        leaf cpe-primary-mpls-wan-ebgp-neighbor {
-          type leafref {
-            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/triple-cpe-site/triple-cpe-site-services[site-name=current()/../../../site-name]/cpe-primary-mpls-wan/end-points/bgp-peers/peer-ip";
-          }
+        leaf created-by {
+          type string;
           description
-            "Select WAN eBGP peer under container cpe-primary-mpls-wan on which to perform failover/fallback operation";
+            "string";
+          config false;
         }
-        leaf cpe-primary-inet-wan-ebgp-neighbor {
-          type leafref {
-            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/triple-cpe-site/triple-cpe-site-services[site-name=current()/../../../site-name]/cpe-primary-inet-wan/end-points/bgp-peers/peer-ip";
-          }
+        leaf created-on {
+          type string;
           description
-            "Select WAN eBGP peer under container cpe-primary-inet-wan on which to perform failover/fallback operation";
-        }
-        leaf cpe-secondary-mpls-wan-ebgp-neighbor {
-          type leafref {
-            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/triple-cpe-site/triple-cpe-site-services[site-name=current()/../../../site-name]/cpe-secondary-mpls-wan/end-points/bgp-peers/peer-ip";
-          }
-          description
-            "Select WAN eBGP peer under container cpe-secondary-mpls-wan on which to perform failover/fallback operation";
-        }
-        leaf cpe-secondary-inet-wan-ebgp-neighbor {
-          type leafref {
-            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/triple-cpe-site/triple-cpe-site-services[site-name=current()/../../../site-name]/cpe-secondary-inet-wan/end-points/bgp-peers/peer-ip";
-          }
-          description
-            "Select WAN eBGP peer under container cpe-secondary-inet-wan on which to perform failover/fallback operation";
-        }
-        leaf cpe-tertiary-mpls-wan-ebgp-neighbor {
-          type leafref {
-            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/triple-cpe-site/triple-cpe-site-services[site-name=current()/../../../site-name]/cpe-tertiary-mpls-wan/end-points/bgp-peers/peer-ip";
-          }
-          description
-            "Select WAN eBGP peer under container cpe-tertiary-mpls-wan on which to perform failover/fallback operation";
-        }
-        leaf cpe-tertiary-inet-wan-ebgp-neighbor {
-          type leafref {
-            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/triple-cpe-site/triple-cpe-site-services[site-name=current()/../../../site-name]/cpe-tertiary-inet-wan/end-points/bgp-peers/peer-ip";
-          }
-          description
-            "Select WAN eBGP peer under container cpe-tertiary-inet-wan on which to perform failover/fallback operation";
-        }
-        leaf dps-tunnel-id {
-          type leafref {
-            path "/ac:devices/ac:device[ac:id=current()/../device]/dmvpn:dmvpntunnels/dmvpn:dmvpntunnel/dmvpn:name";
-          }
-          description
-            "Select DPS DMVPN Tunnel ID on which to perform failover/fallback operation";
-        }
-        leaf failover {
-          type boolean;
-          description
-            "Check if you want to perform a Failover Operation";
-          when "../fallback = 'false' ";
-        }
-        leaf fallback {
-          type boolean;
-          description
-            "Check if you want to perform a Fallback Operation";
-          when "../failover = 'false' ";
-        }
-        leaf failover-wan {
-          type boolean;
-          description
-            "If Checked, this will shutdown the WAN eBGP peer(s) specified";
-          when " ../failover = 'true' ";
-        }
-        leaf fallback-wan {
-          type boolean;
-          description
-            "If Checked, this will restore the WAN eBGP peer(s) specified";
-          when " ../fallback = 'true' ";
-        }
-        leaf failover-b2b {
-          type boolean;
-          description
-            "If Checked, this will shutdown all B2B Physical/Subinterfaces on the specified device";
-          when " ../failover = 'true' ";
-        }
-        leaf fallback-b2b {
-          type boolean;
-          description
-            "If Checked, this will restore all B2B Physical/Subinterfaces on the specified device";
-          when " ../fallback = 'true' ";
-        }
-        leaf failover-lan {
-          type boolean;
-          description
-            "If Checked, this will shutdown all LAN Physical/Subinterfaces on the specified device";
-          when " ../failover = 'true' ";
-        }
-        leaf fallback-lan {
-          type boolean;
-          description
-            "If Checked, this will restore all LAN Physical/Subinterfaces on the specified device";
-          when " ../fallback = 'true' ";
-        }
-        leaf failover-dps {
-          type boolean;
-          description
-            "If Checked, this will shutdown the DPS Tunnel Interface on the specified device";
-          when " ../failover = 'true' ";
-        }
-        leaf fallback-dps {
-          type boolean;
-          description
-            "If Checked, this will shutdown the DPS Tunnel Interface on the specified device";
-          when " ../fallback = 'true' ";
+            "string";
+          config false;
         }
       }
     }
@@ -11758,6 +12110,17 @@ module cpedeployment {
           type boolean;
           description
             "Check if this is a Zero-Touch Provisioning Site";
+        }
+        leaf failover-state {
+          type enumeration {
+            enum "true";
+            enum "false";
+            enum "dps-off";
+          }
+          default "false";
+          description
+            "failover-state: True/False";
+          config false;
         }
         leaf show-topology {
           type boolean;
@@ -12442,6 +12805,15 @@ module cpedeployment {
           when "../interface-type = 'Physical' or ../interface-type = 'SVI' or ../interface-type = 'Sub-Interface'";
           default "false";
         }
+        leaf inbound-qos-policy {
+          type leafref {
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/qos-service/policies/policy/name";
+          }
+          description
+            "Select Inbound QoS Policy-Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/inbound-qos";
+          when "../endpoint-level-qos = 'true'";
+        }
         leaf hierarchical-outbound-qos {
           type boolean;
           description
@@ -12982,6 +13354,15 @@ module cpedeployment {
           when "../interface-type = 'Physical' or ../interface-type = 'SVI' or ../interface-type = 'Sub-Interface'";
           default "false";
         }
+        leaf inbound-qos-policy {
+          type leafref {
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/qos-service/policies/policy/name";
+          }
+          description
+            "Select Inbound QoS Policy-Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/inbound-qos";
+          when "../endpoint-level-qos = 'true'";
+        }
         leaf hierarchical-outbound-qos {
           type boolean;
           description
@@ -13279,6 +13660,15 @@ module cpedeployment {
             "Check this option if you want to overwrite QoS policy specified in cpe-wan parent container";
           when "../interface-type = 'Physical' or ../interface-type = 'SVI' or ../interface-type = 'Sub-Interface'";
           default "false";
+        }
+        leaf inbound-qos-policy {
+          type leafref {
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/qos-service/policies/policy/name";
+          }
+          description
+            "Select Inbound QoS Policy-Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/inbound-qos";
+          when "../endpoint-level-qos = 'true'";
         }
         leaf hierarchical-outbound-qos {
           type boolean;
@@ -13927,7 +14317,7 @@ module cpedeployment {
   grouping failover-fallback-dualwan-def {
     container failover-fallback-service {
       list failover-fallback {
-        key "name";
+        key "transaction-id";
         leaf sequence-number {
           type string;
           default "89";
@@ -13935,45 +14325,49 @@ module cpedeployment {
             "sequence-number";
           config false;
         }
-        leaf name {
+        leaf transaction-id {
           type string-no-space;
           description
             "Enter Transaction Name
-             This is an internal field used by Anuta NCX";
+             This is an internal field for Anuta NCX";
         }
-        leaf cpe-primary-mpls-wan-ebgp-neighbor {
-          type leafref {
-            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services[site-name=current()/../../../site-name]/cpe-primary-mpls-wan/end-points/bgp-peers/peer-ip";
+        leaf operation-type {
+          type enumeration {
+            enum "failover";
+            enum "fallback";
+            enum "switch-off-dps";
+            enum "switch-on-dps";
+          }
+          mandatory true;
+          description
+            "Select operation type:
+             - Failover: Apply policy on WAN eBGP peer(s) configured under cpe-primary-wan & cpe-secondary-wan or selectively
+             - Fallback: Restore original policy on WAN eBGP peer(s) configured under cpe-primary-wan & cpe-secondary-wan
+             - Switch-Off-DPS: Apply CoPP policy to disable OSPF adjancecy on Tunnel100
+             - Switch-On-DPS:  Remove CoPP policy to re-enable OSPF adjacency on Tunnel100";
+        }
+        leaf selective-failover {
+          type enumeration {
+            enum "primary-cpe-primary-wan-link";
+            enum "primary-cpe-secondary-wan-link";
           }
           description
-            "Select WAN eBGP peer under container cpe-primary-mpls on which to perform failover/fallback operation";
+            "primary-cpe-primary-wan-link
+             primary-cpe-secondary-wan-link
+            ";
+          when "../operation-type = 'failover'";
         }
-        leaf cpe-primary-inet-wan-ebgp-neighbor {
-          type leafref {
-            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services[site-name=current()/../../../site-name]/cpe-primary-inet-wan/end-points/bgp-peers/peer-ip";
-          }
+        leaf created-by {
+          type string;
           description
-            "Select WAN eBGP peer under container cpe-primary-inet on which to perform failover/fallback operation";
+            "string";
+          config false;
         }
-        leaf cpe-secondary-mpls-wan-ebgp-neighbor {
-          type leafref {
-            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services[site-name=current()/../../../site-name]/cpe-secondary-mpls-wan/end-points/bgp-peers/peer-ip";
-          }
+        leaf created-on {
+          type string;
           description
-            "Select WAN eBGP peer under container cpe-secondary-mpls on which to perform failover/fallback operation";
-        }
-        leaf cpe-secondary-inet-wan-ebgp-neighbor {
-          type leafref {
-            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/dual-cpe-dual-wan-site/dual-cpe-dual-wan-site-services[site-name=current()/../../../site-name]/cpe-secondary-inet-wan/end-points/bgp-peers/peer-ip";
-          }
-          description
-            "Select WAN eBGP peer under container cpe-secondary-inet on which to perform failover/fallback operation";
-        }
-        leaf swap-bgp-route-maps {
-          type boolean;
-          description
-            "Check to Switch eBGP Peer Route-Maps between primary/secondary peers";
-          default "true";
+            "string";
+          config false;
         }
       }
     }
@@ -14258,6 +14652,15 @@ module cpedeployment {
             "Check this option if you want to overwrite QoS policy specified in cpe-wan parent container";
           when "../interface-type = 'Physical' or ../interface-type = 'SVI' or ../interface-type = 'Sub-Interface'";
           default "false";
+        }
+        leaf inbound-qos-policy {
+          type leafref {
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/qos-service/policies/policy/name";
+          }
+          description
+            "Select Inbound QoS Policy-Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/inbound-qos";
+          when "../endpoint-level-qos = 'true'";
         }
         leaf hierarchical-outbound-qos {
           type boolean;
@@ -14639,7 +15042,7 @@ module cpedeployment {
   grouping failover-fallback-def {
     container failover-fallback-service {
       list failover-fallback {
-        key "name";
+        key "transaction-id";
         leaf sequence-number {
           type string;
           default "88";
@@ -14647,33 +15050,47 @@ module cpedeployment {
             "sequence-number";
           config false;
         }
-        leaf name {
+        leaf transaction-id {
           type string-no-space;
           description
             "Enter Transaction Name
              This is an internal field used by Anuta NCX";
         }
-        leaf cpe-primary-wan-ebgp-neighbor {
+        leaf operation-type {
+          type enumeration {
+            enum "failover";
+            enum "fallback";
+            enum "switch-off-dps";
+            enum "switch-on-dps";
+          }
+          mandatory true;
+          description
+            "Select operation type:
+             - Failover: Selection of one eBGP peer mandatory to apply failover policy
+             - Fallback: Selection of one eBGP peer mandatory to apply fallover policy
+             - Switch-Off-DPS: Apply CoPP policy to disable OSPF adjancecy on Tunnel100
+             - Switch-On-DPS:  Remove CoPP policy to re-enable OSPF adjacency on Tunnel100";
+        }
+        leaf wan-ebgp-neighbor {
           type leafref {
             path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/single-cpe-site/single-cpe-site-services[site-name=current()/../../../site-name]/cpe-wan/end-points/bgp-peers/peer-ip";
           }
           description
             "Select WAN eBGP peer under container cpe-wan on which to perform failover/fallback operation";
+          when "../operation-type = 'failover' or ../operation-type = 'fallback'";
           mandatory true;
         }
-        leaf cpe-secondary-wan-ebgp-neighbor {
-          type leafref {
-            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/single-cpe-site/single-cpe-site-services[site-name=current()/../../../site-name]/cpe-wan/end-points/bgp-peers/peer-ip";
-          }
+        leaf created-by {
+          type string;
           description
-            "Select WAN eBGP peer under container cpe-wan on which to perform failover/fallback operation";
-          mandatory true;
+            "string";
+          config false;
         }
-        leaf swap-bgp-route-maps {
-          type boolean;
+        leaf created-on {
+          type string;
           description
-            "Check to Switch eBGP Peer Route-Maps between primary/secondary peers";
-          default "true";
+            "string";
+          config false;
         }
       }
     }
@@ -14870,7 +15287,7 @@ module cpedeployment {
           description
             "Enter switchport port security maximum MAC addresses allowed";
           when "../options =  'port-security' and ../port-security-options =  'maximum'";
-          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/if:interfaces/interface[long-name=current()/../../interface-name]/if-ext:port-security/if-ext:portSecurityMaximum";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/if:interfaces/interface[long-name=current()/../../interface-name]/if-ext:port-security/if-ext:port-security-maximum/if-ext:portSecurityMaximum";
         }
         leaf violation {
           type enumeration {
@@ -15380,6 +15797,15 @@ module cpedeployment {
           when "../interface-type = 'Physical' or ../interface-type = 'SVI' or ../interface-type = 'Sub-Interface'";
           default "false";
         }
+        leaf inbound-qos-policy {
+          type leafref {
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/qos-service/policies/policy/name";
+          }
+          description
+            "Select Inbound QoS Policy-Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/inbound-qos";
+          when "../endpoint-level-qos = 'true'";
+        }
         leaf hierarchical-outbound-qos {
           type boolean;
           description
@@ -15677,6 +16103,15 @@ module cpedeployment {
             "Check this option if you want to overwrite QoS policy specified in cpe-wan parent container";
           when "../interface-type = 'Physical' or ../interface-type = 'SVI' or ../interface-type = 'Sub-Interface'";
           default "false";
+        }
+        leaf inbound-qos-policy {
+          type leafref {
+            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/qos-service/policies/policy/name";
+          }
+          description
+            "Select Inbound QoS Policy-Name";
+          n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/if:interfaces/interface[long-name=current()/../interface-name]/inbound-qos";
+          when "../endpoint-level-qos = 'true'";
         }
         leaf hierarchical-outbound-qos {
           type boolean;
@@ -16077,6 +16512,17 @@ module cpedeployment {
           description
             "Check if this is a Zero-Touch Provisioning";
         }
+        leaf failover-state {
+          type enumeration {
+            enum "true";
+            enum "false";
+            enum "dps-off";
+          }
+          default "false";
+          description
+            "failover-state: True/False";
+          config false;
+        }
         leaf greenfield-site {
           type boolean;
           config false;
@@ -16168,7 +16614,7 @@ module cpedeployment {
   grouping failover-fallback-single-def {
     container failover-fallback-service {
       list failover-fallback {
-        key "name";
+        key "transaction-id";
         leaf sequence-number {
           type string;
           default "89";
@@ -16176,33 +16622,38 @@ module cpedeployment {
             "sequence-number";
           config false;
         }
-        leaf name {
+        leaf transaction-id {
           type string-no-space;
           description
             "Enter Transaction Name
              This is an internal field for Anuta NCX";
         }
-        leaf cpe-primary-wan-ebgp-neighbor {
-          type leafref {
-            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services[site-name=current()/../../../site-name]/cpe-primary-wan/end-points/bgp-peers/peer-ip";
+        leaf operation-type {
+          type enumeration {
+            enum "failover";
+            enum "fallback";
+            enum "switch-off-dps";
+            enum "switch-on-dps";
           }
-          description
-            "Select WAN eBGP peer under container cpe-primary-wan on which to perform failover/fallback operation";
           mandatory true;
-        }
-        leaf cpe-secondary-wan-ebgp-neighbor {
-          type leafref {
-            path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../../../name]/single-cpe-dual-wan-site/single-cpe-dual-wan-site-services[site-name=current()/../../../site-name]/cpe-secondary-wan/end-points/bgp-peers/peer-ip";
-          }
           description
-            "Select WAN eBGP peer under container cpe-secondary-wan on which to perform failover/fallback operation";
-          mandatory true;
+            "Select operation type:
+             - Failover: Apply policy on all WAN eBGP peers configured under cpe-primary-wan
+             - Fallback: Restore original policy on all WAN eBGP peers configured under cpe-primary-wan
+             - Switch-Off-DPS: Apply CoPP policy to disable OSPF adjancecy on Tunnel100
+             - Switch-On-DPS:  Remove CoPP policy to re-enable OSPF adjacency on Tunnel100";
         }
-        leaf swap-bgp-route-maps {
-          type boolean;
+        leaf created-by {
+          type string;
           description
-            "Check to Switch eBGP Peer Route-Maps between primary/secondary peers";
-          default "true";
+            "string";
+          config false;
+        }
+        leaf created-on {
+          type string;
+          description
+            "string";
+          config false;
         }
       }
     }
@@ -16229,6 +16680,17 @@ module cpedeployment {
           type boolean;
           description
             "Check if this is a Zero-Touch Provisioning Site";
+        }
+        leaf failover-state {
+          type enumeration {
+            enum "true";
+            enum "false";
+            enum "dps-off";
+          }
+          default "false";
+          description
+            "failover-state: True/False";
+          config false;
         }
         leaf greenfield-site {
           type boolean;
@@ -16348,6 +16810,11 @@ module cpedeployment {
             "tunnel-id";
           mandatory true;
         }
+        leaf update-profile {
+          type boolean;
+          description
+            "Check to update customer template";
+        }
         leaf operation {
           type operation-def;
           description
@@ -16437,10 +16904,31 @@ module cpedeployment {
           when " ../operation = 'CREATE' ";
           //n-ext:maps-to "/ac:devices/device/dmvpn:dmvpntunnels/dmvpntunnel/ipsec-profile-name";
         }
+        leaf apply-to-sites {
+          type boolean;
+          description
+            "Check if you want to perform bulk update operation on individual sites";
+          when "../apply-to-device-group = 'false'";
+        }
+        leaf apply-to-device-group {
+          type boolean;
+          description
+            "Check if you want to perform bulk update operation on device group";
+          when "../apply-to-sites = 'false'";
+        }
+        leaf device-group {
+          type leafref {
+            path "/ac:data-grouping/ac:definition/ac:name";
+          }
+          description
+            "device-group";
+          when "../apply-to-device-group = 'true'";
+        }
         leaf single-cpe-site {
           type boolean;
           description
             "single-cpe-site: True/False";
+          when "../apply-to-sites = 'true'";
         }
         leaf-list single-cpe-sites {
           type leafref {
@@ -16455,6 +16943,7 @@ module cpedeployment {
           type boolean;
           description
             "dual-cpe-site: True/False";
+          when "../apply-to-sites = 'true'";
         }
         leaf-list dual-cpe-sites {
           type leafref {
@@ -16469,6 +16958,7 @@ module cpedeployment {
           type boolean;
           description
             "single-cpe-dual-wan-site: True/False";
+          when "../apply-to-sites = 'true'";
         }
         leaf-list single-cpe-dual-wan-sites {
           type leafref {
@@ -16483,6 +16973,7 @@ module cpedeployment {
           type boolean;
           description
             "dual-cpe-dual-wan-site: True/False";
+          when "../apply-to-sites = 'true'";
         }
         leaf-list dual-cpe-dual-wan-sites {
           type leafref {
@@ -16497,6 +16988,7 @@ module cpedeployment {
           type boolean;
           description
             "triple-cpe-site: True/False";
+          when "../apply-to-sites = 'true'";
         }
         leaf-list triple-cpe-sites {
           type leafref {
@@ -16513,7 +17005,7 @@ module cpedeployment {
 
   grouping dmvpn-domain-profile-def {
     leaf name {
-      type string;
+      type string-no-space;
       description
         "name";
       n-ext:maps-to "/ac:devices/device/dmvpn:dmvpntunnels/dmvpntunnel/name";
@@ -16866,6 +17358,11 @@ module cpedeployment {
       when " ../crypto-type = 'IKEV1' ";
       n-ext:maps-to "/ac:devices/ac:device/dmvpn:crypto-policies/crypto-policy[crypto-type=IKEV1]/policy-number";
     }
+    leaf local-address {
+      type string-no-space;
+      description
+        "Enter Crypto ISAKMP Profile Source Interface";
+    }
     leaf auth-type {
       type auth-mode;
       description
@@ -17008,6 +17505,11 @@ module cpedeployment {
              DELETE
             ";
         }
+        leaf update-profile {
+          type boolean;
+          description
+            "Check to update customer template";
+        }
         leaf prefix-name {
           type string;
           description
@@ -17060,10 +17562,31 @@ module cpedeployment {
             "Enter maximum subnet length to match";
           when " ../operation = 'CREATE' ";
         }
+        leaf apply-to-sites {
+          type boolean;
+          description
+            "Check if you want to perform bulk update operation on individual sites";
+          when "../apply-to-device-group = 'false'";
+        }
+        leaf apply-to-device-group {
+          type boolean;
+          description
+            "Check if you want to perform bulk update operation on device group";
+          when "../apply-to-sites = 'false'";
+        }
+        leaf device-group {
+          type leafref {
+            path "/ac:data-grouping/ac:definition/ac:name";
+          }
+          description
+            "device-group";
+          when "../apply-to-device-group = 'true'";
+        }
         leaf single-cpe-site {
           type boolean;
           description
             "single-cpe-site: True/False";
+          when "../apply-to-sites = 'true'";
         }
         leaf-list single-cpe-sites {
           type leafref {
@@ -17078,6 +17601,7 @@ module cpedeployment {
           type boolean;
           description
             "dual-cpe-site: True/False";
+          when "../apply-to-sites = 'true'";
         }
         leaf-list dual-cpe-sites {
           type leafref {
@@ -17092,6 +17616,7 @@ module cpedeployment {
           type boolean;
           description
             "single-cpe-dual-wan-site: True/False";
+          when "../apply-to-sites = 'true'";
         }
         leaf-list single-cpe-dual-wan-sites {
           type leafref {
@@ -17106,6 +17631,7 @@ module cpedeployment {
           type boolean;
           description
             "dual-cpe-dual-wan-site: True/False";
+          when "../apply-to-sites = 'true'";
         }
         leaf-list dual-cpe-dual-wan-sites {
           type leafref {
@@ -17120,6 +17646,7 @@ module cpedeployment {
           type boolean;
           description
             "triple-cpe-site: True/False";
+          when "../apply-to-sites = 'true'";
         }
         leaf-list triple-cpe-sites {
           type leafref {
@@ -17461,6 +17988,11 @@ module cpedeployment {
       description
         "Enter Transaction ID. This is an internal field for Anuta NCX";
     }
+    leaf update-acl-in-profile {
+      type boolean;
+      description
+        "Check to update customer template";
+    }
     leaf access-list-name {
       type leafref {
         path "/ac:services/cpedeployment:managed-cpe-services/customer[name=current()/../../../name]/access-lists/access-list/name";
@@ -17469,6 +18001,12 @@ module cpedeployment {
         "access-list-name";
       mandatory true;
       //n-ext:maps-to "/ac:devices/device/acl:access-lists/access-list/name";
+    }
+    leaf rule-name {
+      type string-no-lead-trail-space;
+      description
+        "Enter ACL Rule Name (eg: permit ip any any)";
+      mandatory true;
     }
     leaf operation {
       type operation-def;
@@ -17688,10 +18226,31 @@ module cpedeployment {
       when " ../match-packets = 'dscp' ";
       //n-ext:maps-to "/ac:devices/device/acl:access-lists/access-list[name=current()/../../name]/acl-rules/acl-rule[name=current()/../name]/precedence";
     }
+    leaf apply-to-sites {
+      type boolean;
+      description
+        "Check if you want to perform bulk update operation on individual sites";
+      when "../apply-to-device-group = 'false'";
+    }
+    leaf apply-to-device-group {
+      type boolean;
+      description
+        "Check if you want to perform bulk update operation on device group";
+      when "../apply-to-sites = 'false'";
+    }
+    leaf device-group {
+      type leafref {
+        path "/ac:data-grouping/ac:definition/ac:name";
+      }
+      description
+        "device-group";
+      when "../apply-to-device-group = 'true'";
+    }
     leaf single-cpe-site {
       type boolean;
       description
         "single-cpe-site: True/False";
+      when "../apply-to-sites = 'true'";
     }
     leaf-list single-cpe-sites {
       type leafref {
@@ -17707,6 +18266,7 @@ module cpedeployment {
       type boolean;
       description
         "dual-cpe-site: True/False";
+      when "../apply-to-sites = 'true'";
     }
     leaf-list dual-cpe-sites {
       type leafref {
@@ -17722,6 +18282,7 @@ module cpedeployment {
       type boolean;
       description
         "single-cpe-dual-wan-site: True/False";
+      when "../apply-to-sites = 'true'";
     }
     leaf-list single-cpe-dual-wan-sites {
       type leafref {
@@ -17737,6 +18298,7 @@ module cpedeployment {
       type boolean;
       description
         "dual-cpe-dual-wan-site: True/False";
+      when "../apply-to-sites = 'true'";
     }
     leaf-list dual-cpe-dual-wan-sites {
       type leafref {
@@ -17752,6 +18314,7 @@ module cpedeployment {
       type boolean;
       description
         "triple-cpe-site: True/False";
+      when "../apply-to-sites = 'true'";
     }
     leaf-list triple-cpe-sites {
       type leafref {
@@ -17769,6 +18332,12 @@ module cpedeployment {
         type string-no-space;
         description
           "Enter Unique ID. This is an internal field for Anuta NCX";
+      }
+      leaf rule-name {
+        type string-no-lead-trail-space;
+        description
+          "Enter ACL Rule Name (eg: permit ip any any)";
+        mandatory true;
       }
       leaf acl-sequence-num {
         type uint32 {
@@ -19018,7 +19587,12 @@ module cpedeployment {
 
   grouping adaptive-dps {
     list adaptive-dps-eem-applet-services {
-      key "applet-name";
+      key "transaction-id";
+      leaf transaction-id {
+        type string-no-space;
+        description
+          "Enter Unique Transaction ID. This is an internal field for Anuta NCX";
+      }
       leaf applet-name {
         type string;
         description
@@ -19297,6 +19871,17 @@ module cpedeployment {
               ";
             when "../action-statement = 'syslog'";
             // n-ext:maps-to "/ac:devices/ac:device/l3:eem-applets/event-manager-applet/actions/action/syslog-priority";
+          }
+          leaf syslog-type {
+            type enumeration {
+              enum "priority";
+              enum "msg";
+            }
+            description
+              "priority
+               msg
+              ";
+            when "../action-statement = 'syslog'";
           }
           leaf syslog-msg {
             type string;
@@ -19610,7 +20195,10 @@ module cpedeployment {
       mandatory true;
     }
     leaf area {
-      type uint32;
+      type union {
+        type uint32;
+        type inet:ipv4-address;
+      }
       description
         "Enter OSPF area";
     }
@@ -23501,47 +24089,4 @@ module cpedeployment {
       anyxml payload;
     }
   }
-
-  /*rpc reapply-template {
-    description
-      "Reapply Customer Template";
-    input {
-      leaf route-map {
-        type boolean;
-        description
-          "Check To Re-Apply Route-Map Template";
-      }
-      leaf route-name-name {
-        type string-no-space;
-        description
-          "string";
-        when " ../route-map = 'true' ";
-      }
-      leaf access-list {
-        type boolean;
-        description
-          "Check to Re-Apply ACL Template";
-      }
-      leaf access-list-name {
-        type string-no-space;
-        description
-          "Select ACL Template to Re-Apply";
-        when " ../access-list = 'true' ";
-      }
-      leaf single-cpe-site {
-        type boolean;
-        description
-          "single-cpe-site: True/False";
-      }
-      leaf-list single-cpe-sites {
-        type string-no-space;
-        description
-          "single-sites";
-        when " ../single-cpe-site = 'true' ";
-      }
-    }
-    output {
-      anyxml payload;
-    }
-  }*/
 }

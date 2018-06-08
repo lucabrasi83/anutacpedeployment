@@ -117,6 +117,7 @@ class EndPoints(yang.AbstractYangServiceHandler):
         inputdict['bfd_interval'] = config.get_field_value('bfd_interval')
         inputdict['bfd_min_rx'] = config.get_field_value('bfd_min_rx')
         inputdict['bfd_multiplier'] = config.get_field_value('bfd_multiplier')
+        inputdict['nbar_discovery'] = config.get_field_value('nbar_discovery')
         # END OF FETCHING THE LEAF PARAMETERS
 
 
@@ -196,6 +197,7 @@ class EndPoints(yang.AbstractYangServiceHandler):
         inputdict['bfd_interval'] = config.get_field_value('bfd_interval')
         inputdict['bfd_min_rx'] = config.get_field_value('bfd_min_rx')
         inputdict['bfd_multiplier'] = config.get_field_value('bfd_multiplier')
+        inputdict['nbar_discovery'] = config.get_field_value('nbar_discovery')
         # END OF FETCHING THE LEAF PARAMETERS
 
          # START OF FETCHING THE LEAF PARAMETERS
@@ -238,6 +240,7 @@ class EndPoints(yang.AbstractYangServiceHandler):
         pinputdict['bfd_interval'] = pconfig.get_field_value('bfd_interval')
         pinputdict['bfd_min_rx'] = pconfig.get_field_value('bfd_min_rx')
         pinputdict['bfd_multiplier'] = pconfig.get_field_value('bfd_multiplier')
+        pinputdict['nbar_discovery'] = pconfig.get_field_value('nbar_discovery')
         # END OF FETCHING THE LEAF PARAMETERS
 
         #Fetch Device Object
@@ -308,6 +311,7 @@ class EndPoints(yang.AbstractYangServiceHandler):
         inputdict['bfd_interval'] = config.get_field_value('bfd_interval')
         inputdict['bfd_min_rx'] = config.get_field_value('bfd_min_rx')
         inputdict['bfd_multiplier'] = config.get_field_value('bfd_multiplier')
+        inputdict['nbar_discovery'] = config.get_field_value('nbar_discovery')
         # END OF FETCHING THE LEAF PARAMETERS
 
         #Fetch Device Object

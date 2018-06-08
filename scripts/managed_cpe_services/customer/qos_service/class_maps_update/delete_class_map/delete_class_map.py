@@ -72,13 +72,19 @@ class DeleteClassMap(yang.AbstractYangServiceHandler):
 
         # START OF FETCHING THE LEAF PARAMETERS
         inputdict['id'] = config.get_field_value('id')
+        inputdict['update_profile'] = config.get_field_value('update_profile')
         inputdict['name'] = config.get_field_value('name')
         inputdict['dscp'] = config.get_field_value('dscp')
+        inputdict['apply_to_sites'] = config.get_field_value('apply_to_sites')
+        inputdict['apply_to_device_group'] = config.get_field_value('apply_to_device_group')
+        inputdict['device_group'] = config.get_field_value('device_group')
         if inputdict['dscp'] is None:
           inputdict['dscp'] = []
         inputdict['access_group'] = config.get_field_value('access_group')
+        inputdict['custom_nbar'] = config.get_field_value('custom_nbar')
         inputdict['qos_group'] = config.get_field_value('qos_group')
         inputdict['protocol'] = config.get_field_value('protocol')
+        inputdict['http_url'] = config.get_field_value('http_url')
         if inputdict['protocol'] is None:
           inputdict['protocol'] = []
         inputdict['traffic_class'] = config.get_field_value('traffic_class')

@@ -84,6 +84,7 @@ def bgp_peer(cpeentity, entity, smodelctx, sdata, device, **kwargs):
     timers = inputdict['timers']
     keepalive_interval = inputdict['keepalive_interval']
     holdtime = inputdict['holdtime']
+    
     # if util.isEmpty(peer):
     #     raise Exception("Peer is empty")
     #if peer == 'peer-ip':
@@ -105,6 +106,12 @@ def bgp_peer(cpeentity, entity, smodelctx, sdata, device, **kwargs):
 
     if inputdict.get('bfd_fall_over') is not None:
         bgp_neighbor_obj.bfd_fall_over = inputdict['bfd_fall_over']
+
+    if inputdict.get('ebgp_multihop') is not None:
+        bgp_neighbor_obj.ebgp_multihop = inputdict['ebgp_multihop']
+
+    if inputdict.get('update_source') is not None:
+        bgp_neighbor_obj.local_interface = inputdict['update_source']
 
     if import_route_map != "":
         from cpedeployment_lib import route_maps
@@ -242,6 +249,10 @@ def update_bgp_peer(cpeentity, entity, smodelctx, sdata, device, **kwargs):
     prev_keeaplive_interval = previousconfig.get_field_value('keepalive_interval')
     holdtime = config.get_field_value('holdtime')
     prev_holdtime = previousconfig.get_field_value('holdtime')
+    ebgp_multihop = config.get_field_value('ebgp_multihop')
+    prev_ebgp_multihop = previousconfig.get_field_value('ebgp_multihop')
+    update_source = config.get_field_value('update_source')
+    prev_update_source = previousconfig.get_field_value('update_source')
 
 
     bgp_neighbor_obj = vrfs.vrf.router_bgp.neighbor.neighbor()
@@ -310,6 +321,12 @@ def update_bgp_peer(cpeentity, entity, smodelctx, sdata, device, **kwargs):
             bgp_neighbor_obj_new._empty_tag = True
         else:
             bgp_neighbor_obj_new.bfd_fall_over = bfd_fall_over
+
+    if ebgp_multihop != prev_ebgp_multihop:
+        bgp_neighbor_obj_new.ebgp_multihop = ebgp_multihop
+
+    if update_source != prev_update_source:
+        bgp_neighbor_obj_new.local_interface = update_source
 
     if timers != prev_timers:
         if timers == "false":

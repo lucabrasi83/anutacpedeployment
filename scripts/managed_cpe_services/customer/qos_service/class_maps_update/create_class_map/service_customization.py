@@ -202,7 +202,17 @@ class ServiceDataCustomization:
                         create_match_condition(entity, conf, sdata, **kwargs)
                         entity = 'cpe_secondary_dual'
                         create_match_condition(entity, conf, sdata, **kwargs)
-
+                        
+            if util.isNotEmpty(inputdict['device_group']):
+                dev_group_output = yang.Sdk.invokeRpc('controller:apply-data-grouping', '''<input><group-name>'''+ inputdict['device_group'] + '''</group-name></input>''')
+                dev_group_obj = util.parseXmlString(dev_group_output)
+                if hasattr(dev_group_obj, 'output'):
+                    if hasattr(dev_group_obj.output, 'result'):
+                        for each_dev in util.convert_to_list(dev_group_obj.output.result):
+                            if hasattr(each_dev, 'device'):
+                                if hasattr(each_dev.device, 'id'):
+                                    create_match_condition(each_dev.device.id, None, sdata, **kwargs)
+            modify_class(sdata, **kwargs)
     @staticmethod
     def process_service_device_bindings(smodelctx, sdata, dev, **kwargs):
       """ Custom API to modify the device bindings or Call the Business Login Handlers"""
@@ -233,6 +243,60 @@ class ServiceDataCustomization:
         for key, value in kwargs.iteritems():
           log("%s == %s" %(key,value))
 
+def modify_class(sdata, **kwargs):
+    uri = sdata.getRcPath()
+    uri_list = uri.split('/', 5)
+    url = '/'.join(uri_list[0:4])
+    inputdict = kwargs['inputdict']
+    name = inputdict['name']
+    if inputdict['update_profile'] == 'true':
+        url = url + "/qos-service/class-maps"
+        description = '' if util.isEmpty(inputdict['description']) else inputdict['description']
+        match_type = '' if util.isEmpty(inputdict['match_type']) else inputdict['match_type']
+        dscp = '' if util.isEmpty(inputdict['dscp']) else inputdict['dscp']
+        access_group = '' if util.isEmpty(inputdict['access_group']) else inputdict['access_group']
+        qos_group = '' if util.isEmpty(inputdict['qos_group']) else inputdict['qos_group']
+        protocol = '' if util.isEmpty(inputdict['protocol']) else inputdict['protocol']
+        http_url = '' if util.isEmpty(inputdict['http_url']) else inputdict['http_url']
+
+        payload = '''
+                    <class-map>
+                        <description>'''+description+'''</description>
+                        <qos-group>'''+qos_group+'''</qos-group>'''
+        if len(dscp) > 0:
+            if isinstance(dscp, list) is True:
+                for ds in dscp:
+                    payload = payload + '''<dscp>'''+ds+'''</dscp>'''
+            else:
+                payload = payload + '''<dscp>'''+dscp+'''</dscp>'''
+
+        if len(protocol) > 0:
+            if isinstance(protocol, list) is True:
+                for pr in protocol:
+                    payload = payload + '''<protocol>'''+pr+'''</protocol>'''
+            else:
+                payload = payload + '''<protocol>'''+protocol+'''</protocol>'''
+
+        if len(http_url) > 0:
+            if isinstance(http_url, list) is True:
+                for hu in http_url:
+                    payload = payload + '''<http-url>'''+hu+'''</http-url>'''
+            else:
+                payload = payload + '''<http-url>'''+http_url+'''</http-url>'''
+
+        if len(access_group) > 0:
+            if isinstance(access_group, list) is True:
+                for ag in access_group:
+                    payload = payload + '''<access-group>'''+ag+'''</access-group>'''
+            else:
+                payload = payload + '''<access-group>'''+access_group+'''</access-group>'''
+
+        payload = payload + '''   <name>'''+name+'''</name>
+                        <match-type>'''+match_type+'''</match-type>
+                    </class-map>
+                  '''
+        yang.Sdk.createData(url, payload, sdata.getSession(), False)
+
 
 def create_match_condition(entity, conf, sdata, **kwargs):
     if entity == 'cpe':
@@ -253,6 +317,8 @@ def create_match_condition(entity, conf, sdata, **kwargs):
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_secondary.device_ip)
     elif entity == 'cpe_tertiary_triple':
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_tertiary.device_ip)
+    else:
+        device = devicemgr.getDeviceById(entity)
 
     inputdict = kwargs['inputdict']
     cls_name = inputdict['name']

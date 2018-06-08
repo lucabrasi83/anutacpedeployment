@@ -22,13 +22,15 @@ services
                             |
                             customer
                                     |
-                                    route-maps
-                                              |
-                                              update-route-maps
-                                                               
+                                    qos-service
+                                               |
+                                               custom-nbar
+                                                         |
+                                                         nbar-signatures
+                                                                  
 Schema Representation:
 
-/services/managed-cpe-services/customer/route-maps/update-route-maps
+/services/managed-cpe-services/customer/qos-service/custom-nbar/nbar-signatures
 """
 
 from servicemodel import util
@@ -45,7 +47,7 @@ from cpedeployment.cpedeployment_lib import log
 
 import service_customization
 
-class ReapplyRouteMap(yang.AbstractYangServiceHandler):
+class NbarSignatures(yang.AbstractYangServiceHandler):
     _instance = None
 
     def __init__(self):
@@ -53,10 +55,11 @@ class ReapplyRouteMap(yang.AbstractYangServiceHandler):
         self.create_pre_processor = service_customization.CreatePreProcessor()
 
     def create(self, id, sdata):
+        import random
         sdata.getSession().addYangSessionPreReserveProcessor(self.create_pre_processor)
 
         #Fetch Local Config Object
-        config = getCurrentObjectConfig(id, sdata, 'reapply_route_map')
+        config = getCurrentObjectConfig(id, sdata, 'nbar_signatures')
 
         #Fetch Service Model Context Object
         smodelctx = None
@@ -64,56 +67,49 @@ class ReapplyRouteMap(yang.AbstractYangServiceHandler):
         #Fetch Parent Object
         parentobj = None
 
-        dev = []
+        dev = None
         devbindobjs={}
         inputdict = {}
 
         # START OF FETCHING THE LEAF PARAMETERS
+        inputdict['name'] = config.get_field_value('name')
         inputdict['id'] = config.get_field_value('id')
-        inputdict['route_map_name'] = config.get_field_value('route_map_name')
-        inputdict['single_cpe_site'] = config.get_field_value('single_cpe_site')
-        inputdict['single_cpe_sites'] = config.get_field_value('single_cpe_sites')
-        if inputdict.get('single_cpe_sites') is None:
-          inputdict['single_cpe_sites'] = '[]'
-        inputdict['dual_cpe_site'] = config.get_field_value('dual_cpe_site')
-        inputdict['dual_cpe_sites'] = config.get_field_value('dual_cpe_sites')
-        if inputdict.get('dual_cpe_sites') is None:
-          inputdict['dual_cpe_sites'] = '[]'
-        inputdict['single_cpe_dual_wan_site'] = config.get_field_value('single_cpe_dual_wan_site')
-        inputdict['single_cpe_dual_wan_sites'] = config.get_field_value('single_cpe_dual_wan_sites')
-        if inputdict.get('single_cpe_dual_wan_sites') is None:
-          inputdict['single_cpe_dual_wan_sites'] = '[]'
-        inputdict['triple_cpe_site'] = config.get_field_value('triple_cpe_site')
-        inputdict['triple_cpe_sites'] = config.get_field_value('triple_cpe_sites')
-        if inputdict.get('triple_cpe_sites') is None:
-            inputdict['triple_cpe_sites'] = '[]'
-        inputdict['dual_cpe_dual_wan_site'] = config.get_field_value('dual_cpe_dual_wan_site')
-        inputdict['dual_cpe_dual_wan_sites'] = config.get_field_value('dual_cpe_dual_wan_sites')
-        if inputdict.get('dual_cpe_dual_wan_sites') is None:
-            inputdict['dual_cpe_dual_wan_sites'] = '[]'
+        inputdict['custom_nbar_type'] = config.get_field_value('custom_nbar_type')
+        inputdict['http_url'] = config.get_field_value('http_url')
+        inputdict['ssl_sni'] = config.get_field_value('ssl_sni')
+        inputdict['transport_type'] = config.get_field_value('transport_type')
+        inputdict['ip_type'] = config.get_field_value('ip_type')
+        inputdict['ip_address'] = config.get_field_value('ip_address')
+        inputdict['subnet_address'] = config.get_field_value('subnet_address')
+        inputdict['subnet_length'] = config.get_field_value('subnet_length')
+        inputdict['port_type'] = config.get_field_value('port_type')
+        inputdict['port_number'] = config.get_field_value('port_number')
+        inputdict['start_port'] = config.get_field_value('start_port')
+        inputdict['end_port'] = config.get_field_value('end_port')
+        inputdict['direction'] = config.get_field_value('direction')
         # END OF FETCHING THE LEAF PARAMETERS
 
         inputkeydict = {}
         # START OF FETCHING THE PARENT KEY LEAF PARAMETERS
-        inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-3].split('=')[1]
+        inputkeydict['managed_cpe_services_customer_name'] = sdata.getRcPath().split('/')[-4].split('=')[1]
         # END OF FETCHING THE PARENT KEY LEAF PARAMETERS
 
         #Use the custom methods to process the data
-        service_customization.ServiceDataCustomization.process_service_create_data(smodelctx, sdata, dev, device=dev, parentobj=parentobj, inputdict=inputdict, config=config)
+        service_customization.ServiceDataCustomization.process_service_create_data(smodelctx, sdata, dev, parentobj=parentobj, inputdict=inputdict, config=config)
 
-        #Start of Device binding with python bindings
-        #End of Device binding
+        #Use the custom method to process/create payload
+        service_customization.ServiceDataCustomization.process_service_device_bindings(smodelctx, sdata, dev, inputdict=inputdict, parentobj=parentobj, config=config, devbindobjs=devbindobjs)
 
     def update(self, id, sdata):
         #Fetch Local Config Object
-        config = getCurrentObjectConfig(id, sdata, 'reapply_route_map')
+        config = getCurrentObjectConfig(id, sdata, 'nbar_signatures')
 
         #Fetch Service Model Context Object
         smodelctx = None
 
         #Fetch Parent Object
         parentobj = None
-        dev = []
+        dev = None
         #Use the custom method to process the data
         service_customization.ServiceDataCustomization.process_service_update_data(smodelctx, sdata, dev=dev, parentobj=parentobj, config=config)
 
@@ -121,22 +117,22 @@ class ReapplyRouteMap(yang.AbstractYangServiceHandler):
         sdata.getSession().addYangSessionPreReserveProcessor(self.delete_pre_processor)
 
         #Fetch Local Config Object
-        config = getCurrentObjectConfig(id, sdata, 'reapply_route_map')
+        config = getCurrentObjectConfig(id, sdata, 'nbar_signatures')
 
         #Fetch Service Model Context Object
         smodelctx = None
 
         #Fetch Parent Object
         parentobj = None
-        dev = []
+        dev = None
         #Use the custom method to process the data
         service_customization.ServiceDataCustomization.process_service_delete_data(smodelctx, sdata, dev=dev, parentobj=parentobj, config=config)
 
     @staticmethod
     def getInstance():
-        if(ReapplyRouteMap._instance == None):
-            ReapplyRouteMap._instance = ReapplyRouteMap()
-        return ReapplyRouteMap._instance
+        if(NbarSignatures._instance == None):
+            NbarSignatures._instance = NbarSignatures()
+        return NbarSignatures._instance
 
     #def rollbackCreate(self, id, sdata):
         #        log('rollback: id = %s, sdata = %s' % (id, sdata))

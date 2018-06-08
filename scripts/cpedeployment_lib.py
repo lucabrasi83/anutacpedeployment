@@ -905,6 +905,7 @@ def ospf(entity, smodelctx, sdata, device, **kwargs):
     '''
     if distribute_list == 'true':
         if util.isNotEmpty(dis_list_route_map) and util.isNotEmpty(dis_list_route_update):
+            route_maps(dis_list_route_map, device, sdata, None, entity)
             ospf_obj.dis_list_route_map = dis_list_route_map
             ospf_obj.dis_list_route_update = dis_list_route_update
     ospf_url = device.url + '/l3features:vrfs/vrf=%s' % (vrf)
@@ -918,7 +919,7 @@ def ospf(entity, smodelctx, sdata, device, **kwargs):
             if default_inf_metric_type != "2":
                 ospf_obj_def.metric_type = default_inf_metric_type
         if util.isNotEmpty(default_inf_route_map):
-            route_maps(default_inf_route_map, device, sdata)
+            route_maps(default_inf_route_map, device, sdata, None, entity)
             ospf_obj_def.route_map = default_inf_route_map
         if util.isNotEmpty(default_inf_always):
             ospf_obj_def.always = default_inf_always
@@ -1003,7 +1004,7 @@ def access_list(smodelctx, sdata, dev, **kwargs):
     '''
     get_access_list_obj = dev.url+"/acl:access-lists/access-list=%s"%(inputdict['name'])
     if not yang.Sdk.dataExists(get_access_list_obj):
-        yang.Sdk.createData(dev.url, '<access-lists/>', sdata.getSession(), False)
+        #yang.Sdk.createData(dev.url, '<access-lists/>', sdata.getSession(), False)
         access_obj_url = dev.url + '/access-lists'
         yang.Sdk.createData(access_obj_url, access_obj.getxml(filter=True), sdata.getSession())
 
@@ -1664,12 +1665,49 @@ def route_map(route_map_name, route_map_entries, device, sdata, int_name=None, e
             if condition_value is not None:
                 if condition_value == 'LAN-INTERFACE' and condition_type == 'interface':
                     matchcondition_obj.value = int_name
+
+                # Added for SQS 01/06/2018
+                elif condition_value == 'SQS-OSPF-TAG' and condition_type == 'tag':
+                    # Construct dotted-decimal tag value from local Loopback0 IP
+                    uri = sdata.getRcPath()
+                    uri_list = uri.split('/',7)
+                    url = '/'.join(uri_list[0:6])
+
+                    # For SQS - Tag Value should always be primary-cpe loopback IP in case of dual/triple CPE sites
+                    entity_map = {
+                                  "cpe": "cpe",
+                                  "cpe_dual": "cpe",
+                                  "cpe_primary": "cpe-primary",
+                                  "cpe_secondary": "cpe-primary",
+                                  "cpe_primary_dual": "cpe-primary",
+                                  "cpe_secondary_dual": "cpe-primary",
+                                  "cpe_primary_triple": "cpe-primary",
+                                  "cpe_secondary_triple": "cpe-primary",
+                                  "cpe_tertiary_triple": "cpe-primary"
+                    }
+                    
+                    mgmt_loopback_url = url + '/' + entity_map[entity] + '/loopback/loopback=0'
+                    if yang.Sdk.dataExists(mgmt_loopback_url):
+                        loopback_output = yang.Sdk.getData(mgmt_loopback_url, '', sdata.getTaskId())
+                        loopback_obj = util.parseXmlString(loopback_output)
+                        
+                        if hasattr(loopback_obj, 'loopback'):
+                            if hasattr(loopback_obj.loopback, 'ip'):
+                                if util.isNotEmpty(loopback_obj.loopback.ip):
+                                    matchcondition_obj.value = loopback_obj.loopback.ip
+                                else:
+                                    raise Exception("No Valid IP Address found in Loopback0. Cannot proceed with OSPF TAG dotted-decimal generation.")
+                    else:
+                        raise Exception("No Loopback0 interface found in site service. Cannot proceed with OSPF TAG dotted-decimal generation.")
+
                 else:
                     matchcondition_obj.value = condition_value
             if condition_type == 'as-path' and condition_value is not None:
                 as_path_acl(condition_value, device, sdata)
             if condition_type == 'community' and condition_value is not None:
                 community_lists(condition_value, device, sdata)
+           
+
             if condition_type == 'address' and condition_value is not None:
                 from endpoint_lib import access_group_def
                 uri = sdata.getRcPath()
@@ -1776,6 +1814,43 @@ def route_map(route_map_name, route_map_entries, device, sdata, int_name=None, e
                             if hasattr(obj_bgp_as.triple_cpe_site_services, 'bgp_as'):
                                 bgpas = obj_bgp_as.triple_cpe_site_services.bgp_as
                                 set_obj1.value = set_value.replace('AS', bgpas)
+
+                elif 'FLEX-COMMUNITY-LOCAL' in set_value and set_type == 'community':
+                    # Construct community value from local Loopback0 last two octets
+                    uri = sdata.getRcPath()
+                    uri_list = uri.split('/',7)
+                    url = '/'.join(uri_list[0:6])
+
+                    # Quick  fix 16/05/2018
+                    entity_map = {
+                                  "cpe": "cpe",
+                                  "cpe_dual": "cpe",
+                                  "cpe_primary": "cpe-primary",
+                                  "cpe_secondary": "cpe-secondary",
+                                  "cpe_primary_dual": "cpe-primary",
+                                  "cpe_secondary_dual": "cpe-secondary",
+                                  "cpe_primary_triple": "cpe-primary",
+                                  "cpe_secondary_triple": "cpe-secondary",
+                                  "cpe_tertiary_triple": "cpe-tertiary"
+                    }
+                    
+                    mgmt_loopback_url = url + '/' + entity_map[entity] + '/loopback/loopback=0'
+                    if yang.Sdk.dataExists(mgmt_loopback_url):
+                        loopback_output = yang.Sdk.getData(mgmt_loopback_url, '', sdata.getTaskId())
+                        loopback_obj = util.parseXmlString(loopback_output)
+                        
+                        if hasattr(loopback_obj, 'loopback'):
+                            if hasattr(loopback_obj.loopback, 'ip'):
+                                if util.isNotEmpty(loopback_obj.loopback.ip):
+                                    loopback_mgmt_ip = loopback_obj.loopback.ip
+                                    loopback_mgmt_list = loopback_mgmt_ip.split('.')
+                                    flex_com_value = ':'.join(loopback_mgmt_list[2:4])
+                                    set_obj1.value = set_value.replace('FLEX-COMMUNITY-LOCAL', flex_com_value)
+                                else:
+                                    raise Exception("No Valid IP Address found in Loopback0. Cannot proceed with FLEX-COMMUNITY generation")
+                    else:
+                        raise Exception("No Loopback0 interface found in site service. Cannot proceed with FLEX-COMMUNITY generation")
+
                 elif set_type == 'local-preference':
                     set_obj1.value = set_value
                 elif set_type == 'comm-list':
@@ -1823,6 +1898,10 @@ def adv_networks(entity, smodelctx, sdata, device, **kwargs):
     prefix = util.IPPrefix(prefix)
     ip_address = prefix.address
     netmask = prefix.netmask
+    if netmask == '255.255.255.0':
+        for x in range(192,224):
+            if int(ip_address.split('.')[0]) == int(x):
+                netmask = None
     adv_networks_obj = vrfs.vrf.router_bgp.network.network()
     adv_networks_obj.ip_address = ip_address
     if str(netmask) != "0.0.0.0":
@@ -2220,7 +2299,84 @@ def community_list(sdata, device, community_list_obj_given):
         community_list_obj.condition = condition
     value = community_list_obj_given.value
     if util.isNotEmpty(value):
-        community_list_obj.value = value
+
+        # Construct community value from local Loopback0 last two octets
+        if value == "FLEX-COMMUNITY-LOCAL":
+            
+            uri = sdata.getRcPath()
+            uri_list = uri.split('/',7)
+            url = '/'.join(uri_list[0:6])
+            
+            mgmt_loopback_url = url + '/cpe/loopback/loopback=0'
+            if yang.Sdk.dataExists(mgmt_loopback_url):
+                loopback_output = yang.Sdk.getData(mgmt_loopback_url, '', sdata.getTaskId())
+                loopback_obj = util.parseXmlString(loopback_output)
+                
+                if hasattr(loopback_obj, 'loopback'):
+                    if hasattr(loopback_obj.loopback, 'ip'):
+                        if util.isNotEmpty(loopback_obj.loopback.ip):
+                            loopback_mgmt_ip = loopback_obj.loopback.ip
+                            loopback_mgmt_list = loopback_mgmt_ip.split('.')
+                            flex_com_value = ':'.join(loopback_mgmt_list[2:4])
+                            community_list_obj.value = flex_com_value
+                        else:
+                            raise Exception("No Valid IP Address found in Loopback0. Cannot proceed with FLEX-COMMUNITY generation")
+
+            else:
+                raise Exception("No Loopback0 interface found in site service. Cannot proceed with FLEX-COMMUNITY generation")
+
+        # Construct community value from primary CPE Loopback0 last two octets
+        elif value == "FLEX-COMMUNITY-PRI":
+            
+            uri = sdata.getRcPath()
+            uri_list = uri.split('/',6)
+            url = '/'.join(uri_list[0:6])
+            
+            mgmt_loopback_url = url + '/cpe-primary/loopback/loopback=0'
+            if yang.Sdk.dataExists(mgmt_loopback_url):
+                loopback_output = yang.Sdk.getData(mgmt_loopback_url, '', sdata.getTaskId())
+                loopback_obj = util.parseXmlString(loopback_output)
+                
+                if hasattr(loopback_obj, 'loopback'):
+                    if hasattr(loopback_obj.loopback, 'ip'):
+                        if util.isNotEmpty(loopback_obj.loopback.ip):
+                            loopback_mgmt_ip = loopback_obj.loopback.ip
+                            loopback_mgmt_list = loopback_mgmt_ip.split('.')
+                            flex_com_value = ':'.join(loopback_mgmt_list[2:4])
+                            community_list_obj.value = flex_com_value
+                        else:
+                            raise Exception("No Valid IP Address found in Loopback0. Cannot proceed with FLEX-COMMUNITY generation")
+
+            else:
+                raise Exception("No Loopback0 interface found in site service. Cannot proceed with FLEX-COMMUNITY generation")
+
+        # Construct community value from secondary CPE Loopback0 last two octets
+        elif value == "FLEX-COMMUNITY-SEC":
+            
+            uri = sdata.getRcPath()
+            uri_list = uri.split('/',6)
+            url = '/'.join(uri_list[0:6])
+            
+            mgmt_loopback_url = url + '/cpe-secondary/loopback/loopback=0'
+            if yang.Sdk.dataExists(mgmt_loopback_url):
+                loopback_output = yang.Sdk.getData(mgmt_loopback_url, '', sdata.getTaskId())
+                loopback_obj = util.parseXmlString(loopback_output)
+                
+                if hasattr(loopback_obj, 'loopback'):
+                    if hasattr(loopback_obj.loopback, 'ip'):
+                        if util.isNotEmpty(loopback_obj.loopback.ip):
+                            loopback_mgmt_ip = loopback_obj.loopback.ip
+                            loopback_mgmt_list = loopback_mgmt_ip.split('.')
+                            flex_com_value = ':'.join(loopback_mgmt_list[2:4])
+                            community_list_obj.value = flex_com_value
+                        else:
+                            raise Exception("No Valid IP Address found in Loopback0. Cannot proceed with FLEX-COMMUNITY generation")
+
+            else:
+                raise Exception("No Loopback0 interface found in site service. Cannot proceed with FLEX-COMMUNITY generation")
+
+        else:
+            community_list_obj.value = value
     community_list_url = device.url + '/l3features:community-lists'
     payload = community_list_obj.getxml()
     if util.isEmpty(community_list_entry):
@@ -2945,7 +3101,7 @@ def vrf(entity, dev, sdata, **kwarg):
     bgpglobalholdtime = kwarg['inputdict']['bgp_holdtime_timer']
     default_information_originate = kwarg['inputdict']['default_information_originate']
     peer_group = kwarg['inputdict']['peer_group']
-    listen_cidr = kwarg['inputdict']['listen_cidr']
+    # listen_cidr = kwarg['inputdict']['listen_cidr']
     bgp_settings = kwarg['inputdict']['bgp_settings']
     bgp_redis_internal = kwarg['inputdict']['bgp_redis_internal']
     if bgp_community_new == "true":
@@ -2979,84 +3135,103 @@ def vrf(entity, dev, sdata, **kwarg):
         yang.Sdk.createData(router_bgp_url, bgpobj.getxml(filter=True), sdata.getSession())
 
     if util.isNotEmpty(peer_group):
-        remote_as = peer_description = next_hop_self = send_community = import_route_map = None
-        export_route_map = soft_reconfiguration = password = default_originate = None
-        default_originate_route_map = timers = keepalive_interval = holdtime = None
-        advertisement_interval = time_in_sec = None
 
-        get_bgp_url = url + "/bgp-peer-groups/bgp-peer-group=%s" %(peer_group)
-        if yang.Sdk.dataExists(get_bgp_url):
-            xml_output = yang.Sdk.getData(get_bgp_url, '',sdata.getTaskId())
-            peergroup = util.parseXmlString(xml_output)
-            #util.log_debug( "obj: ",peergroup)
-            peergroup = peergroup.bgp_peer_group
-            if hasattr(peergroup, 'remote_as'):
-                remote_as = peergroup.remote_as
-            if hasattr(peergroup, 'peer_description'):
-                peer_description = peergroup.peer_description
-            if hasattr(peergroup, 'next_hop_self'):
-                next_hop_self = peergroup.next_hop_self
-            if hasattr(peergroup, 'send_community'):
-                send_community = peergroup.send_community
-            if hasattr(peergroup, 'import_route_map'):
-                import_route_map = peergroup.import_route_map
-            if hasattr(peergroup, 'export_route_map'):
-                export_route_map = peergroup.export_route_map
-            if hasattr(peergroup, 'soft_reconfiguration'):
-                soft_reconfiguration = peergroup.soft_reconfiguration
-            if hasattr(peergroup, 'password'):
-                password = peergroup.password
-            if hasattr(peergroup, 'default_originate'):
-                default_originate = peergroup.default_originate
-            if hasattr(peergroup, 'default_originate_route_map'):
-                default_originate_route_map = peergroup.default_originate_route_map
-            if hasattr(peergroup, 'timers'):
-                timers = peergroup.timers
-            if hasattr(peergroup, 'keepalive_interval'):
-                keepalive_interval = peergroup.keepalive_interval
-            if hasattr(peergroup, 'holdtime'):
-                holdtime = peergroup.holdtime
-            if hasattr(peergroup, 'advertisement_interval'):
-                advertisement_interval = peergroup.advertisement_interval
-            if hasattr(peergroup, 'time_in_sec'):
-                time_in_sec = peergroup.time_in_sec
+        for pg in util.convert_to_list(peer_group):
+            remote_as = peer_description = listen_range = next_hop_self = send_community = import_route_map = None
+            export_route_map = soft_reconfiguration = password = default_originate = None
+            default_originate_route_map = timers = keepalive_interval = holdtime = None
+            advertisement_interval = time_in_sec = ebgp_multihop = update_source = as_override = None
 
-        bgp_neighbor_obj = vrfs.vrf.router_bgp.peer_group.peer_group()
-        bgp_neighbor_obj.name = peer_group
-        if util.isNotEmpty(remote_as) or remote_as is not None:
-            bgp_neighbor_obj.remote_as = remote_as
-        if util.isNotEmpty(peer_description) or peer_description is not None:
-            bgp_neighbor_obj.description = peer_description
-        if util.isNotEmpty(next_hop_self) or next_hop_self is not None:
-            bgp_neighbor_obj.next_hop_self = next_hop_self
-        if util.isNotEmpty(send_community) or send_community is not None:
-            bgp_neighbor_obj.send_community = send_community
-        if util.isNotEmpty(import_route_map) or import_route_map is not None:
-            bgp_neighbor_obj.in_route_map = import_route_map
-        if util.isNotEmpty(export_route_map) or export_route_map is not None:
-            bgp_neighbor_obj.out_route_map = export_route_map
-        if util.isNotEmpty(soft_reconfiguration) or soft_reconfiguration is not None:
-            bgp_neighbor_obj.soft_reconfiguration = soft_reconfiguration
-        if util.isNotEmpty(password) or password is not None:
-            bgp_neighbor_obj.password = password
-        if util.isNotEmpty(default_originate) or default_originate is not None:
-            bgp_neighbor_obj.default_originate = default_originate
-        if util.isNotEmpty(default_originate_route_map) or default_originate_route_map is not None:
-            bgp_neighbor_obj.def_originate_route_map = default_originate_route_map
-        if timers == 'true':
-            bgp_neighbor_obj.keepalive_interval = keepalive_interval
-            bgp_neighbor_obj.holdtime = holdtime
-        if advertisement_interval == 'true':
-            bgp_neighbor_obj.advertisement_interval = time_in_sec
-        router_bgp_neighbor_url = dev.url + '/l3features:vrfs/vrf=%s/router-bgp' % (vrf_name)
-        yang.Sdk.createData(router_bgp_neighbor_url, bgp_neighbor_obj.getxml(filter=True), sdata.getSession())
+            get_bgp_url = url + "/bgp-peer-groups/bgp-peer-group=%s" % (pg)
+            if yang.Sdk.dataExists(get_bgp_url):
+                xml_output = yang.Sdk.getData(get_bgp_url, '',sdata.getTaskId())
+                peergroup = util.parseXmlString(xml_output)
+                #util.log_debug( "obj: ",peergroup)
+                peergroup = peergroup.bgp_peer_group
+                if hasattr(peergroup, 'remote_as'):
+                    remote_as = peergroup.remote_as
+                if hasattr(peergroup, 'peer_description'):
+                    peer_description = peergroup.peer_description
+                if hasattr(peergroup, 'listen_range'):
+                    listen_range = peergroup.listen_range
+                if hasattr(peergroup, 'next_hop_self'):
+                    next_hop_self = peergroup.next_hop_self
+                if hasattr(peergroup, 'send_community'):
+                    send_community = peergroup.send_community
+                if hasattr(peergroup, 'import_route_map'):
+                    import_route_map = peergroup.import_route_map
+                if hasattr(peergroup, 'export_route_map'):
+                    export_route_map = peergroup.export_route_map
+                if hasattr(peergroup, 'soft_reconfiguration'):
+                    soft_reconfiguration = peergroup.soft_reconfiguration
+                if hasattr(peergroup, 'password'):
+                    password = peergroup.password
+                if hasattr(peergroup, 'default_originate'):
+                    default_originate = peergroup.default_originate
+                if hasattr(peergroup, 'default_originate_route_map'):
+                    default_originate_route_map = peergroup.default_originate_route_map
+                if hasattr(peergroup, 'timers'):
+                    timers = peergroup.timers
+                if hasattr(peergroup, 'keepalive_interval'):
+                    keepalive_interval = peergroup.keepalive_interval
+                if hasattr(peergroup, 'holdtime'):
+                    holdtime = peergroup.holdtime
+                if hasattr(peergroup, 'advertisement_interval'):
+                    advertisement_interval = peergroup.advertisement_interval
+                if hasattr(peergroup, 'time_in_sec'):
+                    time_in_sec = peergroup.time_in_sec
+                if hasattr(peergroup, 'ebgp_multihop'):
+                    ebgp_multihop = peergroup.ebgp_multihop
+                if hasattr(peergroup, 'update_source'):
+                    update_source = peergroup.update_source
+                if hasattr(peergroup, 'as_override'):
+                    as_override = peergroup.as_override
 
-    if util.isNotEmpty(listen_cidr) and util.isNotEmpty(peer_group) and vrf_name == 'GLOBAL':
-        bgp_listen_obj = vrfs.vrf.router_bgp.listen_range.listen_range()
-        bgp_listen_obj.name = peer_group
-        bgp_listen_obj.cidr = listen_cidr
-        router_bgp_listen_url = dev.url + '/l3features:vrfs/vrf=%s/router-bgp' % (vrf_name)
-        yang.Sdk.createData(router_bgp_listen_url, bgp_listen_obj.getxml(filter=True), sdata.getSession())
+            bgp_neighbor_obj = vrfs.vrf.router_bgp.peer_group.peer_group()
+            bgp_neighbor_obj.name = pg
+            if util.isNotEmpty(remote_as) or remote_as is not None:
+                bgp_neighbor_obj.remote_as = remote_as
+            if util.isNotEmpty(peer_description) or peer_description is not None:
+                bgp_neighbor_obj.description = peer_description
+            if util.isNotEmpty(next_hop_self) or next_hop_self is not None:
+                bgp_neighbor_obj.next_hop_self = next_hop_self
+            if util.isNotEmpty(send_community) or send_community is not None:
+                bgp_neighbor_obj.send_community = send_community
+            if util.isNotEmpty(import_route_map) or import_route_map is not None:
+                route_maps(import_route_map, dev, sdata, None, entity)
+                bgp_neighbor_obj.in_route_map = import_route_map
+            if util.isNotEmpty(export_route_map) or export_route_map is not None:
+                route_maps(export_route_map, dev, sdata, None, entity)
+                bgp_neighbor_obj.out_route_map = export_route_map
+            if util.isNotEmpty(soft_reconfiguration) or soft_reconfiguration is not None:
+                bgp_neighbor_obj.soft_reconfiguration = soft_reconfiguration
+            if util.isNotEmpty(password) or password is not None:
+                bgp_neighbor_obj.password = password
+            if util.isNotEmpty(default_originate) or default_originate is not None:
+                bgp_neighbor_obj.default_originate = default_originate
+            if util.isNotEmpty(default_originate_route_map) or default_originate_route_map is not None:
+                route_maps(default_originate_route_map, dev, sdata)
+                bgp_neighbor_obj.def_originate_route_map = default_originate_route_map
+            if util.isNotEmpty(ebgp_multihop) or ebgp_multihop is not None:
+                bgp_neighbor_obj.ebgp_multihop = ebgp_multihop
+            if util.isNotEmpty(update_source) or update_source is not None:
+                bgp_neighbor_obj.local_interface = update_source
+            if util.isNotEmpty(as_override) or as_override is not None:
+                bgp_neighbor_obj.as_override = as_override
+            if timers == 'true':
+                bgp_neighbor_obj.keepalive_interval = keepalive_interval
+                bgp_neighbor_obj.holdtime = holdtime
+            if advertisement_interval == 'true':
+                bgp_neighbor_obj.advertisement_interval = time_in_sec
+            router_bgp_neighbor_url = dev.url + '/l3features:vrfs/vrf=%s/router-bgp' % (vrf_name)
+            yang.Sdk.createData(router_bgp_neighbor_url, bgp_neighbor_obj.getxml(filter=True), sdata.getSession())
+
+            if util.isNotEmpty(listen_range) and util.isNotEmpty(pg) and vrf_name == 'GLOBAL':
+                bgp_listen_obj = vrfs.vrf.router_bgp.listen_range.listen_range()
+                bgp_listen_obj.name = pg
+                bgp_listen_obj.cidr = listen_range
+                router_bgp_listen_url = dev.url + '/l3features:vrfs/vrf=%s/router-bgp' % (vrf_name)
+                yang.Sdk.createData(router_bgp_listen_url, bgp_listen_obj.getxml(filter=True), sdata.getSession())
 
     redistconnected = kwarg['inputdict']['redistribute_connected']
     if redistconnected == 'true':
@@ -3083,23 +3258,62 @@ def vrf(entity, dev, sdata, **kwarg):
 
     aggsumnetworks = kwarg['inputdict']['aggregate_summary_networks']
     if aggsumnetworks == 'true':
-        sumnetworks = kwarg['inputdict']['summary_networks']
-        if sumnetworks is not None:
-            each_sumnet = sumnetworks.split(",")
-            for i in range(len(each_sumnet)):
-                net = each_sumnet[i].strip()
-                summaryobj = vrfs.vrf.router_bgp.aggregate_summary_network.aggregate_summary_network()
-                cidr_pattern = '^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}' + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])' + '/(([0-9])|([1-2][0-9])|(3[0-2]))$';
-                if re.match(cidr_pattern,net) == None:
-                    raise Exception("Please provide CIDR for summary networks")
+        if util.isEmpty(kwarg['inputdict']['summary_networks']):
+            raise Exception('Aggregate Summary network is empty')
+        sumnetworks = util.convert_to_list(kwarg['inputdict']['summary_networks'])
+        if len(sumnetworks) > 0:
+            if isinstance(sumnetworks, list) is True:
+                for sum_network in sumnetworks:
+                    if sum_network.__contains__(' '):
+                        each_sumnet = sum_network.split(",")
+                        for i in range(len(each_sumnet)):
+                            net = each_sumnet[i].strip()
+                            summaryobj = vrfs.vrf.router_bgp.aggregate_summary_network.aggregate_summary_network()
+                            cidr_pattern = '^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}' + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])' + '/(([0-9])|([1-2][0-9])|(3[0-2]))$';
+                            ip_net_pattern = '^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}' + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])' + ' (([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}' + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$';
+                            if re.match(cidr_pattern,net) == None and re.match(ip_net_pattern,net) == None:
+                                raise Exception("Please provide CIDR/ IP NETMASK for summary networks")
 
-                netmasklen = net.split("/")[1]
-                prefix = util.IPPrefix(net)
-                ip_address = prefix.address
-                netmask = prefix.netmask
-                summaryobj.network = ip_address + ' ' + netmask
-                router_bgp_redist_url = dev.url + '/l3features:vrfs/vrf=%s/router-bgp' % (vrf_name)
-                yang.Sdk.createData(router_bgp_redist_url, summaryobj.getxml(filter=True), sdata.getSession())
+                            if net.__contains__('/'):
+                                netmasklen = net.split("/")[1]
+                                prefix = util.IPPrefix(net)
+                                ip_address = prefix.address
+                                netmask = prefix.netmask
+                                summaryobj.network = ip_address + ' ' + netmask
+                            else:
+                                summaryobj.network = net
+                            router_bgp_redist_url = dev.url + '/vrfs/vrf=%s/router-bgp' % (vrf_name)
+                            yang.Sdk.createData(router_bgp_redist_url, summaryobj.getxml(filter=True), sdata.getSession())
+                    elif sum_network.__contains__(','):
+                        each_sumnet = sum_network.split(",")
+                        for i in range(len(each_sumnet)):
+                            net = each_sumnet[i].strip()
+                            summaryobj = vrfs.vrf.router_bgp.aggregate_summary_network.aggregate_summary_network()
+                            cidr_pattern = '^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}' + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])' + '/(([0-9])|([1-2][0-9])|(3[0-2]))$';
+                            if re.match(cidr_pattern,net) == None:
+                                raise Exception("Please provide CIDR for summary networks")
+
+                            netmasklen = net.split("/")[1]
+                            prefix = util.IPPrefix(net)
+                            ip_address = prefix.address
+                            netmask = prefix.netmask
+                            summaryobj.network = ip_address + ' ' + netmask
+                            router_bgp_redist_url = dev.url + '/vrfs/vrf=%s/router-bgp' % (vrf_name)
+                            yang.Sdk.createData(router_bgp_redist_url, summaryobj.getxml(filter=True), sdata.getSession())
+                    else:
+                        net = sum_network.strip()
+                        summaryobj = vrfs.vrf.router_bgp.aggregate_summary_network.aggregate_summary_network()
+                        cidr_pattern = '^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}' + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])' + '/(([0-9])|([1-2][0-9])|(3[0-2]))$';
+                        if re.match(cidr_pattern,net) == None:
+                            raise Exception("Please provide CIDR for summary networks")
+
+                        netmasklen = net.split("/")[1]
+                        prefix = util.IPPrefix(net)
+                        ip_address = prefix.address
+                        netmask = prefix.netmask
+                        summaryobj.network = ip_address + ' ' + netmask
+                        router_bgp_redist_url = dev.url + '/vrfs/vrf=%s/router-bgp' % (vrf_name)
+                        yang.Sdk.createData(router_bgp_redist_url, summaryobj.getxml(filter=True), sdata.getSession())
 
 
 class ServiceModelContext(yang.ServiceModelContext):

@@ -75,6 +75,10 @@ class UpdatePrefixList(yang.AbstractYangServiceHandler):
         # START OF FETCHING THE LEAF PARAMETERS
         inputdict['id'] = config.get_field_value('id')
         inputdict['prefix_list_name'] = config.get_field_value('prefix_list_name')
+        inputdict['update_profile'] = config.get_field_value('update_profile')
+        inputdict['apply_to_sites'] = config.get_field_value('apply_to_sites')
+        inputdict['apply_to_device_group'] = config.get_field_value('apply_to_device_group')
+        inputdict['device_group'] = config.get_field_value('device_group')
         inputdict['operation'] = config.get_field_value('operation')
         inputdict['prefix_name'] = config.get_field_value('prefix_name')
         inputdict['rule_num'] = config.get_field_value('rule_num')
@@ -137,6 +141,10 @@ class UpdatePrefixList(yang.AbstractYangServiceHandler):
         # START OF FETCHING THE LEAF PARAMETERS
         inputdict['id'] = config.get_field_value('id')
         inputdict['prefix_list_name'] = config.get_field_value('prefix_list_name')
+        inputdict['update_profile'] = config.get_field_value('update_profile')
+        inputdict['apply_to_sites'] = config.get_field_value('apply_to_sites')
+        inputdict['apply_to_device_group'] = config.get_field_value('apply_to_device_group')
+        inputdict['device_group'] = config.get_field_value('device_group')
         inputdict['operation'] = config.get_field_value('operation')
         inputdict['prefix_name'] = config.get_field_value('prefix_name')
         inputdict['rule_num'] = config.get_field_value('rule_num')
@@ -192,6 +200,10 @@ class UpdatePrefixList(yang.AbstractYangServiceHandler):
         # START OF FETCHING THE LEAF PARAMETERS
         inputdict['id'] = config.get_field_value('id')
         inputdict['prefix_list_name'] = config.get_field_value('prefix_list_name')
+        inputdict['update_profile'] = config.get_field_value('update_profile')
+        inputdict['apply_to_sites'] = config.get_field_value('apply_to_sites')
+        inputdict['apply_to_device_group'] = config.get_field_value('apply_to_device_group')
+        inputdict['device_group'] = config.get_field_value('device_group')
         inputdict['operation'] = config.get_field_value('operation')
         inputdict['prefix_name'] = config.get_field_value('prefix_name')
         inputdict['rule_num'] = config.get_field_value('rule_num')

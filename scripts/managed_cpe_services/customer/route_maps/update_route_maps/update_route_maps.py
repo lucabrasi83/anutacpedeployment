@@ -71,6 +71,10 @@ class UpdateRouteMaps(yang.AbstractYangServiceHandler):
         # START OF FETCHING THE LEAF PARAMETERS
         inputdict['id'] = config.get_field_value('id')
         inputdict['route_map_name'] = config.get_field_value('route_map_name')
+        inputdict['update_profile'] = config.get_field_value('update_profile')
+        inputdict['apply_to_sites'] = config.get_field_value('apply_to_sites')
+        inputdict['apply_to_device_group'] = config.get_field_value('apply_to_device_group')
+        inputdict['device_group'] = config.get_field_value('device_group')
         inputdict['sequence_number'] = config.get_field_value('sequence_number')
         inputdict['action'] = config.get_field_value('action')
         inputdict['entry'] = config.get_field_value('entry')

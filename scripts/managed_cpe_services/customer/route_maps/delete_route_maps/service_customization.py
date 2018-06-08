@@ -199,6 +199,17 @@ class ServiceDataCustomization:
                         entity = 'cpe_secondary_dual'
                         delete_route_map(entity, conf, sdata, **kwargs)
 
+            if util.isNotEmpty(inputdict['device_group']):
+                dev_group_output = yang.Sdk.invokeRpc('controller:apply-data-grouping', '''<input><group-name>'''+ inputdict['device_group'] + '''</group-name></input>''')
+                dev_group_obj = util.parseXmlString(dev_group_output)
+                if hasattr(dev_group_obj, 'output'):
+                    if hasattr(dev_group_obj.output, 'result'):
+                        for each_dev in util.convert_to_list(dev_group_obj.output.result):
+                            if hasattr(each_dev, 'device'):
+                                if hasattr(each_dev.device, 'id'):
+                                    delete_route_map(each_dev.device.id, None, sdata, **kwargs)
+            modify_route(sdata, **kwargs)
+
     @staticmethod
     def process_service_device_bindings(smodelctx, sdata, dev, **kwargs):
       """ Custom API to modify the device bindings or Call the Business Login Handlers"""
@@ -230,6 +241,30 @@ class ServiceDataCustomization:
         for key, value in kwargs.iteritems():
           log("%s == %s" %(key,value))
 
+def modify_route(sdata, **kwargs):
+    uri = sdata.getRcPath()
+    uri_list = uri.split('/', 5)
+    url = '/'.join(uri_list[0:4])
+    inputdict = kwargs['inputdict']
+    route_map_name = inputdict['route_map_name']
+    if inputdict['update_profile'] == 'true':
+        url = url + "/route-maps/route-map=" + str(route_map_name)
+        sequence_number = '' if util.isEmpty(inputdict['sequence_number']) else inputdict['sequence_number']
+        action = '' if util.isEmpty(inputdict['action']) else inputdict['action']
+        entry = '' if util.isEmpty(inputdict['entry']) else inputdict['entry']
+        condition_type = '' if util.isEmpty(inputdict['condition_type']) else inputdict['condition_type']
+        value = '' if util.isEmpty(inputdict['value']) else inputdict['value']
+        set_type = '' if util.isEmpty(inputdict['set_type']) else inputdict['set_type']
+        ip = '' if util.isEmpty(inputdict['ip']) else inputdict['ip']
+        set_value = '' if util.isEmpty(inputdict['set_value']) else inputdict['set_value']
+        if entry == 'match-condition':
+            url = url + "/route-map-entries=" + str(sequence_number) + "/match-condition=" + str(condition_type) + "," + str(value)
+            if yang.Sdk.dataExists(url):
+                yang.Sdk.deleteData(url, '', sdata.getTaskId(), sdata.getSession())
+        elif entry == 'set-action':
+            url = url + "/route-map-entries=" + str(sequence_number) + "/set-action=" + str(set_type) + "," + str(set_value)
+            if yang.Sdk.dataExists(url):
+                yang.Sdk.deleteData(url, '', sdata.getTaskId(), sdata.getSession())
 
 def delete_route_map(entity, conf, sdata, **kwargs):
     if entity == 'cpe':
@@ -250,6 +285,8 @@ def delete_route_map(entity, conf, sdata, **kwargs):
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_secondary.device_ip)
     elif entity == 'cpe_tertiary_triple':
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_tertiary.device_ip)
+    else:
+        device = devicemgr.getDeviceById(entity)
 
     inputdict = kwargs['inputdict']
     route_map_name = inputdict['route_map_name']
