@@ -167,7 +167,7 @@ class CreatePreProcessor(yang.SessionPreProcessor):
         operations = session.getOperations()
         """Add any move operations for creation"""
         log('operations: %s' % (operations))
-        yang.moveOperations(operations, ['CreateInterface', 'UpdateInterface'], ['CreateQPolicyMap'], True)
+        yang.moveOperations(operations, ['CreateInterface', 'UpdateInterface'], ['CreateQPolicyMap', 'CreateAccessList', 'CreateAclRule'], True)
         yang.moveOperations(operations, ['CreateInterfaceOspf', 'CreateInterfaceHSRP'], ['CreateInterface', 'UpdateInterface'], True)
         util.log_debug('pass00: operations: %s' % (operations))
         # yang.moveOperations(operations, ['CreateInterface'], ['UpdateVrf'], True)

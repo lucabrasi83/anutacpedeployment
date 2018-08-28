@@ -220,6 +220,7 @@ class ServiceDataCustomization:
                         for each_dev in util.convert_to_list(dev_group_obj.output.result):
                             if hasattr(each_dev, 'device'):
                                 if hasattr(each_dev.device, 'id'):
+                                    yang.Sdk.append_taskdetail(sdata.getTaskId(), str(each_dev.device.id))
                                     create_match_condition(each_dev.device.id, None, sdata, **kwargs)
 
             modify_class(sdata, **kwargs)
