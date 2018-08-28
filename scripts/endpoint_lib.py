@@ -1024,6 +1024,12 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
         if delay is not None:
             dmvpn_obj.delay = delay
 
+        
+        # if nat_inside == 'true':
+        #     dmvpn_obj.nat_name = 'inside'
+        # if nat_outside == 'true':
+        #     dmvpn_obj.nat_name = 'outside'
+
         if hasattr(obj.dmvpn_tunnel_profile, 'no_nhrp_route_watch'):
             no_nhrp_route_watch = obj.dmvpn_tunnel_profile.no_nhrp_route_watch
         else:
@@ -1119,6 +1125,7 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
         dmvpn_obj.nhrp_network_id = obj.dmvpn_tunnel_profile.nhrp_nw_id
         dmvpn_obj.tunnel_key = obj.dmvpn_tunnel_profile.tunnel_key
         dmvpn_obj.description = interface_description
+        # Bugzilla Bug ID #17  - Fixed NAT statement to be configurable for DMVPN tunnel interface with a profile attached
         if nat_inside == 'true':
             dmvpn_obj.nat_name = 'inside'
         if nat_outside == 'true':
@@ -1226,7 +1233,9 @@ def wan_endpoint(entity, smodelctx, sdata, device, **kwargs):
                 dmvpn_obj_nhrp.sourceip = local_nhrpmaps.wan_tunnel_ip
                 dmvpn_obj_nhrp.nhrp_type = 'nhs'
                 dmvpn_obj_nhrp.destip = local_nhrpmaps.wan_public_ip
-                yang.Sdk.createData(device.url+'/dmvpn:dmvpntunnels/dmvpntunnel=%s' % (obj.dmvpn_tunnel_profile.tunnel_id), dmvpn_obj_nhrp.getxml(filter=True), sdata.getSession())
+                yang.Sdk.createData(device.url+'/dmvpn:dmvpntunnels/dmvpntunnel=%s' % 
+                    (inputdict['tunnel_interface_id'] if util.isNotEmpty(inputdict['tunnel_interface_id']) else obj.dmvpn_tunnel_profile.tunnel_id), 
+                    dmvpn_obj_nhrp.getxml(filter=True), sdata.getSession())
 
 def IpsecCreation(sdata, device, ipsecProfileSelected, fvrf, wan_public_ip, smodelctx):
     obj = getLocalObject(sdata, 'customer')
@@ -1278,6 +1287,7 @@ def IpsecCreation(sdata, device, ipsecProfileSelected, fvrf, wan_public_ip, smod
                 policy_number = crypto_profile_dynamic.get_field_value('policy_number')
                 auth_type = crypto_profile_dynamic.get_field_value('auth_type')
                 local_address = crypto_profile_dynamic.get_field_value('local_address')
+                isakmp_keepalive = crypto_profile_dynamic.get_field_value('keepalive')
 
     if hasattr(obj.customer.ipsec.transform_sets, 'transform_set'):
         obj.customer.ipsec.transform_sets.transform_set = util.convert_to_list(obj.customer.ipsec.transform_sets.transform_set)
@@ -1318,6 +1328,7 @@ def IpsecCreation(sdata, device, ipsecProfileSelected, fvrf, wan_public_ip, smod
     policy_payload.hash = hash1
     policy_payload.group = group
     policy_payload.life_time = life_time
+    policy_payload.keepalive = isakmp_keepalive
     if not yang.Sdk.dataExists(device.url + '/dmvpn:crypto-policies'):
         yang.Sdk.createData(device.url, '<crypto-policies/>', sdata.getSession(), False)
     yang.Sdk.createData(device.url+'/dmvpn:crypto-policies', policy_payload.getxml(filter=True), sdata.getSession())
@@ -2663,7 +2674,7 @@ def delete_physical_interface(entity, smodelctx, sdata, device, **kwarg):
             intf_obj_phy.mode = "l3-interface"
             intf_obj.mace_enable._empty_tag = True
             #intf_obj_phy.vrf._empty_tag = True
-            intf_obj_phy.link_negotiation._empty_tag = True
+            #intf_obj_phy.link_negotiation._empty_tag = True
             intf_obj_phy.outbound_qos._empty_tag = True
             intf_obj_phy.inbound_qos._empty_tag = True
             intf_obj_phy.acl_inbound_name._empty_tag = True
@@ -2710,7 +2721,7 @@ def delete_physical_interface(entity, smodelctx, sdata, device, **kwarg):
             intf_obj.long_name = interface_name
             intf_obj.description._empty_tag = True
             intf_obj.mode = "l3-interface"
-            intf_obj.link_negotiation._empty_tag = True
+            #intf_obj.link_negotiation._empty_tag = True
             intf_obj.outbound_qos._empty_tag = True
             intf_obj.inbound_qos._empty_tag = True
             intf_obj.acl_inbound_name._empty_tag = True
@@ -3089,6 +3100,7 @@ def back_endpoint(entity, smodelctx, sdata, device, **kwargs):
     if auto_negotiation == "true":
         link_negotiation = "auto"
 
+
     intf_obj = interfaces.interface.interface()
     if mode == "sub-interface" or mode == "l3-interface":
         intf_obj.name = interface_name
@@ -3181,7 +3193,9 @@ def back_endpoint(entity, smodelctx, sdata, device, **kwargs):
     if interface_type == "Physical":
         if link_negotiation is not None:
             intf_obj.link_negotiation = link_negotiation
+            intf_obj.duplex = "auto"
         if auto_negotiation != "true":
+            intf_obj.link_negotiation = None
             if util.isNotEmpty(speed):
                 intf_obj.speed = speed
             if util.isNotEmpty(duplex):
@@ -3207,7 +3221,9 @@ def back_endpoint(entity, smodelctx, sdata, device, **kwargs):
         intf_obj_phy.mode = "l3-interface"
         if link_negotiation is not None:
             intf_obj_phy.link_negotiation = link_negotiation
+            intf_obj_phy.duplex = "auto"
         if auto_negotiation != "true":
+            intf_obj_phy.link_negotiation = None
             if util.isNotEmpty(speed):
                 intf_obj_phy.speed = speed
             if util.isNotEmpty(duplex):
@@ -3972,7 +3988,9 @@ def new_back_endpoint(entity, smodelctx, sdata, device, **kwargs):
     if interface_type == "Physical":
         if link_negotiation is not None:
             intf_obj.link_negotiation = link_negotiation
+            intf_obj.duplex = "auto"
         if auto_negotiation != "true":
+            intf_obj.link_negotiation = None
             if util.isNotEmpty(speed):
                 intf_obj.speed = speed
             if util.isNotEmpty(duplex):
@@ -3998,7 +4016,9 @@ def new_back_endpoint(entity, smodelctx, sdata, device, **kwargs):
         intf_obj_phy.mode = "l3-interface"
         if link_negotiation is not None:
             intf_obj_phy.link_negotiation = link_negotiation
+            intf_obj_phy.duplex = "auto"
         if auto_negotiation != "true":
+            intf_obj_phy.link_negotiation = None
             if util.isNotEmpty(speed):
                 intf_obj_phy.speed = speed
             if util.isNotEmpty(duplex):
@@ -4971,7 +4991,39 @@ def update_wan_endpoint(sdata, device, **kwargs):
                         #intf_obj.pbr_policy._empty_tag = True
                         
         intf_obj.pbr_policy._empty_tag = True
-    
+
+    # Handle update endpoint level QoS
+    if inputdict['endpoint_level_qos'] != pinputdict['endpoint_level_qos'] and util.isNotEmpty(inputdict['endpoint_level_qos']):
+        if inputdict['endpoint_level_qos'] == "true":
+            if inputdict['inbound_qos_policy'] != pinputdict['inbound_qos_policy'] and util.isNotEmpty(inputdict['inbound_qos_policy']):
+                qos_child(None, inputdict['inbound_qos_policy'], device, sdata)
+                intf_obj.inbound_qos = inputdict['inbound_qos_policy']
+
+            if inputdict['hierarchical_outbound_qos'] != pinputdict['hierarchical_outbound_qos'] and util.isNotEmpty(inputdict['hierarchical_outbound_qos']):
+                if inputdict['hierarchical_outbound_qos'] == "true":
+                    if inputdict['hierarchical_qos_policy_name'] != pinputdict['hierarchical_qos_policy_name'] and util.isNotEmpty(inputdict['hierarchical_qos_policy_name']):
+
+                        ep_map_obj = policy_maps.policy_map.policy_map()
+                        ep_map_obj.name = inputdict['hierarchical_qos_policy_name']
+
+                        yang.Sdk.createData(device.url+"/qos:policy-maps", ep_map_obj.getxml(filter=True), sdata.getSession())
+                        intf_obj.outbound_qos = inputdict['hierarchical_qos_policy_name']
+                        ep_cls_obj = policy_maps.policy_map.class_entry.class_entry()
+                        ep_cls_obj.class_name = 'class-default'
+                        if util.isNotEmpty(inputdict['shape_average']):
+                            ep_cls_obj.shape_average = inputdict['shape_average']
+                        if util.isNotEmpty(inputdict['bits_sustained']) and inputdict['bits_sustained'] is not None:
+                            ep_cls_obj.bits_sustained = inputdict['bits_sustained']
+                        if util.isNotEmpty(inputdict['bits_excess']) and inputdict['bits_excess'] is not None:
+                            ep_cls_obj.bits_excess = inputdict['bits_excess']
+                        if inputdict['child_qos_policy_name'] != pinputdict['child_qos_policy_name'] and util.isNotEmpty(inputdict['child_qos_policy_name']):
+                            qos_child(None, inputdict['child_qos_policy_name'], device, sdata)
+                            ep_cls_obj.service_policy = inputdict['child_qos_policy_name']
+                        yang.Sdk.createData(device.url+"/qos:policy-maps/policy-map=%s" %(inputdict['hierarchical_qos_policy_name']), ep_cls_obj.getxml(filter=True), sdata.getSession())
+
+
+
+
     if inputdict['nat_outside'] != pinputdict['nat_outside'] and util.isNotEmpty(inputdict['nat_outside']):
         if inputdict['nat_outside'] == "true":
             intf_obj.nat_name = "outside"
@@ -4987,6 +5039,11 @@ def update_wan_endpoint(sdata, device, **kwargs):
     if inputdict['wan_interface_bandwidth'] != pinputdict['wan_interface_bandwidth'] and util.isNotEmpty(inputdict['wan_interface_bandwidth']):
         intf_obj.bandwidth = inputdict['wan_interface_bandwidth']
     elif inputdict['wan_interface_bandwidth'] != pinputdict['wan_interface_bandwidth'] and util.isEmpty(inputdict['wan_interface_bandwidth']):
+        intf_obj.bandwidth._empty_tag = True
+
+    if inputdict['tunnel_bandwidth'] != pinputdict['tunnel_bandwidth'] and util.isNotEmpty(inputdict['tunnel_bandwidth']):
+        intf_obj.bandwidth = inputdict['tunnel_bandwidth']
+    elif inputdict['tunnel_bandwidth'] != pinputdict['tunnel_bandwidth'] and util.isEmpty(inputdict['tunnel_bandwidth']):
         intf_obj.bandwidth._empty_tag = True
 
     if inputdict['bfd'] != pinputdict['bfd'] and util.isNotEmpty(inputdict['bfd']):
@@ -5536,12 +5593,18 @@ def update_lan_profile(sdata, **kwargs):
                     lan_if_name = endpoint.interface_name
                 elif endpoint.interface_type == "Sub-Interface":
                     lan_if_name = endpoint.interface_name + '.' + endpoint.vlan_id
+                    lan_phy_name = endpoint.interface_name
                 elif endpoint.interface_type == "SVI":
                     lan_if_name = "Vlan" + endpoint.vlan_id
 
                 intf_obj = interfaces.interface.interface()
                 intf_obj.name = lan_if_name
                 intf_obj.long_name = lan_if_name
+
+                if endpoint.interface_type == "Sub-Interface":
+                    int_phy_obj = interfaces.interface.interface()
+                    int_phy_obj.name = lan_phy_name
+                    int_phy_obj.long_name = lan_phy_name
 
                 if inputdict['inbound_policy'] != pinputdict['inbound_policy'] and util.isNotEmpty(inputdict['inbound_policy']):
                     if util.isEmpty(pinputdict['inbound_policy']):
@@ -5718,6 +5781,7 @@ def update_lan_profile(sdata, **kwargs):
                 
                     if inputdict['auto_negotiation'] == "true" and pinputdict['auto_negotiation'] == "false":
                         intf_obj.link_negotiation = "auto"
+                        intf_obj.duplex = "auto"
                     elif inputdict['auto_negotiation'] == "false":
                         intf_obj.link_negotiation._empty_tag = True
                         if inputdict['speed'] != pinputdict['speed'] and util.isNotEmpty(inputdict['speed']):
@@ -5752,6 +5816,60 @@ def update_lan_profile(sdata, **kwargs):
                             intf_obj.out_queue_length = inputdict['out_queue_length']
                     elif inputdict['hold_queue_out'] == "false":
                         intf_obj.out_queue_length._empty_tag = True
+
+                # Handle Case where speed/duplex settings are specified in LAN profile but interface is a sub-interface
+                # Speed/Duplex settings will be configured at the Physical interface level
+                elif endpoint.interface_type == "Sub-Interface":
+                    if inputdict['load_interval'] == "true" and pinputdict['load_interval'] == "false":
+                        if util.isNotEmpty(inputdict['load_interval_delay']):
+                            int_phy_obj.load_interval_delay = inputdict['load_interval_delay']
+                    elif pinputdict['load_interval'] == "true":
+                        if inputdict['load_interval_delay'] != pinputdict['load_interval_delay'] and util.isNotEmpty(['load_interval_delay']):
+                            int_phy_obj.load_interval_delay = inputdict['load_interval_delay']
+
+                
+                    if inputdict['auto_negotiation'] == "true" and pinputdict['auto_negotiation'] == "false":
+                        int_phy_obj.link_negotiation = "auto"
+                        int_phy_obj.duplex = "auto"
+                    elif inputdict['auto_negotiation'] == "false":
+                        int_phy_obj.link_negotiation._empty_tag = True
+                        if inputdict['speed'] != pinputdict['speed'] and util.isNotEmpty(inputdict['speed']):
+                            int_phy_obj.speed = inputdict['speed']
+
+                        if inputdict['duplex'] != pinputdict['duplex'] and util.isNotEmpty(inputdict['duplex']):
+                            int_phy_obj.duplex = inputdict['duplex']
+                    elif pinputdict['auto_negotiation'] == "false":
+                        int_phy_obj.link_negotiation._empty_tag = True
+                        if inputdict['speed'] != pinputdict['speed'] and util.isNotEmpty(inputdict['speed']):
+                            int_phy_obj.speed = inputdict['speed']
+
+                        if inputdict['duplex'] != pinputdict['duplex'] and util.isNotEmpty(inputdict['duplex']):
+                            int_phy_obj.duplex = inputdict['duplex']
+
+                    if pinputdict['hold_queue_in'] == "true":
+                        if pinputdict['in_queue_length'] != inputdict['in_queue_length']:
+                            int_phy_obj.in_queue_length = inputdict['in_queue_length']
+                    
+                    if inputdict['hold_queue_in'] == "true":
+                        if util.isNotEmpty(inputdict['in_queue_length']):
+                            int_phy_obj.in_queue_length = inputdict['in_queue_length']
+                    elif inputdict['hold_queue_in'] == "false":
+                        int_phy_obj.in_queue_length._empty_tag = True
+
+                    if pinputdict['hold_queue_out'] == "true":
+                        if pinputdict['out_queue_length'] != inputdict['out_queue_length']:
+                            int_phy_obj.out_queue_length = inputdict['out_queue_length']
+                    
+                    if inputdict['hold_queue_out'] == "true":
+                        if util.isNotEmpty(inputdict['out_queue_length']):
+                            int_phy_obj.out_queue_length = inputdict['out_queue_length']
+                    elif inputdict['hold_queue_out'] == "false":
+                        int_phy_obj.out_queue_length._empty_tag = True
+
+                    # Send payload to update Physical interface
+                    uri = device.url + '/interface:interfaces/interface=%s' % (str(lan_phy_name).replace('/', '%2F'))
+                    int_phy_payload = int_phy_obj.getxml(filter=True)
+                    yang.Sdk.patchData(uri, int_phy_payload, sdata, add_reference=False)
     
 
                 uri = device.url + '/interface:interfaces/interface=%s' % (str(lan_if_name).replace('/', '%2F'))

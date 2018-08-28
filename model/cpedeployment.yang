@@ -7682,7 +7682,7 @@ module cpedeployment {
           type uint16;
           description
             "0..65535";
-          units "Mbps";
+          units "Kbps";
           when "../interface-type = 'Tunnel'";
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/bandwidth";
         }
@@ -7989,7 +7989,7 @@ module cpedeployment {
           type uint16;
           description
             "0..65535";
-          units "Mbps";
+          units "Kbps";
           when "../interface-type = 'Tunnel'";
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/bandwidth";
         }
@@ -9958,7 +9958,7 @@ module cpedeployment {
           type uint16;
           description
             "Enter Tunnel Interface Bandwidth";
-          units "Mbps";
+          units "Kbps";
           when "../interface-type = 'Tunnel'";
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/bandwidth";
         }
@@ -10261,7 +10261,7 @@ module cpedeployment {
           type uint16;
           description
             "0..65535";
-          units "Mbps";
+          units "Kbps";
           when "../interface-type = 'Tunnel'";
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/bandwidth";
         }
@@ -10568,7 +10568,7 @@ module cpedeployment {
           type uint16;
           description
             "0..65535";
-          units "Mbps";
+          units "Kbps";
           when "../interface-type = 'Tunnel'";
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/bandwidth";
         }
@@ -10875,7 +10875,7 @@ module cpedeployment {
           type uint16;
           description
             "0..65535";
-          units "Mbps";
+          units "Kbps";
           when "../interface-type = 'Tunnel'";
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/bandwidth";
         }
@@ -11181,7 +11181,7 @@ module cpedeployment {
           type uint16;
           description
             "0..65535";
-          units "Mbps";
+          units "Kbps";
           when "../interface-type = 'Tunnel'";
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/bandwidth";
         }
@@ -11488,7 +11488,7 @@ module cpedeployment {
           type uint16;
           description
             "0..65535";
-          units "Mbps";
+          units "Kbps";
           when "../interface-type = 'Tunnel'";
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/bandwidth";
         }
@@ -12930,7 +12930,7 @@ module cpedeployment {
           type uint16;
           description
             "0..65535";
-          units "Mbps";
+          units "Kbps";
           when "../interface-type = 'Tunnel'";
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/bandwidth";
         }
@@ -13172,7 +13172,7 @@ module cpedeployment {
           type uint16;
           description
             "0..65535";
-          units "Mbps";
+          units "Kbps";
           when "../interface-type = 'Tunnel'";
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/bandwidth";
         }
@@ -13479,7 +13479,7 @@ module cpedeployment {
           type uint16;
           description
             "0..65535";
-          units "Mbps";
+          units "Kbps";
           when "../interface-type = 'Tunnel'";
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/bandwidth";
         }
@@ -13786,7 +13786,7 @@ module cpedeployment {
           type uint16;
           description
             "0..65535";
-          units "Mbps";
+          units "Kbps";
           when "../interface-type = 'Tunnel'";
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/bandwidth";
         }
@@ -14778,7 +14778,7 @@ module cpedeployment {
           type uint16;
           description
             "0..65535";
-          units "Mbps";
+          units "Kbps";
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/bandwidth";
           when "../interface-type = 'Tunnel'";
         }
@@ -15922,7 +15922,7 @@ module cpedeployment {
           type uint16;
           description
             "0..65535";
-          units "Mbps";
+          units "Kbps";
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/bandwidth";
           when "../interface-type = 'Tunnel'";
         }
@@ -16229,7 +16229,7 @@ module cpedeployment {
           type uint16;
           description
             "0..65535";
-          units "Mbps";
+          units "Kbps";
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/bandwidth";
           when "../interface-type = 'Tunnel'";
         }
@@ -17387,6 +17387,14 @@ module cpedeployment {
       when " ../crypto-type = 'IKEV1' ";
       //n-ext:maps-to "/ac:devices/device/dmvpn:crypto/crypto-profile/life-time";
       n-ext:maps-to "/ac:devices/ac:device/dmvpn:crypto-policies/crypto-policy[policy-number=current()/../policy-number]/life-time";
+    }
+    leaf keepalive {
+      type uint16 {
+        range "10..3600";
+      }
+      description
+        "Enter ISAKMP keepalive timer in seconds";
+      when " ../crypto-type = 'IKEV1' ";
     }
   }
 

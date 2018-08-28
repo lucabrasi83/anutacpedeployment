@@ -88,6 +88,8 @@ class UpdateClassMap(yang.AbstractYangServiceHandler):
         inputdict['qos_group'] = config.get_field_value('qos_group')
         inputdict['protocol'] = config.get_field_value('protocol')
         inputdict['custom_nbar'] = config.get_field_value('custom_nbar')
+        if inputdict['custom_nbar'] is None:
+            inputdict['custom_nbar'] = []
         inputdict['http_url'] = config.get_field_value('http_url')
         if inputdict['protocol'] is None:
           inputdict['protocol'] = []

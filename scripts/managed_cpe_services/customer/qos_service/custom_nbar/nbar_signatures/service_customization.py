@@ -91,18 +91,21 @@ class ServiceDataCustomization:
 
         random.seed(cuid)
 
-        nbar_app_cuid = random.randint(1, 654)
+        nbar_app_cuid = random.randint(1, 500)
 
-        # nbar_list_split = url.split('/', 6)[0:6]
-        # nbar_list_url = "/".join(nbar_list_split)
+        # Check the current number of NBAR App and provide error message if exceeding threshold.
+        nbar_list_split = url.split('/', 6)[0:6]
+        nbar_list_url = "/".join(nbar_list_split)
 
-        # custom_nbar_apps = yang.Sdk.getData(nbar_list_url, '', sdata.getTaskId())
-        # custom_nbar_apps_obj = util.parseXmlString(custom_nbar_apps)
-        # custom_nbar_apps_list = util.convert_to_list(custom_nbar_apps_obj.custom_nbar.nbar_signatures)
-        # yang.Sdk.append_taskdetail(sdata.getTaskId(), 'NBAR Signature List Length: ' + str(len(custom_nbar_apps_list)))
+        custom_nbar_apps = yang.Sdk.getData(nbar_list_url, '', sdata.getTaskId())
+        custom_nbar_apps_obj = util.parseXmlString(custom_nbar_apps)
+        custom_nbar_apps_list = util.convert_to_list(custom_nbar_apps_obj.custom_nbar.nbar_signatures)
+        yang.Sdk.append_taskdetail(sdata.getTaskId(), 'NBAR Signature List Length: ' + str(len(custom_nbar_apps_list)))
+        if len(custom_nbar_apps_list) >= 50:
+          raise Exception("Maximum of 50 custom NBAR apps allowed per customer. If you delete custom NBAR apps, make sure they're also deleted from the device.")
 
         random.seed(datetime.datetime.now())
-        nbar_app_id = random.randint(0, 99)
+        nbar_app_id = random.randint(0, 100)
 
         config = kwargs['config']
         inputdict = kwargs['inputdict']

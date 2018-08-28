@@ -1341,6 +1341,7 @@ def dps(entity, conf, sdata, **kwargs):
             dmvpn_obj.bandwidth = bandwidth
         if inputdict['hub'] == 'true':
             dmvpn_obj.type = "HUB"
+            dmvpn_obj.map_multicast = "true"
         else:
             dmvpn_obj.type = "SPOKE"
         dmvpn_obj.name = obj_dmvpn.dmvpn_tunnel_profile.tunnel_id
