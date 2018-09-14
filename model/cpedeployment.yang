@@ -7679,9 +7679,11 @@ module cpedeployment {
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/tunnel-source";
         }
         leaf tunnel-bandwidth {
-          type uint16;
+          type uint32 {
+            range "1..100000000";
+          }
           description
-            "0..65535";
+            "Enter Tunnel Interface Bandwidth";
           units "Kbps";
           when "../interface-type = 'Tunnel'";
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/bandwidth";
@@ -7986,9 +7988,11 @@ module cpedeployment {
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/tunnel-source";
         }
         leaf tunnel-bandwidth {
-          type uint16;
+          type uint32 {
+            range "1..100000000";
+          }
           description
-            "0..65535";
+            "Enter Tunnel Interface Bandwidth";
           units "Kbps";
           when "../interface-type = 'Tunnel'";
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/bandwidth";
@@ -9955,7 +9959,9 @@ module cpedeployment {
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/tunnel-source";
         }
         leaf tunnel-bandwidth {
-          type uint16;
+          type uint32 {
+            range "1..100000000";
+          }
           description
             "Enter Tunnel Interface Bandwidth";
           units "Kbps";
@@ -10258,9 +10264,11 @@ module cpedeployment {
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/tunnel-source";
         }
         leaf tunnel-bandwidth {
-          type uint16;
+          type uint32 {
+            range "1..100000000";
+          }
           description
-            "0..65535";
+            "Enter Tunnel Interface Bandwidth";
           units "Kbps";
           when "../interface-type = 'Tunnel'";
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/bandwidth";
@@ -10565,9 +10573,11 @@ module cpedeployment {
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/tunnel-source";
         }
         leaf tunnel-bandwidth {
-          type uint16;
+          type uint32 {
+            range "1..100000000";
+          }
           description
-            "0..65535";
+            "Enter Tunnel Interface Bandwidth";
           units "Kbps";
           when "../interface-type = 'Tunnel'";
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/bandwidth";
@@ -10872,9 +10882,11 @@ module cpedeployment {
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/tunnel-source";
         }
         leaf tunnel-bandwidth {
-          type uint16;
+          type uint32 {
+            range "1..100000000";
+          }
           description
-            "0..65535";
+            "Enter Tunnel Interface Bandwidth";
           units "Kbps";
           when "../interface-type = 'Tunnel'";
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/bandwidth";
@@ -11178,9 +11190,11 @@ module cpedeployment {
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/tunnel-source";
         }
         leaf tunnel-bandwidth {
-          type uint16;
+          type uint32 {
+            range "1..100000000";
+          }
           description
-            "0..65535";
+            "Enter Tunnel Interface Bandwidth";
           units "Kbps";
           when "../interface-type = 'Tunnel'";
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/bandwidth";
@@ -11485,9 +11499,11 @@ module cpedeployment {
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/tunnel-source";
         }
         leaf tunnel-bandwidth {
-          type uint16;
+          type uint32 {
+            range "1..100000000";
+          }
           description
-            "0..65535";
+            "Enter Tunnel Interface Bandwidth";
           units "Kbps";
           when "../interface-type = 'Tunnel'";
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/bandwidth";
@@ -12927,9 +12943,11 @@ module cpedeployment {
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/tunnel-source";
         }
         leaf tunnel-bandwidth {
-          type uint16;
+          type uint32 {
+            range "1..100000000";
+          }
           description
-            "0..65535";
+            "Enter Tunnel Interface Bandwidth";
           units "Kbps";
           when "../interface-type = 'Tunnel'";
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/bandwidth";
@@ -13169,9 +13187,11 @@ module cpedeployment {
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/tunnel-source";
         }
         leaf tunnel-bandwidth {
-          type uint16;
+          type uint32 {
+            range "1..100000000";
+          }
           description
-            "0..65535";
+            "Enter Tunnel Interface Bandwidth";
           units "Kbps";
           when "../interface-type = 'Tunnel'";
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/bandwidth";
@@ -13476,9 +13496,11 @@ module cpedeployment {
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/tunnel-source";
         }
         leaf tunnel-bandwidth {
-          type uint16;
+          type uint32 {
+            range "1..100000000";
+          }
           description
-            "0..65535";
+            "Enter Tunnel Interface Bandwidth";
           units "Kbps";
           when "../interface-type = 'Tunnel'";
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/bandwidth";
@@ -13783,9 +13805,11 @@ module cpedeployment {
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/tunnel-source";
         }
         leaf tunnel-bandwidth {
-          type uint16;
+          type uint32 {
+            range "1..100000000";
+          }
           description
-            "0..65535";
+            "Enter Tunnel Interface Bandwidth";
           units "Kbps";
           when "../interface-type = 'Tunnel'";
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/bandwidth";
@@ -14775,9 +14799,11 @@ module cpedeployment {
           when "../interface-type = 'Tunnel'";
         }
         leaf tunnel-bandwidth {
-          type uint16;
+          type uint32 {
+            range "1..100000000";
+          }
           description
-            "0..65535";
+            "Enter Tunnel Interface Bandwidth";
           units "Kbps";
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/bandwidth";
           when "../interface-type = 'Tunnel'";
@@ -15919,9 +15945,11 @@ module cpedeployment {
           when "../interface-type = 'Tunnel'";
         }
         leaf tunnel-bandwidth {
-          type uint16;
+          type uint32 {
+            range "1..100000000";
+          }
           description
-            "0..65535";
+            "Enter Tunnel Interface Bandwidth";
           units "Kbps";
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/bandwidth";
           when "../interface-type = 'Tunnel'";
@@ -16226,9 +16254,11 @@ module cpedeployment {
           when "../interface-type = 'Tunnel'";
         }
         leaf tunnel-bandwidth {
-          type uint16;
+          type uint32 {
+            range "1..100000000";
+          }
           description
-            "0..65535";
+            "Enter Tunnel Interface Bandwidth";
           units "Kbps";
           n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../device-ip]/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../tunnel-interface-id]/bandwidth";
           when "../interface-type = 'Tunnel'";
@@ -16880,9 +16910,11 @@ module cpedeployment {
           //n-ext:maps-to "/ac:devices/device/dmvpn:dmvpntunnels/dmvpntunnel/tcp-adjust-mss";
         }
         leaf tunnel-bandwidth {
-          type uint16;
+          type uint32 {
+            range "1..100000000";
+          }
           description
-            "0..65535";
+            "Enter Tunnel Interface Bandwidth";
           when " ../operation = 'CREATE' ";
           //n-ext:maps-to "/ac:devices/device/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../name]/bandwidth";
         }
@@ -19545,7 +19577,9 @@ module cpedeployment {
         when " ../tunnel = 'true' and ../cpe != 'cpe-primary'";
       }
       leaf tunnel-bandwidth {
-        type uint16;
+        type uint32 {
+          range "1..100000000";
+        }
         description
           "Enter DPS DMVPN Tunnel interface bandwidth";
         when " ../tunnel = 'true' and ../cpe != 'cpe-primary'";
