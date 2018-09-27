@@ -119,6 +119,10 @@ class ServiceDataCustomization:
                     conf = util.parseXmlString(site_output)
                     if obj_cpe.cpe_name.cpe == 'cpe-primary-only':
                         entity = 'cpe_primary_triple'
+                    elif obj_cpe.cpe_name.cpe == 'cpe-primary':
+                        entity = 'cpe_primary_triple'
+                    elif obj_cpe.cpe_name.cpe == 'cpe-secondary':
+                        entity = 'cpe_secondary_triple'
             if entity == 'cpe':
                 device_ip = conf.single_cpe_site_services.cpe.device_ip
             elif entity == 'cpe_primary':
@@ -133,6 +137,8 @@ class ServiceDataCustomization:
                 device_ip = conf.dual_cpe_dual_wan_site_services.cpe_secondary.device_ip
             elif entity == 'cpe_primary_triple':
                 device_ip = conf.triple_cpe_site_services.cpe_primary.device_ip
+            elif entity == 'cpe_secondary_triple':
+                device_ip = conf.triple_cpe_site_services.cpe_secondary.device_ip
             vrf = inputdict['vrf_name']
             if util.isEmpty(vrf) or vrf is None:
                 if hasattr(obj_cpe.cpe_name, 'vrf'):
@@ -149,6 +155,15 @@ class ServiceDataCustomization:
                 if entity == 'cpe_primary_dual':
                     if hasattr(conf.dual_cpe_dual_wan_site_services.cpe_lan, 'end_points'):
                         for endpoint in util.convert_to_list(conf.dual_cpe_dual_wan_site_services.cpe_lan.end_points):
+                            endpoint_ip = endpoint.device_ip
+                            if device_ip == endpoint_ip:
+                                if endpoint.dps == 'true':
+                                    if hasattr(endpoint, 'vrf'):
+                                        vrf = endpoint.vrf
+
+                if entity == 'cpe_primary_triple':
+                    if hasattr(conf.triple_cpe_site_services.cpe_lan, 'end_points'):
+                        for endpoint in util.convert_to_list(conf.triple_cpe_site_services.cpe_lan.end_points):
                             endpoint_ip = endpoint.device_ip
                             if device_ip == endpoint_ip:
                                 if endpoint.dps == 'true':

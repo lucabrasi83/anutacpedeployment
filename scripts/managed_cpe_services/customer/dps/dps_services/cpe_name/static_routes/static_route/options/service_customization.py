@@ -128,6 +128,10 @@ class ServiceDataCustomization:
                 conf = util.parseXmlString(site_output)
                 if obj_cpe.cpe_name.cpe == 'cpe-primary-only':
                     entity = 'cpe_primary_triple'
+                elif obj_cpe.cpe_name.cpe == 'cpe-primary':
+                    entity = 'cpe_primary_triple'
+                elif obj_cpe.cpe_name.cpe == 'cpe-secondary':
+                    entity = 'cpe_secondary_triple'
         if entity == 'cpe':
             device_ip = conf.single_cpe_site_services.cpe.device_ip
         elif entity == 'cpe_primary':
@@ -142,6 +146,8 @@ class ServiceDataCustomization:
             device_ip = conf.dual_cpe_dual_wan_site_services.cpe_secondary.device_ip
         elif entity == 'cpe_primary_triple':
             device_ip = conf.triple_cpe_site_services.cpe_primary.device_ip
+        elif entity == 'cpe_secondary_triple':
+            device_ip = conf.triple_cpe_site_services.cpe_secondary.device_ip
         staticroute(smodelctx, sdata, device_ip, **kwargs)
 
     @staticmethod

@@ -52,5 +52,5 @@
     <ncx-version>[6.0.5,)</ncx-version>
     <order>-1</order>
     <type>SERVICE_MODEL</type>
-    <version>6.0.9.9</version>
+    <version>6.0.8.8</version>
 </package>

@@ -232,6 +232,10 @@ class ServiceDataCustomization:
             conf = util.parseXmlString(site_output)
             if config.cpe == 'cpe-primary-only':
                 entity = 'cpe_primary_triple'
+            elif config.cpe == 'cpe-primary':
+                entity = 'cpe_primary_triple'
+            elif config.cpe == 'cpe-secondary':
+                entity = 'cpe_secondary_triple'
 
         if config.cpe != 'cpe-secondary':
             if config.lan_interface == 'true':
@@ -798,6 +802,33 @@ def dps(entity, conf, sdata, **kwargs):
         bgp_as = conf.triple_cpe_site_services.bgp_as
         if hasattr(conf.triple_cpe_site_services.cpe_primary.vrfs.vrf, 'bgp_address_family'):
             bgp_address_family = conf.triple_cpe_site_services.cpe_primary.vrfs.vrf.bgp_address_family
+    elif entity == 'cpe_secondary_triple':
+        device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_secondary.device_ip, False, 5)
+        if hasattr(conf.triple_cpe_site_services.cpe_lan, 'end_points'):
+            obj = util.convert_to_list(conf.triple_cpe_site_services.cpe_lan.end_points)
+            for endpoint in obj:
+                if endpoint.device_ip == conf.triple_cpe_site_services.cpe_secondary.device_ip:
+                    if endpoint.dps == 'true':
+                        if hasattr(endpoint, 'vrf'):
+                            lan_vrf = endpoint.vrf
+                        if endpoint.interface_type == 'Physical':
+                            interface_name = endpoint.interface_name
+                            mode = 'l3-interface'
+                            int_name_list.append(interface_name)
+                            int_mode_list.append(mode)
+                        elif endpoint.interface_type == 'Sub-Interface':
+                            interface_name = endpoint.interface_name + '.' + str(endpoint.vlan_id)
+                            mode = 'sub-interface'
+                            int_name_list.append(interface_name)
+                            int_mode_list.append(mode)
+                        elif endpoint.interface_type == 'SVI':
+                            interface_name = "Vlan" + str(endpoint.vlan_id)
+                            mode = 'vlan'
+                            int_name_list.append(interface_name)
+                            int_mode_list.append(mode)
+        bgp_as = conf.triple_cpe_site_services.bgp_as
+        if hasattr(conf.triple_cpe_site_services.cpe_secondary.vrfs.vrf, 'bgp_address_family'):
+            bgp_address_family = conf.triple_cpe_site_services.cpe_secondary.vrfs.vrf.bgp_address_family
 
     inputdict = kwargs['inputdict']
     vrf = inputdict['vrf']
@@ -1643,6 +1674,8 @@ def delete_interface(entity, smodelctx, sdata, conf, **kwargs):
         device = devicemgr.getDeviceById(conf.dual_cpe_dual_wan_site_services.cpe_secondary.device_ip, False, 5)
     elif entity == 'cpe_primary_triple':
         device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_primary.device_ip, False, 5)
+    elif entity == 'cpe_secondary_triple':
+        device = devicemgr.getDeviceById(conf.triple_cpe_site_services.cpe_secondary.device_ip, False, 5)
 
     if entity == 'cpe':
         obj = util.convert_to_list(conf.single_cpe_site_services.cpe_lan.end_points)
@@ -1711,6 +1744,17 @@ def delete_interface(entity, smodelctx, sdata, conf, **kwargs):
             else:
                 interface_name,mode = endpoint_def(endpoint)
     elif entity == 'cpe_primary_triple':
+        obj = util.convert_to_list(conf.triple_cpe_site_services.cpe_lan.end_points)
+        for endpoint in obj:
+            if hasattr(endpoint,"dps"):
+                if endpoint.dps == 'true':
+                    if endpoint.device_ip == device.device.id:
+                        interface_name,mode = endpoint_def(endpoint)
+                        int_name_list.append(interface_name)
+                        int_mode_list.append(mode)
+            else:
+                interface_name,mode = endpoint_def(endpoint)
+    elif entity == 'cpe_secondary_triple':
         obj = util.convert_to_list(conf.triple_cpe_site_services.cpe_lan.end_points)
         for endpoint in obj:
             if hasattr(endpoint,"dps"):

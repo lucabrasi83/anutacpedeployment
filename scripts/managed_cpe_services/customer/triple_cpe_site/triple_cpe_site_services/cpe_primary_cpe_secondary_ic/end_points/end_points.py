@@ -187,7 +187,7 @@ class EndPoints(yang.AbstractYangServiceHandler):
         self.opaque_args['hireachy_device'] = dev
 
         #Use the custom method to process the data
-        service_customization.ServiceDataCustomization.process_service_update_data(smodelctx, sdata, id=id, dev=dev, parentobj=parentobj, config=config, hopaque=opaque_args, inputdict=inputdict)
+        service_customization.ServiceDataCustomization.process_service_update_data(smodelctx, sdata, id=id, dev=dev, parentobj=parentobj, config=config, pconfig=pconfig, hopaque=opaque_args, inputdict=inputdict, pinputdict=pinputdict)
 
     def delete(self, id, sdata):
         sdata.getSession().addYangSessionPreReserveProcessor(self.delete_pre_processor)
