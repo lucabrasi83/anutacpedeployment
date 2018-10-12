@@ -81,6 +81,7 @@ class ListEntry(yang.AbstractYangServiceHandler):
         # START OF FETCHING THE LEAF PARAMETERS
         inputdict['list_track_number'] = config.get_field_value('list_track_number')
         inputdict['track_type'] = 'list'
+        inputdict['zscaler_mgmt'] = config.get_field_value('zscaler_mgmt')
         inputdict['list_type'] = config.get_field_value('list_type')
         if inputdict.get('list_type') is None:
           inputdict['list_type'] = 'boolean'
@@ -127,6 +128,7 @@ class ListEntry(yang.AbstractYangServiceHandler):
         inputdict['list_track_number'] = config.get_field_value('list_track_number')
         inputdict['track_type'] = 'list'
         inputdict['list_type'] = config.get_field_value('list_type')
+        inputdict['zscaler_mgmt'] = config.get_field_value('zscaler_mgmt')
         if inputdict.get('list_type') is None:
           inputdict['list_type'] = 'boolean'
         inputdict['boolean_type'] = config.get_field_value('boolean_type')
@@ -167,6 +169,7 @@ class ListEntry(yang.AbstractYangServiceHandler):
         inputdict['list_track_number'] = config.get_field_value('list_track_number')
         inputdict['track_type'] = 'list'
         inputdict['list_type'] = config.get_field_value('list_type')
+        inputdict['zscaler_mgmt'] = config.get_field_value('zscaler_mgmt')
         if inputdict.get('list_type') is None:
           inputdict['list_type'] = 'boolean'
         inputdict['boolean_type'] = config.get_field_value('boolean_type')
