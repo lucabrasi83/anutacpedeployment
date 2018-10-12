@@ -3805,6 +3805,11 @@ module cpedeployment {
         "Track List Boolean Type";
       n-ext:maps-to "/ac:devices/ac:device[ac:id=current()/../../../device-ip]/l3features:tracks/track[track-number=current()/../list-track-number]/boolean-type";
     }
+    leaf zscaler-mgmt {
+      type boolean;
+      description
+        "Check to activate Zscaler Track and EEM management templates";
+    }
     list object-list {
       key "object-number";
       leaf object-number {
@@ -17140,7 +17145,7 @@ module cpedeployment {
       }
       description
         "1..65535";
-      default "60";
+      default "3600";
       n-ext:maps-to "/ac:devices/ac:device/dmvpn:dmvpntunnels/dmvpntunnel[name=current()/../name]/nhrp-holdtime";
     }
     leaf nhrp-redirect {

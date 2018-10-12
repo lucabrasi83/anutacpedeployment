@@ -2065,12 +2065,13 @@ def ip_sla(smodelctx, sdata, device, **kwargs):
 
 def list_entry_def(smodelctx,sdata,device,**kwargs):
     inputdict = kwargs['inputdict']
-    track_type = None 
+    track_type = None
     if inputdict.has_key('list_track_number') and inputdict.has_key('track_type'):
         list_track_number = inputdict['list_track_number']
         track_type = inputdict['track_type']
         list_type = inputdict['list_type']
         boolean_type = inputdict['boolean_type']
+        zscaler_mgmt = inputdict['zscaler_mgmt']
     if inputdict.has_key('list_track_number'):
         list_track_number = inputdict['list_track_number']
     else:
@@ -2099,6 +2100,134 @@ def list_entry_def(smodelctx,sdata,device,**kwargs):
         fill = '<list-type>' + list_type + '</list-type><boolean-type>' + boolean_type + '</boolean-type></l3features:track>'
         payload = payload.replace('</l3features:track>', fill)
         yang.Sdk.createData(tracks_url, payload, sdata.getSession())
+        if zscaler_mgmt == "true":
+
+            eem_zscaler_det_payload = '''
+                        <event-manager-applet>
+                        <events>
+                            <none>false</none>
+                            <track>
+                                <track-number>'''+list_track_number+'''</track-number>
+                                <state>any</state>
+                            </track>
+                        </events>
+                        <actions>
+                            <action>
+                                <label>9.1</label>
+                                <action-statement>exit</action-statement>
+                                <exit-result>0</exit-result>
+                            </action>
+                            <action>
+                                <label>6.5</label>
+                                <action-statement>cli</action-statement>
+                                <cli-type>command</cli-type>
+                                <cli-string>event manager applet ZSCALER authorization bypass</cli-string>
+                            </action>
+                            <action>
+                                <label>6.9</label>
+                                <action-statement>cli</action-statement>
+                                <cli-type>command</cli-type>
+                                <cli-string>end</cli-string>
+                            </action>
+                            <action>
+                                <label>8.1</label>
+                                <action-statement>end</action-statement>
+                            </action>
+                            <action>
+                                <label>3.9</label>
+                                <action-statement>cli</action-statement>
+                                <cli-type>command</cli-type>
+                                <cli-string>end</cli-string>
+                            </action>
+                            <action>
+                                <label>5.1</label>
+                                <action-statement>else</action-statement>
+                            </action>
+                            <action>
+                                <label>3.1</label>
+                                <action-statement>cli</action-statement>
+                                <cli-type>command</cli-type>
+                                <cli-string>enable</cli-string>
+                            </action>
+                            <action>
+                                <label>6.3</label>
+                                <action-statement>cli</action-statement>
+                                <cli-type>command</cli-type>
+                                <cli-string>config t</cli-string>
+                            </action>
+                            <action>
+                                <label>3.3</label>
+                                <action-statement>cli</action-statement>
+                                <cli-type>command</cli-type>
+                                <cli-string>conf t</cli-string>
+                            </action>
+                            <action>
+                                <label>3.7</label>
+                                <action-statement>cli</action-statement>
+                                <cli-type>command</cli-type>
+                                <cli-string>event timer countdown time 600</cli-string>
+                            </action>
+                            <action>
+                                <label>2.1</label>
+                                <action-statement>if</action-statement>
+                                <first-operand>$_track_state</first-operand>
+                                <compare>eq</compare>
+                                <second-operand>down</second-operand>
+                            </action>
+                            <action>
+                                <label>6.7</label>
+                                <action-statement>cli</action-statement>
+                                <cli-type>command</cli-type>
+                                <cli-string>event none</cli-string>
+                            </action>
+                            <action>
+                                <label>6.1</label>
+                                <action-statement>cli</action-statement>
+                                <cli-type>command</cli-type>
+                                <cli-string>enable</cli-string>
+                            </action>
+                            <action>
+                                <label>3.5</label>
+                                <action-statement>cli</action-statement>
+                                <cli-type>command</cli-type>
+                                <cli-string>event manager applet ZSCALER authorization bypass</cli-string>
+                            </action>
+                        </actions>
+                        <applet-name>ZSCALER-DET</applet-name>
+                    </event-manager-applet>
+                               '''
+            if not yang.Sdk.dataExists(device.url + '/l3features:eem-applets'):
+                yang.Sdk.createData(device.url, '<eem-applets/>', sdata.getSession(), False)
+
+            yang.Sdk.createData(device.url + '/l3features:eem-applets', eem_zscaler_det_payload, sdata.getSession())
+
+            eem_zscaler_payload = '''
+                                    <event-manager-applet>
+                                    <actions>
+                                        <action>
+                                            <label>2.0</label>
+                                            <action-statement>syslog</action-statement>
+                                            <syslog>msg</syslog>
+                                            <syslog-msg>*** ZScaler Trap : No internet connectivity ***</syslog-msg>
+                                        </action>
+                                        <action>
+                                            <label>1.0</label>
+                                            <action-statement>snmp-trap</action-statement>
+                                            <snmp-trap-type>strdata</snmp-trap-type>
+                                            <snmp-trap-data>ZScaler Trap : No internet connectivity</snmp-trap-data>
+                                        </action>
+                                        <action>
+                                            <label>9.0</label>
+                                            <action-statement>exit</action-statement>
+                                        </action>
+                                    </actions>
+                                    <applet-name>ZSCALER</applet-name>
+                                    <events>
+                                        <none>true</none>
+                                    </events>
+                                </event-manager-applet>
+                                  '''
+            yang.Sdk.createData(device.url + '/l3features:eem-applets', eem_zscaler_payload, sdata.getSession())
 
     if util.isNotEmpty(object_number):
         print "Entered in to object_number"
@@ -2111,6 +2240,7 @@ def list_entry_def(smodelctx,sdata,device,**kwargs):
         tracks_url = device.url + object_list_url 
         yang.Sdk.createData(tracks_url, tracks_obj_list.getxml(filter=True), sdata.getSession())
 
+   
 def staticroute(smodelctx, sdata, dev, **kwarg):
     vrf_name = kwarg['inputdict']['vrf']
 
